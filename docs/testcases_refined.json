@@ -1,0 +1,783 @@
+[
+  {
+    "testName": "OAC-20001: End-to-End Book Appointment (Desktop, Functional)",
+    "businessGoal": "Verify a user can complete web widget appointment booking from service selection through confirmation and portal validation.",
+    "preconditions": [
+      "Web Widget accessible in desktop browser",
+      "At least one active service visible",
+      "One active location for selected service",
+      "Selected service supports multiple meeting preferences",
+      "At least one future time slot for selected service/location/meeting preference",
+      "Valid test customer data exists",
+      "Booking environment connected to Admin Portal"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Open web widget URL", "expected": "Service selection page displayed" },
+      { "step": 2, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 3, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 4, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 5, "action": "Select available future date", "expected": "Available slots displayed" },
+      { "step": 6, "action": "Select time slot and proceed", "expected": "Personal Details page displayed" },
+      { "step": 7, "action": "Enter valid details and submit", "expected": "Navigate to Confirmation page" },
+      { "step": 8, "action": "Verify confirmation details", "expected": "Details match selected and entered data" },
+      { "step": 9, "action": "Validate appointment in Admin Portal", "expected": "Appointment exists with matching data" },
+      { "step": 10, "action": "Verify notification behavior", "expected": "Notification sent if configured" }
+    ],
+    "expectedResult": [
+      "Successful booking and confirmation page",
+      "Admin Portal record matches widget confirmation"
+    ],
+    "reusableActions": [
+      "Open widget URL",
+      "Select service",
+      "Select location",
+      "Select meeting preference",
+      "Select date/time slot",
+      "Enter personal details",
+      "Submit booking",
+      "Verify confirmation",
+      "Validate in Admin Portal"
+    ],
+    "configurationDependencies": [
+      "Active service/location working",
+      "Multiple meeting preferences enabled on service",
+      "Notification config as per Admin Portal"
+    ]
+  },
+  {
+    "testName": "OAC-20002: Edit Existing Appointment From Widget (Desktop, Functional)",
+    "businessGoal": "Verify editable appointment can be updated via widget and updates reflect in portal.",
+    "preconditions": [
+      "Existing appointment editable",
+      "Valid widget edit URL/token",
+      "Appointment within edit window",
+      "At least one future slot for rescheduling",
+      "Valid replacement customer details",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Open edit URL", "expected": "Appointment loads in edit context" },
+      { "step": 2, "action": "Change date/time", "expected": "New slot accepted" },
+      { "step": 3, "action": "Update personal details", "expected": "Values accepted by validation" },
+      { "step": 4, "action": "Submit edits", "expected": "Navigate to Confirmation page" },
+      { "step": 5, "action": "Verify updated confirmation", "expected": "Updated values shown" },
+      { "step": 6, "action": "Validate Admin Portal", "expected": "Record updated, not duplicated" },
+      { "step": 7, "action": "Verify notifications", "expected": "Notification behavior per config" }
+    ],
+    "expectedResult": [
+      "Appointment updated successfully",
+      "Portal shows edited values"
+    ],
+    "reusableActions": [
+      "Open appointment URL",
+      "Edit date/time",
+      "Edit personal details",
+      "Submit changes",
+      "Verify portal update"
+    ],
+    "configurationDependencies": [
+      "Appointment editable settings",
+      "Edit window enforcement",
+      "Notification config"
+    ]
+  },
+  {
+    "testName": "OAC-20003: Attempt Edit on Non-Editable Appointment (Desktop, Functional)",
+    "businessGoal": "Verify non-editable/cancel-disabled appointment shows proper disabled UI and no actions.",
+    "preconditions": [
+      "Appointment exists and not editable",
+      "Valid widget URL/token",
+      "Appointment active and retrievable",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Open appointment URL", "expected": "Load in non-editable context" },
+      { "step": 2, "action": "Check edit controls", "expected": "Edit controls not actionable" },
+      { "step": 3, "action": "Check Cancel button", "expected": "Cancel disabled" },
+      { "step": 4, "action": "Check non-editable message", "expected": "Message displayed" },
+      { "step": 5, "action": "Attempt to interact with controls", "expected": "No action triggered" },
+      { "step": 6, "action": "Validate portal state", "expected": "Appointment unchanged" }
+    ],
+    "expectedResult": [
+      "Non-editable flow enforced",
+      "No state change in portal"
+    ],
+    "reusableActions": [
+      "Open appointment URL",
+      "Verify control states",
+      "Validate Admin Portal status"
+    ],
+    "configurationDependencies": [
+      "Appointment edit/cancel flag set false in config"
+    ]
+  },
+  {
+    "testName": "OAC-20004: Cancel Existing Appointment From Web Widget (Desktop, Functional)",
+    "businessGoal": "Verify user can cancel appointment via widget and cancellation state is reflected in portal.",
+    "preconditions": [
+      "Existing appointment cancelable",
+      "Valid widget URL/token",
+      "Appointment active, within cancellation window",
+      "Not already canceled/deleted",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Open appointment URL", "expected": "Appointment loaded" },
+      { "step": 2, "action": "Verify Cancel action availability", "expected": "Cancel enabled" },
+      { "step": 3, "action": "Click Cancel and dismiss popup", "expected": "Appointment remains active" },
+      { "step": 4, "action": "Click Cancel and confirm", "expected": "Cancellation processed" },
+      { "step": 5, "action": "Verify cancellation messages", "expected": "Cancelled state text and Book Another shown" },
+      { "step": 6, "action": "Validate portal status", "expected": "Marked cancelled" },
+      { "step": 7, "action": "Verify notifications", "expected": "Cancellation notification per config" }
+    ],
+    "expectedResult": [
+      "Appointment canceled successfully",
+      "Portal status cancelled"
+    ],
+    "reusableActions": [
+      "Open appointment URL",
+      "Cancel appointment",
+      "Validate portal status"
+    ],
+    "configurationDependencies": [
+      "Cancellation window settings",
+      "Cancel user journey config",
+      "Notification config"
+    ]
+  },
+  {
+    "testName": "OAC-20005: Book Another After Successful Booking (Desktop, Functional)",
+    "businessGoal": "Verify 'Book Another' retains personal details and allows a second booking with different service/date/time.",
+    "preconditions": [
+      "Widget accessible",
+      "At least two services and alternate future slot exist",
+      "First appointment can be created",
+      "Valid personal details available",
+      "Admin Portal access available",
+      "Personal details persistence enabled in widget",
+      "API access for appointment validation"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Create first appointment", "expected": "Confirmation with Book Another" },
+      { "step": 2, "action": "Capture first appointment details", "expected": "Values available" },
+      { "step": 3, "action": "Click Book Another", "expected": "Start new booking" },
+      { "step": 4, "action": "Select different service", "expected": "Second service selected" },
+      { "step": 5, "action": "Select different date/time", "expected": "Second date/time selected" },
+      { "step": 6, "action": "Check personal details page", "expected": "Personal details prefilled" },
+      { "step": 7, "action": "Verify all details retained correctly", "expected": "First name, last name, email, phone match" },
+      { "step": 8, "action": "Submit second booking", "expected": "Booking succeeds with retained details" },
+      { "step": 9, "action": "Verify second confirmation", "expected": "Personal details retained, new service/date/time shown" },
+      { "step": 10, "action": "Verify personal details consistency", "expected": "Same customer data in both appointments" }
+    ],
+    "expectedResult": [
+      "Book Another flow works",
+      "Personal details persisted across multiple bookings",
+      "API validation confirms data consistency"
+    ],
+    "reusableActions": [
+      "Create booking",
+      "Book Another",
+      "Validate appointment(s) in portal",
+      "Verify personal details retention"
+    ],
+    "configurationDependencies": [
+      "Book Another setting",
+      "Service and slot availability",
+      "Admin Portal record validation",
+      "Personal details persistence settings",
+      "API access for appointment validation"
+    ]
+  },
+  {
+    "testName": "OAC-20006: Book Another From Cancellation Page (Desktop, Functional)",
+    "businessGoal": "Verify after cancellation, Book Another keeps personal details and completes a new booking.",
+    "preconditions": [
+      "Cancelable appointment exists",
+      "Valid widget URL/token",
+      "At least two services and future slots available",
+      "Valid personal details",
+      "Admin Portal access available",
+      "Personal details persistence enabled in widget",
+      "API access for appointment validation"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Cancel existing appointment", "expected": "Cancellation page shown" },
+      { "step": 2, "action": "Verify cancellation content", "expected": "Book Another shown" },
+      { "step": 3, "action": "Click Book Another", "expected": "Start booking flow" },
+      { "step": 4, "action": "Select different service", "expected": "New service selected" },
+      { "step": 5, "action": "Select different date/time", "expected": "New date/time selected" },
+      { "step": 6, "action": "Check personal details page", "expected": "Personal details prefilled" },
+      { "step": 7, "action": "Verify all details retained correctly", "expected": "First name, last name, email, phone match" },
+      { "step": 8, "action": "Submit new booking", "expected": "Booking succeeds" },
+      { "step": 9, "action": "Verify new confirmation", "expected": "Retained details + new selections" },
+      { "step": 10, "action": "Verify both appointments via API", "expected": "Old canceled, new created with correct data" },
+      { "step": 11, "action": "Verify personal details consistency", "expected": "Same customer data in new appointment" }
+    ],
+    "expectedResult": [
+      "New booking created with retained personal details",
+      "API validation confirms data persistence"
+    ],
+    "reusableActions": [
+      "Cancel appointment",
+      "Book Another",
+      "Validate portal statuses",
+      "Verify personal details retention"
+    ],
+    "configurationDependencies": [
+      "Cancelation and Book Another settings",
+      "service and slot availability",
+      "Personal details persistence settings",
+      "API access for appointment validation"
+    ]
+  },
+  {
+    "testName": "OAC-20007: Select P/S With Appointment Skip Enabled (Yes Skip Appointment)",
+    "businessGoal": "Verify yes on skip prompt redirects to external configured site and ends flow.",
+    "preconditions": [
+      "Widget accessible",
+      "Service configured with appointment skip enabled",
+      "External redirect URL configured and verified",
+      "Skip popup message configured",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Select service with appointment skip", "expected": "Skip prompt shown" },
+      { "step": 2, "action": "Verify skip popup message displays correctly", "expected": "Configured popup message shown" },
+      { "step": 3, "action": "Choose Yes on skip prompt", "expected": "Redirect to configured external URL" },
+      { "step": 4, "action": "Verify redirect URL matches configuration", "expected": "Correct external site loaded" },
+      { "step": 5, "action": "Verify widget flow terminated", "expected": "No return to booking flow, session ended" },
+      { "step": 6, "action": "Verify skip configuration via API", "expected": "Skip settings confirmed" }
+    ],
+    "expectedResult": [
+      "Skip prompt displays configured message",
+      "Yes option redirects to correct external URL",
+      "Widget booking flow terminates after redirect"
+    ],
+    "reusableActions": [
+      "Select skip-enabled service",
+      "Choose skip option",
+      "Verify redirection",
+      "Verify skip configuration"
+    ],
+    "configurationDependencies": [
+      "Appointment skip enabled on service",
+      "External redirect URL configuration",
+      "Skip popup message settings"
+    ]
+  },
+  {
+    "testName": "OAC-20008: Select P/S With Appointment Skip Enabled (No Skip Appointment)",
+    "businessGoal": "Verify no on skip prompt continues standard booking flow.",
+    "preconditions": [
+      "Widget accessible",
+      "Service configured with appointment skip enabled",
+      "Standard booking path available",
+      "Skip popup message configured",
+      "Valid personal details available",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Select skip-enabled service", "expected": "Popup shown" },
+      { "step": 2, "action": "Verify skip popup message displays correctly", "expected": "Configured popup message shown" },
+      { "step": 3, "action": "Choose No on skip prompt", "expected": "No redirect, continue in widget" },
+      { "step": 4, "action": "Verify standard booking flow continues", "expected": "Navigate to next booking step normally" },
+      { "step": 5, "action": "Continue booking", "expected": "Standard flow proceeds" },
+      { "step": 6, "action": "Complete booking", "expected": "Confirmation displayed" },
+      { "step": 7, "action": "Verify confirmation", "expected": "Details match booking" },
+      { "step": 8, "action": "Verify booking created in portal", "expected": "Appointment record exists with correct data" }
+    ],
+    "expectedResult": [
+      "Skip prompt displays configured message",
+      "No option maintains widget booking flow",
+      "Standard booking completion works after declining skip"
+    ],
+    "reusableActions": [
+      "Select skip-enabled service",
+      "Choose No",
+      "Complete booking",
+      "Validate portal"
+    ],
+    "configurationDependencies": [
+      "Appointment skip enabled on service",
+      "Standard booking flow configuration",
+      "Skip popup message settings"
+    ]
+  },
+  {
+    "testName": "OAC-20009: Personal Details Validation for Phone/Email Mandatory and Optional Configurations",
+    "businessGoal": "Verify email/phone required/optional behavior based on Admin Portal widget settings.",
+    "preconditions": [
+      "Widget accessible",
+      "Bookable path to Personal Details page",
+      "Admin Portal access for widget settings",
+      "Test data for mandatory/optional cases",
+      "Tenant-wide widget settings configured",
+      "Service-level override settings documented"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Set widget settings for each case", "expected": "Validation requirements match configuration" },
+      { "step": 2, "action": "Leave both blank and submit", "expected": "Case A required, Case B optional" },
+      { "step": 3, "action": "Invalid email and valid phone submit", "expected": "Email format blocked" },
+      { "step": 4, "action": "Invalid phone and valid email submit", "expected": "Phone format blocked" },
+      { "step": 5, "action": "Provide valid values and submit", "expected": "Success when valid" },
+      { "step": 6, "action": "Test tenant-wide mandatory email, optional phone", "expected": "Email required validation enforced, phone optional" },
+      { "step": 7, "action": "Test tenant-wide optional email, mandatory phone", "expected": "Phone required validation enforced, email optional" },
+      { "step": 8, "action": "Test both optional", "expected": "Submission allowed without email/phone" },
+      { "step": 9, "action": "Test both mandatory", "expected": "Both fields required for submission" },
+      { "step": 10, "action": "Validate confirmation and portal", "expected": "Values match case behavior" }
+    ],
+    "expectedResult": [
+      "Email/phone rules enforced as configurable",
+      "Widget settings enforced consistently across tenant",
+      "Email/phone validation combinations work correctly"
+    ],
+    "reusableActions": [
+      "Configure widget phone/email rules",
+      "Trigger validation errors",
+      "Submit and verify success",
+      "Validate portal record"
+    ],
+    "configurationDependencies": [
+      "Email/phone mandatory/optional widget settings",
+      "Tenant-wide widget email/phone requirements",
+      "Service-level validation overrides",
+      "Field validation rule priority"
+    ]
+  },
+  {
+    "testName": "OAC-20010: Select P/S Without Multiple Meeting Preference Enabled (MP Page Skipped)",
+    "businessGoal": "Verify MP page is skipped for services without multiple meeting preference option.",
+    "preconditions": [
+      "Widget accessible",
+      "Service configured without MP choices",
+      "Downstream availability exists",
+      "Valid personal details available",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Select service without MP options", "expected": "Flow continues without MP choice" },
+      { "step": 2, "action": "Continue booking", "expected": "Goes directly to date/time or next step" },
+      { "step": 3, "action": "Complete booking", "expected": "Confirmation shown" },
+      { "step": 4, "action": "Verify confirmation", "expected": "No MP selection step in flow" },
+      { "step": 5, "action": "Validate portal", "expected": "Appointment created per config" }
+    ],
+    "expectedResult": [
+      "MP skip behavior works as expected"
+    ],
+    "reusableActions": [
+      "Select service",
+      "Continue booking",
+      "Validate confirmation",
+      "Validate portal"
+    ],
+    "configurationDependencies": [
+      "Service MP mode setting"
+    ]
+  },
+  {
+    "testName": "OAC-20011: Select P/S With Multiple Meeting Preference Enabled",
+    "businessGoal": "Verify MP page appears and selection applied when multiple meeting preference enabled.",
+    "preconditions": [
+      "Widget accessible",
+      "Service with multiple MP enabled",
+      "At least two MP options available",
+      "Downstream availability exists",
+      "Valid personal details available",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Select service with multiple MP", "expected": "MP page displays options" },
+      { "step": 2, "action": "Select one MP option", "expected": "Proceed to date/time" },
+      { "step": 3, "action": "Complete booking", "expected": "Confirmation shown" },
+      { "step": 4, "action": "Verify confirmation MP", "expected": "Selected MP reflected" },
+      { "step": 5, "action": "Validate portal", "expected": "MP recorded correctly" }
+    ],
+    "expectedResult": [
+      "Multi-MP behavior validated"
+    ],
+    "reusableActions": [
+      "Select MP option",
+      "Complete booking",
+      "Validate portal record"
+    ],
+    "configurationDependencies": [
+      "Service MP multi-select enabled"
+    ]
+  },
+  {
+    "testName": "OAC-20012: Personal Details Validations Based on Selected Meeting Preference",
+    "businessGoal": "Verify PD validations adapt by meeting preference (phone mandatory for phone MP, email optional for virtual MP, etc.).",
+    "preconditions": [
+      "Widget accessible",
+      "Service with multiple MP including phone and virtual",
+      "Global widget settings: phone optional, email optional",
+      "Phone meeting preference override behavior documented",
+      "Service configured with phone, virtual, and in-person MP options",
+      "Booking path to PD page exists",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Select baseline MP path", "expected": "PD baseline validation applied" },
+      { "step": 2, "action": "Verify baseline phone/email state", "expected": "Baseline rules apply" },
+      { "step": 3, "action": "Select phone MP path", "expected": "PD phone mandatory" },
+      { "step": 4, "action": "Leave phone blank and submit", "expected": "Phone required validation shown" },
+      { "step": 5, "action": "Invalid phone format submit", "expected": "Phone format validation shown" },
+      { "step": 6, "action": "Select virtual MP path", "expected": "PD email optional" },
+      { "step": 7, "action": "Leave email blank and submit", "expected": "Submission allowed with other valid fields" },
+      { "step": 8, "action": "Submit all required values", "expected": "Success confirmation" },
+      { "step": 9, "action": "Configure global phone as optional in widget settings", "expected": "Phone field shows as optional" },
+      { "step": 10, "action": "Select phone meeting preference", "expected": "Phone field becomes mandatory (override behavior)" },
+      { "step": 11, "action": "Attempt submit without phone under phone MP", "expected": "Phone required validation error displayed" },
+      { "step": 12, "action": "Add phone and submit successfully", "expected": "Booking completes, override behavior confirmed" },
+      { "step": 13, "action": "Validate portal records", "expected": "MP-specific validation state reflected" }
+    ],
+    "expectedResult": [
+      "PD validation changes with meeting preference",
+      "Phone MP overrides global optional phone setting",
+      "Meeting preference validation takes precedence over widget settings"
+    ],
+    "reusableActions": [
+      "Switch MP type",
+      "Verify field validations",
+      "Submit booking",
+      "Validate portal",
+      "Test override behavior"
+    ],
+    "configurationDependencies": [
+      "MP-specific PD validation overrides in config",
+      "Widget phone/email requirement settings",
+      "Meeting preference validation override rules",
+      "Service-level MP configuration"
+    ]
+  },
+  {
+    "testName": "OAC-20013: Widget Behavior During Partial Holiday",
+    "businessGoal": "Verify partial holiday date blocks only specific slot ranges while allowing non-holiday slots.",
+    "preconditions": [
+      "Widget accessible",
+      "Service/location normal bookable",
+      "Partial holiday configured: 10:00-12:00 on test date",
+      "Normal availability outside holiday hours confirmed",
+      "Holiday setup verified via AC Portal",
+      "Admin Portal access available",
+      "Valid personal details available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Go to date/time for partial holiday date", "expected": "Slots load" },
+      { "step": 2, "action": "Verify slots before 10:00 available", "expected": "Early morning slots selectable" },
+      { "step": 3, "action": "Verify slots 10:00-12:00 disabled", "expected": "Holiday time range blocked" },
+      { "step": 4, "action": "Verify slots after 12:00 available", "expected": "Afternoon slots selectable" },
+      { "step": 5, "action": "Verify holiday-blocked slots", "expected": "Blocked slots unavailable" },
+      { "step": 6, "action": "Verify allowed slots", "expected": "Allowed slots available" },
+      { "step": 7, "action": "Select available slot and proceed", "expected": "Can complete booking" },
+      { "step": 8, "action": "Verify confirmation", "expected": "Shows selected non-holiday slot" },
+      { "step": 9, "action": "Validate portal", "expected": "Correct appointment recorded" },
+      { "step": 10, "action": "Verify holiday setup via API", "expected": "Holiday configuration confirmed" }
+    ],
+    "expectedResult": [
+      "Partial holiday blocks only configured time range",
+      "Widget allows booking outside holiday hours",
+      "Holiday behavior matches AC Portal configuration"
+    ],
+    "reusableActions": [
+      "Check slot availability",
+      "Select available slot",
+      "Complete booking",
+      "Validate portal",
+      "Verify holiday configuration"
+    ],
+    "configurationDependencies": [
+      "Partial holiday time range configuration",
+      "AC Portal holiday setup verification",
+      "Widget holiday display logic"
+    ]
+  },
+  {
+    "testName": "OAC-20014: Widget Behavior During Full Holiday",
+    "businessGoal": "Verify full holiday date does not allow any booking slots.",
+    "preconditions": [
+      "Widget accessible",
+      "Service/location bookable normally",
+      "Full day holiday configured on test date",
+      "Adjacent non-holiday dates available for comparison",
+      "Holiday setup verified via AC Portal",
+      "Admin Portal access available",
+      "Valid personal details available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Go to full holiday date", "expected": "No selectable slots" },
+      { "step": 2, "action": "Verify all time slots disabled on holiday date", "expected": "No selectable slots available" },
+      { "step": 3, "action": "Attempt to select any slot", "expected": "Selection prevented, no navigation to personal details" },
+      { "step": 4, "action": "Try selecting slot", "expected": "Cannot proceed" },
+      { "step": 5, "action": "Navigate to next available non-holiday date", "expected": "Normal slot availability displayed" },
+      { "step": 6, "action": "Select non-holiday date", "expected": "Slots available" },
+      { "step": 7, "action": "Complete booking on non-holiday date", "expected": "Success" },
+      { "step": 8, "action": "Validate portal", "expected": "No holiday booking captured" },
+      { "step": 9, "action": "Verify full holiday setup via API", "expected": "Full day holiday configuration confirmed" }
+    ],
+    "expectedResult": [
+      "Full holiday prevents all bookings on configured date",
+      "Widget maintains normal functionality on non-holiday dates",
+      "Holiday behavior matches AC Portal configuration"
+    ],
+    "reusableActions": [
+      "Check holiday date restriction",
+      "Use non-holiday date",
+      "Complete booking",
+      "Validate portal",
+      "Verify holiday configuration"
+    ],
+    "configurationDependencies": [
+      "Full day holiday configuration",
+      "AC Portal holiday setup verification",
+      "Widget date availability logic"
+    ]
+  },
+  {
+    "testName": "OAC-20015: Verify Past Dates Cannot Be Selected",
+    "businessGoal": "Ensure widget disallows selecting past calendar dates for appointments.",
+    "preconditions": [
+      "Widget accessible",
+      "Valid service/location path to date/time page",
+      "System date/time/timezone correct",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Open date/time page", "expected": "Calendar shown" },
+      { "step": 2, "action": "Attempt select past date", "expected": "Past date disabled/unselectable" },
+      { "step": 3, "action": "Attempt to proceed with past date", "expected": "Cannot proceed" },
+      { "step": 4, "action": "Select current/future date and continue", "expected": "Proceed normally" }
+    ],
+    "expectedResult": [
+      "Past dates blocked from booking"
+    ],
+    "reusableActions": [
+      "Date picker validation",
+      "Select valid date"
+    ],
+    "configurationDependencies": [
+      "Past date block behavior in widget"
+    ]
+  },
+  {
+    "testName": "OAC-20016: Verify Timeslots Display According to Availability (User Availability Focus)",
+    "businessGoal": "Verify slot availability display and enable/disable based on user availability windows and service duration.",
+    "preconditions": [
+      "Widget accessible",
+      "Slot interval 15 min",
+      "Service duration 30 min",
+      "Location 1 Monday availability set in portal",
+      "No blackout holidays overriding",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Select Location1 and Monday date", "expected": "Timeslots displayed" },
+      { "step": 2, "action": "Verify before 08:00/after 17:30", "expected": "Hidden" },
+      { "step": 3, "action": "Verify 12:00-14:45 block", "expected": "Disabled" },
+      { "step": 4, "action": "Verify 11:30 vs 11:45/12:00", "expected": "11:30 enabled, 11:45/12:00 disabled" },
+      { "step": 5, "action": "Select enabled timeslot and book", "expected": "Success" },
+      { "step": 6, "action": "Validate portal", "expected": "Correct appointment time" }
+    ],
+    "expectedResult": [
+      "Timeslot display follows availability and duration constraints"
+    ],
+    "reusableActions": [
+      "Check slot boundary rules",
+      "Select valid slot",
+      "Validate portal"
+    ],
+    "configurationDependencies": [
+      "Location availability schedule",
+      "Service duration"
+    ]
+  },
+  {
+    "testName": "OAC-20017: Verify Widget Spanish Language Translations Load Properly",
+    "businessGoal": "Verify Spanish localization is loaded and displayed across widget pages.",
+    "preconditions": [
+      "Widget accessible",
+      "Language selector enabled",
+      "Spanish resources available",
+      "Valid service/location path"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Open widget default language", "expected": "English page" },
+      { "step": 2, "action": "Change language to Spanish", "expected": "UI updates to Spanish" },
+      { "step": 3, "action": "Navigate key pages", "expected": "Spanish text on labels/buttons/validation" },
+      { "step": 4, "action": "Trigger validation message", "expected": "Spanish validation message" },
+      { "step": 5, "action": "Complete booking", "expected": "Confirmation in Spanish" }
+    ],
+    "expectedResult": [
+      "Spanish translation works end-to-end"
+    ],
+    "reusableActions": [
+      "Change widget language",
+      "Verify translated text",
+      "Complete booking"
+    ],
+    "configurationDependencies": [
+      "Language selector setting",
+      "Spanish i18n resource availability"
+    ]
+  },
+  {
+    "testName": "OAC-20018: Verify Appointment Checklist Display Based on Selected P/S and Configuration",
+    "businessGoal": "Verify confirmation checklist link visibility and content follows service-specific checklist config.",
+    "preconditions": [
+      "Widget accessible",
+      "Checklist on confirmation enabled",
+      "Checklist items configured for P/S A",
+      "Another P/S exists with different/no checklist",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Book P/S A", "expected": "Checklist link appears on confirmation" },
+      { "step": 2, "action": "Click Checklist", "expected": "Popup shows checklist items for P/S A" },
+      { "step": 3, "action": "Book P/S B", "expected": "Checklist content matches P/S B configuration" },
+      { "step": 4, "action": "Compare popup content", "expected": "Difference as configured" },
+      { "step": 5, "action": "Disable checklist setting and book again", "expected": "Checklist link absent" }
+    ],
+    "expectedResult": [
+      "Checklist visibility/content depends on service + config"
+    ],
+    "reusableActions": [
+      "Verify checklist link",
+      "Open checklist popup",
+      "Toggle checklist setting"
+    ],
+    "configurationDependencies": [
+      "Show Appointment Checklist setting",
+      "P/S checklist configuration"
+    ]
+  },
+  {
+    "testName": "OAC-20019: Verify URL Parameters `loc` and `svc` in Widget",
+    "businessGoal": "Verify URL query parameters skip service/location pages correctly and selection persists.",
+    "preconditions": [
+      "Widget accessible",
+      "Valid loc and svc IDs available",
+      "Valid loc+svc combination exists",
+      "Admin Portal access to validate IDs",
+      "Invalid location/service codes prepared for testing",
+      "Widget error handling behavior documented"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Launch with svc only", "expected": "Service page skipped, location shown" },
+      { "step": 2, "action": "Launch with loc only", "expected": "Location skipped after service select" },
+      { "step": 3, "action": "Launch with loc+svc", "expected": "Service+location skipped, meeting pref shown" },
+      { "step": 4, "action": "Complete booking", "expected": "Confirmation reflects URL selections" },
+      { "step": 5, "action": "Launch with /loc=invalid (unknown location code)", "expected": "Service selection page displayed, location selection shown (invalid ignored)" },
+      { "step": 6, "action": "Launch with /unknown=value (unknown parameter)", "expected": "Normal flow continues, unknown parameter ignored" },
+      { "step": 7, "action": "Launch with malformed parameter /loc=", "expected": "Graceful fallback to normal flow" }
+    ],
+    "expectedResult": [
+      "Valid parameters processed correctly and skip appropriate steps",
+      "Invalid/unknown parameters ignored gracefully",
+      "Widget maintains normal flow regardless of malformed input"
+    ],
+    "reusableActions": [
+      "Launch widget URL with params",
+      "Confirm flow skipping behavior",
+      "Complete booking",
+      "Test invalid parameters"
+    ],
+    "configurationDependencies": [
+      "Service/location IDs in portal",
+      "Parameter mapping behavior",
+      "Parameter validation rules in widget",
+      "Error handling for unknown parameters"
+    ]
+  },
+  {
+    "testName": "OAC-20020: Verify Impact of Manual Staff Selection and Request Spanish Speaker",
+    "businessGoal": "Verify staff selection and Spanish speaker request affect slot availability and portal data accordingly.",
+    "preconditions": [
+      "Widget accessible",
+      "Request Spanish Speaker enabled",
+      "At least two eligible staff exist",
+      "Manual staff selection enabled",
+      "Valid availability for both paths",
+      "Admin Portal access available"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Select Staff A without Spanish request", "expected": "Appointment with Staff A can complete" },
+      { "step": 2, "action": "Validate portal for Staff A", "expected": "Assigned Staff A" },
+      { "step": 3, "action": "Select Staff B with Spanish request", "expected": "Spanish speaker conditions applied" },
+      { "step": 4, "action": "Complete booking for Spanish path", "expected": "Booking succeeds with correct options" },
+      { "step": 5, "action": "Validate portal for Spanish request", "expected": "Record reflects staff and Spanish speaker details" }
+    ],
+    "expectedResult": [
+      "Manual staff and Spanish request honored"
+    ],
+    "reusableActions": [
+      "Select staff",
+      "Enable Spanish speaker request",
+      "Complete booking",
+      "Validate portal record"
+    ],
+    "configurationDependencies": [
+      "Manual staff selection enablement",
+      "Spanish speaker request feature"
+    ]
+  }
+]
