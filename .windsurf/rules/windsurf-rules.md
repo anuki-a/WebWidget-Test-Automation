@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Playwright Automation Suite - Development Rules
 
 ## 🔄 Project Awareness & Context

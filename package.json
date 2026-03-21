@@ -1,0 +1,46 @@
+{
+  "name": "webwidget-testsuite",
+  "version": "1.0.0",
+  "description": "Playwright TypeScript test automation framework for Web Widget customer-facing application and AC Admin Portal integration",
+  "main": "dist/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright test --reporter=html",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project=\"Mobile Chrome\"",
+    "build": "tsc",
+    "clean": "rimraf dist test-results playwright-report",
+    "lint": "eslint src tests --ext .ts",
+    "format": "prettier --write src tests",
+    "install:browsers": "playwright install",
+    "show:report": "playwright show-report"
+  },
+  "keywords": [
+    "playwright",
+    "test-automation",
+    "typescript",
+    "e2e-testing",
+    "web-widget",
+    "appointment-booking"
+  ],
+  "author": "QA Team",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0",
+    "dotenv": "^17.3.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

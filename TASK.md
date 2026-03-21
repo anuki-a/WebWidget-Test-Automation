@@ -12,15 +12,15 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 - [ ] Core framework structure ready
 - [ ] API + UI integration working
 
-### 🔹 Step 1: Project Setup
+### 🔹 Step 1: Project Setup ✅ COMPLETED
 
-- [ ] Initialize Node.js project
-- [ ] Install Playwright + TypeScript
-- [ ] Create `playwright.config.ts`
-- [ ] Setup `.env`:
-  - [ ] baseURL (widget)
-  - [ ] apiURL
-  - [ ] credentials
+- [x] Initialize Node.js project
+- [x] Install Playwright + TypeScript
+- [x] Create `playwright.config.ts`
+- [x] Setup `.env`:
+  - [x] baseURL (widget)
+  - [x] apiURL
+  - [x] credentials
 
 ### 🔹 Step 2: Folder Structure
 
