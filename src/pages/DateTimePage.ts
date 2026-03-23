@@ -57,16 +57,20 @@ export class DateTimePage {
    */
   async selectTodayAndFirstAvailableTime(): Promise<{ date: Date; time: string }> {
     await this.waitForDateTimePage();
-    
-    // Select today's date
     const today = DateUtils.getToday();
+
+    // 1. Trigger the click
     await this.calendarComponent.selectToday();
+
+    // 2. Get the date that is actually marked as "selected" in the UI
+    // This ensures your bookingData matches what the user sees
+  const actualSelectedDate = await this.calendarComponent.getSelectedDate();
     
-    // Select first available time slot
+    // 3. Select first available time slot
     const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
     
     return {
-      date: today,
+      date: actualSelectedDate || today,
       time: selectedTime,
     };
   }

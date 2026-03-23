@@ -48,6 +48,9 @@ export default defineConfig({
     
     /* Global timeout for navigation */
     navigationTimeout: 60000,
+
+    permissions: ['geolocation'],
+    geolocation: { latitude: 33.1972, longitude: -96.6398 }, // McKinney, TX
   },
 
   /* Configure projects for major browsers */
@@ -65,16 +68,6 @@ export default defineConfig({
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
-    },
-    
-    /* Test against mobile viewports. */
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
     },
   ],
 

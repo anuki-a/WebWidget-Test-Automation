@@ -128,10 +128,12 @@ export class LocationPage {
     const searchBox = this.page.getByRole("textbox", {
       name: "Enter city and state, or ZIP",
     });
-    
+    const mileText = this.page.getByText("mile");
+
     // Wait for search box to be visible
     await expect(searchBox).toBeVisible();
-    
+    await expect(mileText.first()).toBeVisible({ timeout: 10000 });
+
     // Clear any existing text and enter location code
     await searchBox.clear();
     await searchBox.fill(locationCode);

@@ -61,22 +61,22 @@ export class ServicePage {
    * @param continueWithScheduling - Whether to continue with scheduling (true) or handle online application
    * @returns Promise resolving when dialog is handled
    */
-  async handleOnlineApplicationDialog(continueWithScheduling: boolean = true): Promise<void> {
-    try {
+  async handleSkipAppointmentDialog(continueWithScheduling: boolean = true): Promise<void> {
       // Wait for the dialog to appear (timeout is short since it may not appear)
-      const dialogButton = continueWithScheduling 
-        ? this.page.getByRole('button', { name: 'No, continue with scheduling' })
-        : this.page.getByRole('button', { name: 'Yes, start online application' });
+      const dialogText = "skipping the wait";
+      const dialog = this.page.getByText(dialogText, { exact: false });
 
-      await dialogButton.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
-        // Dialog didn't appear, which is fine
-        return;
+      await dialog.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {
+        // We catch the error internally so the test doesn't fail if it's missing
       });
 
-      await dialogButton.click();
-    } catch (error) {
-      // Dialog handling is optional, continue if it doesn't appear
-    }
+      const dialogButton = continueWithScheduling 
+        ? this.page.getByRole('button', { name: 'NO, CONTINUE WITH SCHEDULING AN APPOINTMENT' })
+        : this.page.getByRole('button', { name: 'YES, SKIP THE WAIT' });
+
+      if (await dialog.isVisible()) {
+        await dialogButton.click();
+      }
   }
 
   /**
@@ -176,7 +176,7 @@ export class ServicePage {
     await this.selectService(selectedService);
     
     // Handle online application dialog if it appears
-    await this.handleOnlineApplicationDialog(continueWithScheduling);
+    await this.handleSkipAppointmentDialog(continueWithScheduling);
 
     return selectedService;
   }

@@ -16,6 +16,9 @@ export const test = base.extend<{ bookingData: BookingData }>({
     const rawName = 'Update Personal Account  60';
     const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
 
+        const rawName1 = 'Estate Accounts  75 Mins';
+    const cleanName1 = "Estate Accounts";
+
     // Create complete booking data
     const data: BookingData = {
       service: {
@@ -45,6 +48,35 @@ export const test = base.extend<{ bookingData: BookingData }>({
         displayName: MeetingPreference.IN_PERSON
       }
     };
-    await use(data);
+
+        const data2: BookingData = {
+      service: {
+        category: 'Estate Accounts',
+        name: rawName1,
+        displayName: cleanName1,
+        duration: 75
+      },
+      location: {
+        code: '75002',
+        name: 'Allen 404 E Stacy Rd. Allen,',
+        confirmationName: 'Allen'
+      },
+      dateTime: {
+        date: today,
+        formattedDate: formattedDate.fullDateString,
+        time: '10:00 AM',
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
+      meetingPreference: {
+        type: 'in-person',
+        displayName: MeetingPreference.IN_PERSON
+      }
+    };
+    await use(data2);
   }
 });
