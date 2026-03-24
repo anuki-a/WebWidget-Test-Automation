@@ -33,12 +33,11 @@ export class CalendarComponent {
   }
 
   /**
-   * Select today's date.
-   * @returns Promise resolving when today's date is selected
+   * Select a given date.
+   * @returns Promise resolving when a given date is selected
    */
-  async selectToday(): Promise<void> {
-    const today = DateUtils.getToday();
-    await this.selectDate(today);
+  async selectDay(day: Date): Promise<void> {
+    await this.selectDate(day);
   }
 
   /**

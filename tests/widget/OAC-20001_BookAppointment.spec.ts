@@ -63,8 +63,7 @@ test.describe('Appointment Booking - OAC-20001', () => {
     await meetingPreferencePage.selectInPerson();
 
     // Select today's date and first available time slot
-    const selectedDateTime = await dateTimePage.selectTodayAndFirstAvailableTime();
-    const selectedTime = selectedDateTime.time;
+    const selectedDateTime = await dateTimePage.selectDayAndFirstAvailableTime(bookingData.dateTime);
 
     // Fill customer information and submit booking form
     await personalDetailsPage.fillDetails(bookingData.customer);
@@ -73,7 +72,9 @@ test.describe('Appointment Booking - OAC-20001', () => {
     // Wait for confirmation page and verify booking details
     await confirmationPage.waitForConfirmationPage();
     
-    bookingData.dateTime.time = selectedTime
+    bookingData.dateTime.time = selectedDateTime.time
+    bookingData.dateTime.date = selectedDateTime.date
+    bookingData.dateTime.formattedDate = selectedDateTime.formattedDate
     // Update booking data with actual selected time for verification
     const isVerified = await confirmationPage.verifyBooking(bookingData);
     expect(isVerified).toBe(true);

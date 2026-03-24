@@ -1,7 +1,8 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { CalendarComponent } from '../components/CalendarComponent';
 import { TimeSlotComponent } from '../components/TimeSlotComponent';
-import { DateUtils } from '../utils/dateUtils';
+import { DateUtils, FormattedDate } from '../utils/dateUtils';
+import { DateTimeData } from '@/types/bookingTypes';
 
 /**
  * Date and time page for selecting appointment date and time.
@@ -55,24 +56,19 @@ export class DateTimePage {
    * Select today's date and first available time slot.
    * @returns Promise resolving to the selected date and time
    */
-  async selectTodayAndFirstAvailableTime(): Promise<{ date: Date; time: string }> {
+  async selectDayAndFirstAvailableTime(dateTime: DateTimeData): Promise<{ date: Date; time: string; formattedDate: string }> {
     await this.waitForDateTimePage();
-    const today = DateUtils.getToday();
+    const day = dateTime.date || DateUtils.getToday();
     // 1. Trigger the click
-    await this.calendarComponent.selectToday();
+    await this.calendarComponent.selectDay(day);
 
-    // 2. Get the date that is actually marked as "selected" in the UI
-    // This ensures your bookingData matches what the user sees
-  const actualSelectedDate = await this.calendarComponent.getSelectedDate();
-    
     // 3. Select first available time slot
     const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
 
-    const finalDate = actualSelectedDate || today;
-    
     return {
-      date: finalDate,
+      date: day,
       time: selectedTime,
+      formattedDate: DateUtils.formatDateForUI(day).fullDateString,
     };
   }
 
