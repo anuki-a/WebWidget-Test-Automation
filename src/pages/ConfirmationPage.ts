@@ -34,7 +34,7 @@ export class ConfirmationPage {
    * Wait for the confirmation page to be loaded and visible.
    * @param timeout - Maximum time to wait
    */
-  async waitForConfirmationPage(timeout: number = 220000): Promise<void> {
+  async waitForConfirmationPage(timeout: number = 22000): Promise<void> {
     // Wait for confirmation heading to appear
     await expect(async () => {
       await expect(this.page.getByRole('heading', { name: /.*appointment has been scheduled/ }))
@@ -282,6 +282,147 @@ export class ConfirmationPage {
     
     await expect(cancelButton).toBeVisible();
     await cancelButton.click();
+  }
+
+  /**
+   * Handle cancellation popup by dismissing (clicking No/Cancel).
+   * @returns Promise resolving when popup is dismissed
+   */
+  async dismissCancellationPopup(): Promise<void> {
+    // check text "Appointment Cancellation"
+    const appointmentText = this.page.locator('text=Appointment Cancellation');
+    await expect(appointmentText).toBeVisible({ timeout: 1000 });
+
+    // Look for dismiss buttons in the cancellation popup
+    const dismissButton = this.page.getByRole('button', { name: 'No' })
+      .or(this.page.getByRole('button', { name: 'Cancel' }))
+      .or(this.page.getByRole('button', { name: 'Dismiss' }))
+      .or(this.page.locator('[data-testid="cancel-dismiss"]'));
+    
+    await expect(dismissButton).toBeVisible({ timeout: 10000 });
+    await dismissButton.click();
+  }
+
+  /**
+   * Handle cancellation popup by confirming (clicking Yes/Confirm).
+   * @returns Promise resolving when cancellation is confirmed
+   */
+  async confirmCancellationPopup(): Promise<void> {
+    // Look for confirm buttons in the cancellation popup
+    const confirmButton = this.page.getByRole('button', { name: 'Yes' })
+      .or(this.page.getByRole('button', { name: 'Confirm' }))
+      .or(this.page.getByRole('button', { name: 'Cancel Appointment' }))
+      .or(this.page.locator('[data-testid="cancel-confirm"]'));
+    
+    await expect(confirmButton).toBeVisible({ timeout: 10000 });
+    await confirmButton.click();
+  }
+
+  /**
+   * Wait for cancellation confirmation message to appear.
+   * @param timeout - Maximum time to wait
+   * @returns Promise resolving when cancellation confirmation is visible
+   */
+  async waitForCancellationConfirmation(timeout: number = 30000): Promise<void> {
+    // Look for cancellation confirmation messages
+    const cancellationMessage = this.page.getByText(/This appointment has been cancelled. Do you want to book another?/i)
+    await expect(cancellationMessage).toBeVisible({ timeout });
+  }
+
+  /**
+   * Verify that appointment is marked as cancelled on the page.
+   * @returns Promise resolving to true if cancellation is confirmed
+   */
+  async verifyAppointmentCancelled(): Promise<boolean> {
+    console.log("Verifying appointment cancellation not happended...");
+    try {
+      // Look for cancellation indicators
+      const cancelledIndicators = [
+        this.page.getByText(/appointment.*cancel|cancel.*appointment/i),
+        this.page.getByText(/cancelled|canceled/i),
+        this.page.locator('[data-testid="appointment-cancelled"]'),
+        this.page.locator('.cancelled-appointment')
+      ];
+      
+      // Check if any cancellation indicator is visible
+      for (const indicator of cancelledIndicators) {
+        if (await indicator.isVisible().catch(() => false)) {
+          return true;
+        }
+      }
+      console.log("Verifying appointment cancellation not happended...");
+      return false;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Check if "Book Another" button is available after cancellation.
+   * @returns Promise resolving to true if Book Another button is visible
+   */
+  async isBookAnotherButtonVisible(): Promise<boolean> {
+    const bookAnotherButton = this.page.getByRole('button', { name: 'Book Another' })
+    return await bookAnotherButton.isVisible().catch(() => false);
+  }
+
+  /**
+   * Complete cancellation flow: click cancel, confirm, and verify cancellation.
+   * @returns Promise resolving to true if cancellation is successful
+   */
+  async testCancelAppointment(): Promise<boolean> {
+    try {
+      // Step 1: Click cancel button
+      await this.clickCancelButton();
+      
+      // Step 2: Confirm cancellation in popup
+      await this.confirmCancellationPopup();
+      
+      // Step 3: Wait for cancellation confirmation
+      await this.waitForCancellationConfirmation();
+      
+      // Step 4: Verify appointment is cancelled
+      const isCancelled = await this.verifyAppointmentCancelled();
+      
+      // Step 5: Verify Book Another button is available
+      const hasBookAnother = await this.isBookAnotherButtonVisible();
+      
+      return isCancelled && hasBookAnother;
+    } catch (error) {
+      console.error('Cancellation flow failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Test cancellation flow by dismissing the popup (appointment should remain active).
+   * @returns Promise resolving to true if appointment remains active after dismissing cancellation
+   */
+  async testCancellationDismiss(): Promise<boolean> {
+    try {
+      // Step 1: Click cancel button
+      await this.clickCancelButton();
+      
+      // Step 2: Dismiss cancellation popup
+      await this.dismissCancellationPopup();
+      
+      // Step 3: Wait a moment for popup to close
+      await this.page.waitForTimeout(2000);
+      
+      // Step 4: check whether "Cancelled" text is not present on the page
+      const isCancelled = await this.page.locator('text=Cancelled').isVisible().catch(() => false);
+      if (isCancelled) {
+        return false;
+      }
+
+      // Step 5: Verify confirmation page is still showing active appointment
+      const confirmationPageActive = await this.verifyConfirmationPageLoaded();
+      
+      return confirmationPageActive;
+    } catch (error) {
+      console.error('Cancellation dismiss test failed:', error);
+      return false;
+    }
   }
 
   /**

@@ -199,7 +199,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 - [ ] OAC-20002 → Edit Appointment
 - [ ] OAC-20003 → Non-editable validation
-- [ ] OAC-20004 → Cancel Appointment
+- [x] OAC-20004 → Cancel Appointment
 
 #### Multi-booking
 
