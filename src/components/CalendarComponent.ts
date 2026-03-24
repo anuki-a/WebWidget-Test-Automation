@@ -29,6 +29,7 @@ export class CalendarComponent {
       name: formattedDate.dayNumber.toString(), 
       exact: true 
     }).click();
+    await this.page.waitForTimeout(10000);
   }
 
   /**

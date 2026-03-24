@@ -58,7 +58,6 @@ export class DateTimePage {
   async selectTodayAndFirstAvailableTime(): Promise<{ date: Date; time: string }> {
     await this.waitForDateTimePage();
     const today = DateUtils.getToday();
-
     // 1. Trigger the click
     await this.calendarComponent.selectToday();
 
@@ -68,9 +67,11 @@ export class DateTimePage {
     
     // 3. Select first available time slot
     const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
+
+    const finalDate = actualSelectedDate || today;
     
     return {
-      date: actualSelectedDate || today,
+      date: finalDate,
       time: selectedTime,
     };
   }

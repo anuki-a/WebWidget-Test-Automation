@@ -86,12 +86,5 @@ test.describe('Appointment Booking - OAC-20001', () => {
 
     // Verify cancel button is present
     await expect(confirmationPage.isCancelButtonVisible()).resolves.toBe(true);
-
-    // // Step 8: Additional verification from the original happy path test
-    // await expect(page.locator('text=McKinney')).toBeVisible();
-    // await expect(page.locator(`text=${formattedDate.fullDateString} at ${selectedTime}`)).toBeVisible();
-    // await expect(page.locator('text=Update Personal Account')).toBeVisible();
-    // await expect(page.locator(`text=${customer.email}`)).toBeVisible();
-    // await expect(page.getByRole('button', { name: 'Cancel Appointment' })).toBeVisible();
   });
 });

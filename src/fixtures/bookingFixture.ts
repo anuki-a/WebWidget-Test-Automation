@@ -77,6 +77,6 @@ export const test = base.extend<{ bookingData: BookingData }>({
         displayName: MeetingPreference.IN_PERSON
       }
     };
-    await use(data2);
+    await use(data);
   }
 });
