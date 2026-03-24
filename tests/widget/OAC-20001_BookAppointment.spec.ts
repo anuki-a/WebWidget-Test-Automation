@@ -9,42 +9,36 @@ import { ConfirmationPage } from '../../src/pages/ConfirmationPage';
 import { expect } from '@playwright/test';
 
 /**
- * OAC-20001: End-to-End Book Appointment Test
+ * OAC-20001: End-to-End Appointment Booking Test
  * 
- * Test Case: Complete booking with valid customer details (Happy Path)
+ * Test Case: Complete booking flow with valid customer details (Happy Path)
  * 
- * Steps:
+ * Prerequisites:
+ * - Widget accessible via BASE_URL environment variable
+ * - Test data provisioned through bookingFixture
+ * - All page objects available and functional
+ * 
+ * Test Flow:
  * 1. Navigate to appointment widget
- * 2. Select service category and service
- * 3. Select location
- * 4. Select meeting preference
- * 5. Select date and time
- * 6. Fill customer details
- * 7. Submit booking
- * 8. Verify confirmation page
+ * 2. Select service category and specific service
+ * 3. Search and select location
+ * 4. Choose meeting preference (in-person)
+ * 5. Select date and time slot
+ * 6. Fill customer details and submit
+ * 7. Verify booking confirmation
+ * 8. Validate cancel button availability
+ * 
+ * Expected Results:
+ * - Booking successfully created
+ * - Confirmation page displays correct details
+ * - All booking data matches input
+ * - User can cancel booking if needed
  */
 test.describe('Appointment Booking - OAC-20001', () => {
   test('Complete booking with valid customer details', { tag: ['@smoke', '@functional'] }, async ({ page, bookingData }) => {
-    // Monitor API calls
-    // const apiCalls: any[] = [];
-    
-    // page.on('request', request => {
-    //   if (request.url().includes('/api/') || request.url().includes('/OacWeb/')) {
-    //     console.log(`🌐 API Request: ${request.method()} ${request.url()}`);
-    //     apiCalls.push({ url: request.url(), method: request.method() });
-    //   }
-    // });
 
-    // page.on('response', async response => {
-    //   if (response.url().includes('/api/') || response.url().includes('/OacWeb/')) {
-    //     const status = response.status();
-    //     console.log(`📡 API Response: ${status} ${response.url()}`);
-    //     if (status >= 400) {
-    //       console.error(`❌ API Error: ${status} ${response.url()}`);
-    //     }
-    //   }
-    // });
-    // Create page objects
+    // Initialize page objects for UI interactions
+    // Following Page Object Model pattern for maintainable test code
     const servicePage = new ServicePage(page);
     const locationPage = new LocationPage(page);
     const meetingPreferencePage = new MeetingPreferencePage(page);
@@ -52,39 +46,39 @@ test.describe('Appointment Booking - OAC-20001', () => {
     const personalDetailsPage = new PersonalDetailsPage(page);
     const confirmationPage = new ConfirmationPage(page);
 
-    // Step 1: Navigate to the service widget
+    // Navigate to appointment widget using environment configuration
     await page.goto(process.env.BASE_URL!);
 
-    // Step 2: Verify service categories are visible and select service
+    // Verify service categories are available and select target service
     await expect(page.getByRole('button', { name: 'Personal Accounts' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Speak with a Department' })).toBeVisible();
 
-    // Select service category and service using page object
+    // Execute service selection flow using page object abstraction
     const selectedService = await servicePage.selectServiceFlow(bookingData.service.category, bookingData.service.name);
 
-    // Step 3: Select location using page object
+    // Search and select location using location code and name
     await locationPage.searchAndSelectLocation(bookingData.location.code, bookingData.location.name);
 
-    // Step 4: Select meeting preference using page object
+    // Select in-person meeting preference
     await meetingPreferencePage.selectInPerson();
 
-    // Step 5: Select date and time using page objects
+    // Select today's date and first available time slot
     const selectedDateTime = await dateTimePage.selectTodayAndFirstAvailableTime();
     const selectedTime = selectedDateTime.time;
 
-    // Step 6: Fill customer details using page object
+    // Fill customer information and submit booking form
     await personalDetailsPage.fillDetails(bookingData.customer);
     await personalDetailsPage.submit();
 
-    // Step 7: Verify confirmation page with booking details using verifyBooking method
+    // Wait for confirmation page and verify booking details
     await confirmationPage.waitForConfirmationPage();
     
     bookingData.dateTime.time = selectedTime
-    // Use the new verifyBooking method for exact verification
+    // Update booking data with actual selected time for verification
     const isVerified = await confirmationPage.verifyBooking(bookingData);
     expect(isVerified).toBe(true);
 
-    // Verify cancel button is present
+    // Verify booking details match expected data using verification method
     await expect(confirmationPage.isCancelButtonVisible()).resolves.toBe(true);
   });
 });
