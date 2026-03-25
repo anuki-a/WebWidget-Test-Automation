@@ -83,12 +83,11 @@ export class CalendarComponent {
    * @returns Promise resolving when calendar is ready
    */
   async waitForCalendar(timeout: number = 10000): Promise<void> {
-    // Wait for calendar container to be visible
+    // Try specific selectors first, then fallback
     await this.page.waitForSelector('[data-testid="calendar"], .calendar, .date-picker', {
       timeout,
       state: 'visible',
     }).catch(() => {
-      // If no specific calendar selector found, wait for any date-related element
       return this.page.waitForSelector('[role="grid"], [role="table"]', {
         timeout,
         state: 'visible',
@@ -113,12 +112,13 @@ export class CalendarComponent {
       const classes = await dateElement.getAttribute('class') || '';
       const ariaDisabled = await dateElement.getAttribute('aria-disabled');
       
+      // Check various disabled indicators
       return classes.includes('disabled') || 
              classes.includes('past') || 
              classes.includes('unavailable') ||
              ariaDisabled === 'true';
     } catch (error) {
-      return true; // Assume disabled if we can't find it
+      return true; // Assume disabled if not found
     }
   }
 
@@ -128,7 +128,6 @@ export class CalendarComponent {
    */
   async navigateToNextMonth(): Promise<void> {
     await this.page.getByRole('button', { name: /next|>/i }).click();
-    //await this.waitForCalendar();
   }
 
   /**
@@ -137,7 +136,6 @@ export class CalendarComponent {
    */
   async navigateToPreviousMonth(): Promise<void> {
     await this.page.getByRole('button', { name: /previous|</i }).click();
-    //await this.waitForCalendar();
   }
 
   /**
@@ -166,10 +164,9 @@ export class CalendarComponent {
   async selectDateWithRetry(date: Date, maxRetries: number = 3, retryDelay: number = 1000): Promise<void> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        //await this.waitForCalendar();
         await this.selectDate(date);
         
-        // Verify the date was selected
+        // Verify selection worked
         const selected = await this.getSelectedDate();
         if (selected && selected.toDateString() === date.toDateString()) {
           return; // Success
@@ -180,7 +177,7 @@ export class CalendarComponent {
         }
       } catch (error) {
         if (attempt === maxRetries) {
-          throw error;
+          throw error; // Final attempt failed
         }
         await this.page.waitForTimeout(retryDelay);
       }
@@ -195,21 +192,16 @@ export class CalendarComponent {
    * @returns Promise resolving to the selected date or null if no available date found
    */
   async selectFirstAvailableDate(maxDaysToSearch: number = 30): Promise<Date | null> {
-    //await this.waitForCalendar();
-    
     for (let daysAhead = 0; daysAhead <= maxDaysToSearch; daysAhead++) {
       const testDate = DateUtils.getFutureDate(daysAhead);
-      
-      // Skip weekends if needed (optional logic)
-      // if (DateUtils.isWeekend(testDate)) continue;
       
       const isDisabled = await this.isDateDisabled(testDate);
       if (!isDisabled) {
         await this.selectDate(testDate);
-        return testDate;
+        return testDate; // Found available date
       }
     }
     
-    return null; // No available date found
+    return null; // No dates available
   }
 }

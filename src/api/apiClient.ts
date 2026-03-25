@@ -42,14 +42,11 @@ export class ApiClient {
    * @returns Promise resolving to the response data
    */
   async get(endpoint: string, params?: Record<string, any>): Promise<any> {
-    console.log(`🔍 API GET: ${this.baseUrl}${endpoint}`, params || {});
-    
     const response = await this.request.get(endpoint, {
       params,
     });
     
     const responseData = await response.json();
-    console.log(`✅ API GET Response: ${response.status()}`, responseData);
     
     if (!response.ok()) {
       throw new Error(`GET ${endpoint} failed: ${response.status()} ${response.statusText()}`);
@@ -66,15 +63,12 @@ export class ApiClient {
    * @returns Promise resolving to the response data
    */
   async post(endpoint: string, data?: any, params?: Record<string, any>): Promise<any> {
-    console.log(`🔍 API POST: ${this.baseUrl}${endpoint}`, { data, params });
-    
     const response = await this.request.post(endpoint, {
       data,
       params,
     });
     
     const responseData = await response.json();
-    console.log(`✅ API POST Response: ${response.status()}`, responseData);
     
     if (!response.ok()) {
       throw new Error(`POST ${endpoint} failed: ${response.status()} ${response.statusText()}`);
