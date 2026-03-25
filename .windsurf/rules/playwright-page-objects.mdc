@@ -1,0 +1,30 @@
+---
+description: Page Object Model patterns
+trigger: always_on
+---
+
+# Page Object Patterns
+
+## Structure
+- Extend `BasePage` for all page objects
+- Export class: `export class PageName extends BasePage`
+
+## Locators as Getters
+```ts
+// ✅ Good - lazy evaluation, auto-wait
+getSubmitButton() {
+  return this.page.getByRole('button', { name: 'Submit' });
+}
+
+// ❌ Bad - evaluated at construction
+submitButton = this.page.getByRole('button', { name: 'Submit' });
+```
+
+## Methods
+- Methods represent user actions: `clickSaveButton()`, `fillForm(data)`
+- Return `Promise<void>` for actions
+- Keep methods focused - one action per method
+
+## Iframe Handling
+- `this.page` - main page context
+- Use `getFrameLocator(title)` from BasePage for iframe access
