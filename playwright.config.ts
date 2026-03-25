@@ -17,10 +17,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : (parseInt(process.env.RETRY_COUNT || '0') || 0),
   
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : (process.env.PARALLEL_TESTS === 'false' ? 1 : (parseInt(process.env.MAX_WORKERS || '1') || undefined)),
   
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
@@ -44,10 +44,10 @@ export default defineConfig({
     video: 'retain-on-failure',
     
     /* Global timeout for each action */
-    actionTimeout: 30000,
+    actionTimeout: parseInt(process.env.DEFAULT_TIMEOUT || '30000'),
     
     /* Global timeout for navigation */
-    navigationTimeout: 60000,
+    navigationTimeout: parseInt(process.env.NAVIGATION_TIMEOUT || '60000'),
 
     permissions: ['geolocation'],
     geolocation: { latitude: 33.1972, longitude: -96.6398 }, // McKinney, TX
@@ -74,12 +74,15 @@ export default defineConfig({
   globalSetup: require.resolve('./tests/auth.setup.ts'),
 
   /* Test timeout */
-  timeout: 30000,
+  timeout: parseInt(process.env.DEFAULT_TIMEOUT || '60000'),
 
   /* Expect timeout */
   expect: {
-    timeout: 10000,
+    timeout: parseInt(process.env.DEFAULT_TIMEOUT || '15000'),
   },
+
+  /* Global timeout for all operations */
+  globalTimeout: parseInt(process.env.DEFAULT_TIMEOUT || '120000'),
 
   /* Output directory for test artifacts */
   outputDir: 'test-results/',
