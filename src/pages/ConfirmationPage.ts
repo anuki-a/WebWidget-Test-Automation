@@ -334,7 +334,7 @@ export class ConfirmationPage {
    * @returns Promise resolving to true if cancellation is confirmed
    */
   async verifyAppointmentCancelled(): Promise<boolean> {
-    console.log("Verifying appointment cancellation not happended...");
+    console.log("Verifying appointment cancellation status...");
     try {
       // Look for cancellation indicators
       const cancelledIndicators = [
@@ -347,10 +347,11 @@ export class ConfirmationPage {
       // Check if any cancellation indicator is visible
       for (const indicator of cancelledIndicators) {
         if (await indicator.isVisible().catch(() => false)) {
+          console.log("Appointment cancellation confirmed on page");
           return true;
         }
       }
-      console.log("Verifying appointment cancellation not happended...");
+      console.log("No cancellation indicators found on page");
       return false;
     } catch (error) {
       return false;

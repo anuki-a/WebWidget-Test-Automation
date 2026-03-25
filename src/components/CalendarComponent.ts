@@ -33,8 +33,9 @@ export class CalendarComponent {
   }
 
   /**
-   * Select a given date.
-   * @returns Promise resolving when a given date is selected
+   * Select a given date (alias for selectDate method).
+   * @param day - Date to select
+   * @returns Promise resolving when date is selected
    */
   async selectDay(day: Date): Promise<void> {
     await this.selectDate(day);

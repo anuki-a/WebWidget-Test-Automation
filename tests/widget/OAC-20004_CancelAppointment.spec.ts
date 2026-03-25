@@ -95,47 +95,5 @@ test.describe('Appointment Booking - OAC-20004', () => {
     // Now, test that confirming the cancellation actually cancels the appointment
     const cancelSuccessful = await confirmationPage.testCancelAppointment();
     expect(cancelSuccessful).toBe(true);
-
-    // // Step 5: Verify cancellation status and UI changes
-    // // Verify appointment shows as cancelled
-    // const isCancelled = await confirmationPage.verifyAppointmentCancelled();
-    // expect(isCancelled).toBe(true);
-
-
-
-
-
-
-
-
-
-
-
-
-    // // Verify "Book Another" button is available after cancellation
-    // const hasBookAnother = await confirmationPage.isBookAnotherButtonVisible();
-    // expect(hasBookAnother).toBe(true);
-
-    // // Step 6: Get appointment details for API validation
-    // const appointmentId = await confirmationPage.getAppointmentId();
-    // expect(appointmentId).toBeDefined();
-
-    // // Step 7: Validate appointment cancellation status via API
-    // // Initialize API client for backend validation
-    // const apiClient = await AppointmentClient.create(process.env.API_URL!);
-    
-    // try {
-    //   // Fetch appointment details from API to verify cancellation status
-    //   const appointmentDetails = await apiClient.getAppointmentById(appointmentId!);
-      
-    //   // Verify appointment is marked as cancelled in the backend
-    //   expect(appointmentDetails.status).toBe('cancelled');
-    //   expect(appointmentDetails.cancelledAt).toBeDefined();
-      
-    //   console.log(`Appointment ${appointmentId} successfully cancelled and verified via API`);
-    // } catch (error) {
-    //   console.warn('API validation failed, but UI cancellation was successful:', error);
-    //   // Don't fail the test if API validation fails, as the primary goal is UI functionality
-    // }
   });
 });

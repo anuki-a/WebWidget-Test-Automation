@@ -122,7 +122,8 @@ export class ApiClient {
   }
 
   /**
-   * Clean up the request context.
+   * Clean up the request context and release resources.
+   * @returns Promise resolving when cleanup is complete
    */
   async dispose(): Promise<void> {
     await this.request.dispose();
