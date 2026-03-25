@@ -392,3 +392,19 @@ After Phase 3:
 - 5 test files created (2 functional, 1 verification, 1 API health check)
 - Complete fixture system with booking data generation
 - All planned pages and components are functional
+
+---
+
+## 🛠 Infrastructure Setup
+
+### MCP Server Integration - March 25, 2026
+
+✅ **Playwright MCP Server Installed**
+
+- Installed `@executeautomation/playwright-mcp-server` globally
+- Created `.windsurf/windsurf.config.json` with Playwright MCP configuration
+- MCP server provides browser automation capabilities via Model Context Protocol
+- Configuration includes:
+  - Command: `npx @executeautomation/playwright-mcp-server`
+  - Environment: `PLAYWRIGHT_BROWSER=chromium`
+- Ready for AI-assisted browser automation and testing workflows
