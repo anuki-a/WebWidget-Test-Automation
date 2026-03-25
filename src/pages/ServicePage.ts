@@ -7,12 +7,123 @@ import { Page, Locator, expect } from '@playwright/test';
 export class ServicePage {
   private page: Page;
 
+  // Header locators
+  languageSelector: Locator;
+  closeButton: Locator;
+  poweredByFMSI: Locator;
+
+  // Progress navigation locators
+  serviceStep: Locator;
+  locationStep: Locator;
+  meetingPreferenceStep: Locator;
+  dateTimeStep: Locator;
+  personalDetailsStep: Locator;
+  confirmationStep: Locator;
+
+  // Main content locators
+  pageHeading: Locator;
+  serviceCategoriesContainer: Locator;
+
+  // Service category buttons
+  personalAccountsButton: Locator;
+  businessAccountsButton: Locator;
+  estateAccountsButton: Locator;
+  speakWithDepartmentButton: Locator;
+  notaryServicesButton: Locator;
+  safeDepositButton: Locator;
+  otherFinancialNeedsButton: Locator;
+
+  // Dynamic service category locators
+  serviceCategoryButtons: Locator;
+  expandedCategory: Locator;
+
+  // Personal Accounts services
+  updatePersonalAccountLink: Locator;
+  updatePersonalAccountWithSpanishSpeakerLink: Locator;
+
+  // Business and Specialized Accounts services
+  updateBusinessAccountLink: Locator;
+  updateBusinessAccountWithSpanishSpeakerLink: Locator;
+
+  // Estate Accounts services
+  estateAccountsLink: Locator;
+
+  // Speak with a Department services
+  fraudRwGEditLink: Locator;
+  iraAccountLink: Locator;
+
+  // Notary and Medallion Services
+  notaryServiceLink: Locator;
+
+  // Safe Deposit services
+  safeDepositAccessLink: Locator;
+
+  // Other Financial Needs services
+  onlineBankingAssistanceLink: Locator;
+
+
   /**
    * Initialize the service page.
    * @param page - Playwright page object
    */
   constructor(page: Page) {
     this.page = page;
+
+    // Initialize header locators
+    this.languageSelector = this.page.locator('select[aria-label="Select Language"]');
+    this.closeButton = this.page.getByRole('button', { name: 'close' });
+    this.poweredByFMSI = this.page.getByText('Powered by FMSI');
+
+    // Initialize progress navigation locators
+    this.serviceStep = this.page.getByRole('link', { name: 'Service' });
+    this.locationStep = this.page.getByRole('link', { name: 'Location' });
+    this.meetingPreferenceStep = this.page.getByRole('link', { name: 'Meeting Preference' });
+    this.dateTimeStep = this.page.getByRole('link', { name: 'Date and Time' });
+    this.personalDetailsStep = this.page.getByRole('link', { name: 'Personal Details' });
+    this.confirmationStep = this.page.getByRole('link', { name: 'Confirmation' });
+
+    // Initialize main content locators
+    this.pageHeading = this.page.getByRole('heading', { name: 'Select a Service' });
+    this.serviceCategoriesContainer = this.page.locator('div').filter({ has: this.page.getByRole('heading', { name: 'Select a Service' }) }).locator('div').nth(1);
+
+    // Initialize service category buttons
+    this.personalAccountsButton = this.page.getByRole('button', { name: 'Personal Accounts' });
+    this.businessAccountsButton = this.page.getByRole('button', { name: 'Business and Specialized Accounts' });
+    this.estateAccountsButton = this.page.getByRole('button', { name: 'Estate Accounts' });
+    this.speakWithDepartmentButton = this.page.getByRole('button', { name: 'Speak with a Department' });
+    this.notaryServicesButton = this.page.getByRole('button', { name: 'Notary and Medallion Services' });
+    this.safeDepositButton = this.page.getByRole('button', { name: 'Safe Deposit' });
+    this.otherFinancialNeedsButton = this.page.getByRole('button', { name: 'Other Financial Needs' });
+
+    // Initialize dynamic service category locators
+    this.serviceCategoryButtons = this.page.locator('button').filter({ hasText: /^(Personal|Business|Estate|Speak|Notary|Safe|Other)/ });
+    this.expandedCategory = this.page.locator('button[expanded][active]');
+
+    // Initialize Personal Accounts services
+    this.updatePersonalAccountLink = this.page.getByRole('link', { name: 'Update Personal Account' });
+    this.updatePersonalAccountWithSpanishSpeakerLink = this.page.getByRole('link', { name: 'Update Personal Account with Spanish Speaker' });
+
+    // Initialize Business and Specialized Accounts services
+    this.updateBusinessAccountLink = this.page.getByRole('link', { name: 'Update Business Account' });
+    this.updateBusinessAccountWithSpanishSpeakerLink = this.page.getByRole('link', { name: 'Update Business Account with Spanish Speaker' });
+
+    // Initialize Estate Accounts services
+    this.estateAccountsLink = this.page.getByRole('link', { name: 'Estate Accounts' });
+
+    // Initialize Speak with a Department services
+    this.fraudRwGEditLink = this.page.getByRole('link', { name: 'Fraud RwG Edit' });
+    this.iraAccountLink = this.page.getByRole('link', { name: 'IRA (Individual Retirement Account)' });
+
+    // Initialize Notary and Medallion Services
+    this.notaryServiceLink = this.page.getByRole('link', { name: 'Notary' });
+
+    // Initialize Safe Deposit services
+    this.safeDepositAccessLink = this.page.getByRole('link', { name: 'Safe Deposit Access' });
+
+    // Initialize Other Financial Needs services
+    this.onlineBankingAssistanceLink = this.page.getByRole('link', { name: 'Online Banking Assistance' });
+
+
   }
 
   /**
@@ -20,16 +131,10 @@ export class ServicePage {
    * @param timeout - Maximum time to wait
    */
   async waitForServicePage(timeout: number = 30000): Promise<void> {
-    // Wait for service categories to be visible
-    await this.page.waitForSelector('[data-testid="service-category"], .service-category', {
-      timeout,
-      state: 'visible',
-    }).catch(() => {
-      // Fallback: wait for any button with service category names
-      return this.page.waitForSelector('button:has-text("Personal Accounts"), button:has-text("Business Services")', {
-        timeout,
-        state: 'visible',
-      });
+    // Wait for service categories to be visible using defined locators
+    await this.serviceCategoryButtons.first().waitFor({ state: 'visible', timeout }).catch(() => {
+      // Fallback: wait for page heading
+      return this.pageHeading.waitFor({ state: 'visible', timeout });
     });
   }
 
@@ -39,7 +144,35 @@ export class ServicePage {
    * @returns Promise resolving when category is selected
    */
   async selectServiceCategory(categoryName: string): Promise<void> {
-    const categoryButton = this.page.getByRole('button', { name: categoryName });
+    let categoryButton;
+    
+    // Use specific category buttons when possible
+    switch (categoryName) {
+      case 'Personal Accounts':
+        categoryButton = this.personalAccountsButton;
+        break;
+      case 'Business and Specialized Accounts':
+        categoryButton = this.businessAccountsButton;
+        break;
+      case 'Estate Accounts':
+        categoryButton = this.estateAccountsButton;
+        break;
+      case 'Speak with a Department':
+        categoryButton = this.speakWithDepartmentButton;
+        break;
+      case 'Notary and Medallion Services':
+        categoryButton = this.notaryServicesButton;
+        break;
+      case 'Safe Deposit':
+        categoryButton = this.safeDepositButton;
+        break;
+      case 'Other Financial Needs':
+        categoryButton = this.otherFinancialNeedsButton;
+        break;
+      default:
+        categoryButton = this.page.getByRole('button', { name: categoryName });
+    }
+    
     await expect(categoryButton).toBeVisible();
     await categoryButton.click();
   }
@@ -50,10 +183,46 @@ export class ServicePage {
    * @returns Promise resolving when service is selected
    */
   async selectService(serviceName: string): Promise<void> {
-    // Look for service as a link or button
-    const serviceLink = this.page.getByRole('link', { name: serviceName });
-    await expect(serviceLink.first()).toBeVisible();
-    await serviceLink.first().click();
+    let serviceLink;
+    
+    // Use specific service locators when possible
+    switch (serviceName) {
+      case 'Update Personal Account':
+        serviceLink = this.updatePersonalAccountLink;
+        break;
+      case 'Update Personal Account with Spanish Speaker':
+        serviceLink = this.updatePersonalAccountWithSpanishSpeakerLink;
+        break;
+      case 'Update Business Account':
+        serviceLink = this.updateBusinessAccountLink;
+        break;
+      case 'Update Business Account with Spanish Speaker':
+        serviceLink = this.updateBusinessAccountWithSpanishSpeakerLink;
+        break;
+      case 'Estate Accounts':
+        serviceLink = this.estateAccountsLink;
+        break;
+      case 'Fraud RwG Edit':
+        serviceLink = this.fraudRwGEditLink;
+        break;
+      case 'IRA (Individual Retirement Account)':
+        serviceLink = this.iraAccountLink;
+        break;
+      case 'Notary':
+        serviceLink = this.notaryServiceLink;
+        break;
+      case 'Safe Deposit Access':
+        serviceLink = this.safeDepositAccessLink;
+        break;
+      case 'Online Banking Assistance':
+        serviceLink = this.onlineBankingAssistanceLink;
+        break;
+      default:
+        serviceLink = this.page.getByRole('link', { name: serviceName });
+    }
+    
+    await expect(serviceLink).toBeVisible();
+    await serviceLink.click();
   }
 
   /**
@@ -86,7 +255,8 @@ export class ServicePage {
   async getAvailableServiceCategories(): Promise<string[]> {
     await this.waitForServicePage();
     
-    const categoryButtons = this.page.locator('button').filter({ hasText: /^(Personal|Business|Mortgage|Investment|Insurance)/ });
+    // Use the defined serviceCategoryButtons locator
+    const categoryButtons = this.serviceCategoryButtons;
     const categories: string[] = [];
     
     const count = await categoryButtons.count();
@@ -106,28 +276,28 @@ export class ServicePage {
    */
   async getAvailableServices(): Promise<string[]> {
     // Wait for services to load after category selection
-    await this.page.waitForSelector('[data-testid="service"], .service, a[href*="service"]', {
-      timeout: 10000,
-      state: 'visible',
-    }).catch(() => {
-      // Fallback: wait for any links with time indicators
-      return this.page.waitForSelector('a:has-text("")', {
-        timeout: 10000,
-        state: 'visible',
-      });
+    await this.expandedCategory.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
+      // Fallback: wait for any service links to be visible
+      return this.page.locator('a[href="javascript:void(0)"]').first().waitFor({ state: 'visible', timeout: 10000 });
     });
 
-    const serviceLinks = this.page.locator('a').filter({ hasText: /\d+\s*minutes?|\d+\s*min/ });
+    // Get visible service links within expanded categories
+    const jsVoidLinks = this.page.locator('a[href="javascript:void(0)"]');
     const services: string[] = [];
     
-    const count = await serviceLinks.count();
+    const count = await jsVoidLinks.count();
     for (let i = 0; i < count; i++) {
-      const text = await serviceLinks.nth(i).textContent();
-      if (text) {
-        // Extract service name (remove time indicator)
-        const serviceName = text.replace(/\s*\s*\d+\s*minutes?/i, '').trim();
-        if (serviceName) {
-          services.push(serviceName);
+      const link = jsVoidLinks.nth(i);
+      const isVisible = await link.isVisible();
+      
+      if (isVisible) {
+        const text = await link.textContent();
+        if (text) {
+          // Extract service name (remove time indicator)
+          const serviceName = text.replace(/\d+\s*Mins.*/, '').trim();
+          if (serviceName) {
+            services.push(serviceName);
+          }
         }
       }
     }
@@ -202,7 +372,35 @@ export class ServicePage {
    */
   async isServiceCategoryAvailable(categoryName: string): Promise<boolean> {
     try {
-      const categoryButton = this.page.getByRole('button', { name: categoryName });
+      let categoryButton;
+      
+      // Use specific category buttons when possible
+      switch (categoryName) {
+        case 'Personal Accounts':
+          categoryButton = this.personalAccountsButton;
+          break;
+        case 'Business and Specialized Accounts':
+          categoryButton = this.businessAccountsButton;
+          break;
+        case 'Estate Accounts':
+          categoryButton = this.estateAccountsButton;
+          break;
+        case 'Speak with a Department':
+          categoryButton = this.speakWithDepartmentButton;
+          break;
+        case 'Notary and Medallion Services':
+          categoryButton = this.notaryServicesButton;
+          break;
+        case 'Safe Deposit':
+          categoryButton = this.safeDepositButton;
+          break;
+        case 'Other Financial Needs':
+          categoryButton = this.otherFinancialNeedsButton;
+          break;
+        default:
+          categoryButton = this.page.getByRole('button', { name: categoryName });
+      }
+      
       return await categoryButton.isVisible();
     } catch (error) {
       return false;
@@ -216,10 +414,45 @@ export class ServicePage {
    */
   async isServiceAvailable(serviceName: string): Promise<boolean> {
     try {
-      const serviceElement = this.page.getByRole('link', { name: serviceName })
-        .or(this.page.getByRole('button', { name: serviceName }));
+      let serviceLink;
       
-      return await serviceElement.first().isVisible();
+      // Use specific service locators when possible
+      switch (serviceName) {
+        case 'Update Personal Account':
+          serviceLink = this.updatePersonalAccountLink;
+          break;
+        case 'Update Personal Account with Spanish Speaker':
+          serviceLink = this.updatePersonalAccountWithSpanishSpeakerLink;
+          break;
+        case 'Update Business Account':
+          serviceLink = this.updateBusinessAccountLink;
+          break;
+        case 'Update Business Account with Spanish Speaker':
+          serviceLink = this.updateBusinessAccountWithSpanishSpeakerLink;
+          break;
+        case 'Estate Accounts':
+          serviceLink = this.estateAccountsLink;
+          break;
+        case 'Fraud RwG Edit':
+          serviceLink = this.fraudRwGEditLink;
+          break;
+        case 'IRA (Individual Retirement Account)':
+          serviceLink = this.iraAccountLink;
+          break;
+        case 'Notary':
+          serviceLink = this.notaryServiceLink;
+          break;
+        case 'Safe Deposit Access':
+          serviceLink = this.safeDepositAccessLink;
+          break;
+        case 'Online Banking Assistance':
+          serviceLink = this.onlineBankingAssistanceLink;
+          break;
+        default:
+          serviceLink = this.page.getByRole('link', { name: serviceName });
+      }
+      
+      return await serviceLink.isVisible();
     } catch (error) {
       return false;
     }
