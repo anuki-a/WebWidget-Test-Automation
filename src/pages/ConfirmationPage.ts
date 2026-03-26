@@ -499,4 +499,39 @@ export class ConfirmationPage {
       return false;
     }
   }
+
+  /**
+   * Click the edit date and time link to modify appointment date/time.
+   * @returns Promise resolving when edit link is clicked
+   */
+  async clickEditDateTime(): Promise<void> {
+    await expect(this.editDateTimeLink).toBeVisible();
+    await this.editDateTimeLink.click();
+  }
+
+  /**
+   * Click the edit personal details link to modify customer information.
+   * @returns Promise resolving when edit link is clicked
+   */
+  async clickEditPersonalDetails(): Promise<void> {
+    await expect(this.editPersonalDetailsLink).toBeVisible();
+    await this.editPersonalDetailsLink.click();
+  }
+
+  /**
+   * Check if all edit links are visible on the confirmation page.
+   * @returns Promise resolving to true if edit links are visible
+   */
+  async areEditLinksVisible(): Promise<boolean> {
+    try {
+      const dateTimeEditVisible = await this.editDateTimeLink.isVisible().catch(() => false);
+      const personalDetailsEditVisible = await this.editPersonalDetailsLink.isVisible().catch(() => false);
+      const locationEditVisible = await this.editLocationLink.isVisible().catch(() => false);
+      const serviceEditVisible = await this.editServiceLink.isVisible().catch(() => false);
+      
+      return dateTimeEditVisible && personalDetailsEditVisible && locationEditVisible && serviceEditVisible;
+    } catch (error) {
+      return false;
+    }
+  }
 }

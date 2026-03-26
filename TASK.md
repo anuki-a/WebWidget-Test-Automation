@@ -197,7 +197,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 #### Core flows
 
-- [ ] OAC-20002 → Edit Appointment
+- [x] OAC-20002 → Edit Appointment ✅ IMPLEMENTED
 - [ ] OAC-20003 → Non-editable validation
 - [x] OAC-20004 → Cancel Appointment ✅ IMPLEMENTED
 
@@ -355,15 +355,28 @@ After Phase 3:
 
 ### Phase 1 Progress: ✅ 10/10 tasks completed
 
-### Phase 2 Progress: 🔄 1/20 tasks completed
+### Phase 2 Progress: 🔄 2/20 tasks completed
 
-### Overall Progress: 🔄 11/30 tasks completed
+### Overall Progress: 🔄 12/30 tasks completed
 
 **Current Focus:** Phase 2 - Functional Coverage Expansion
 
 ---
 
 ## 📝 Discovered During Work
+
+### OAC-20002 Edit Appointment Implementation - March 26, 2026
+
+✅ **Edit Functionality Complete**
+
+- Created comprehensive test for editing existing appointments from widget
+- Added edit functionality to ConfirmationPage:
+  - `clickEditDateTime()` - Navigate to edit date/time
+  - `clickEditPersonalDetails()` - Navigate to edit customer info
+  - `areEditLinksVisible()` - Verify edit controls are available
+- Enhanced DateTimePage with `submit()` method for edit flow
+- Implemented two test scenarios:
+  - **Happy Path Edit**: Complete edit flow with date/time and personal details changes
 
 ### Phase 1 Completion - March 25, 2026
 

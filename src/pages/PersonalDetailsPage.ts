@@ -215,18 +215,16 @@ export class PersonalDetailsPage {
    * Check if there are any validation errors on the form.
    * @returns Promise resolving to array of error messages
    */
-  async getValidationErrors(): Promise<string[]> {
+  async getEmailValidationErrors(): Promise<string[]> {
     const errors: string[] = [];
-    
-    // Look for error messages
-    const errorElements = this.page.locator('.error, .validation-error, [data-testid="error"]');
-    const count = await errorElements.count();
-    
-    for (let i = 0; i < count; i++) {
-      const errorText = await errorElements.nth(i).textContent();
-      if (errorText) {
-        errors.push(errorText.trim());
+    // Check specifically for "Email is invalid" text anywhere on the page
+    try {
+      const emailInvalidText = this.page.locator('text=Email is invalid');
+      if (await emailInvalidText.isVisible()) {
+        errors.push("Email is invalid");
       }
+    } catch (error) {
+      // Continue if check fails
     }
     
     return errors;
@@ -237,6 +235,19 @@ export class PersonalDetailsPage {
    * @returns Promise resolving to true if submit button is enabled
    */
   async isSubmitEnabled(): Promise<boolean> {
-    return !(await this.bookAppointmentButton.isDisabled());
+    try {
+      // First check if button is visible
+      const isVisible = await this.bookAppointmentButton.isVisible({ timeout: 5000 });
+      if (!isVisible) {
+        return false; // Button not visible means it's not enabled
+      }
+      
+      // Check if button is disabled
+      const isDisabled = await this.bookAppointmentButton.isDisabled();
+      return !isDisabled;
+    } catch (error) {
+      // If any error occurs, assume button is not enabled
+      return false;
+    }
   }
 }

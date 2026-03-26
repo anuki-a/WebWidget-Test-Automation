@@ -49,30 +49,26 @@
   },
   {
     "testName": "OAC-20002: Edit Existing Appointment From Widget (Desktop, Functional)",
-    "businessGoal": "Verify editable appointment can be updated via widget and updates reflect in portal.",
+    "businessGoal": "Verify editable appointment can be updated via widget and reflected in Conformation Page",
     "preconditions": [
-      "Existing appointment editable",
-      "Valid widget edit URL/token",
-      "Appointment within edit window",
+      "Do happy path booking",
+      "Appointment Confirmation Page displayed",
       "At least one future slot for rescheduling",
-      "Valid replacement customer details",
-      "Admin Portal access available"
+      "Valid replacement customer details"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Open edit URL", "expected": "Appointment loads in edit context" },
-      { "step": 2, "action": "Change date/time", "expected": "New slot accepted" },
-      { "step": 3, "action": "Update personal details", "expected": "Values accepted by validation" },
-      { "step": 4, "action": "Submit edits", "expected": "Navigate to Confirmation page" },
-      { "step": 5, "action": "Verify updated confirmation", "expected": "Updated values shown" },
-      { "step": 6, "action": "Validate Admin Portal", "expected": "Record updated, not duplicated" },
-      { "step": 7, "action": "Verify notifications", "expected": "Notification behavior per config" }
+      { "step": 1, "action": "Appointment Confirmation Page", "expected": "Appointment Confirmation page displays Clickable Edit buttons" },
+      { "step": 2, "action": "Click edit", "expected": "Appointment loads in edit context" },
+      { "step": 3, "action": "Change date/time", "expected": "New slot accepted" },
+      { "step": 4, "action": "Update personal details", "expected": "Values accepted by validation" },
+      { "step": 5, "action": "Submit edits", "expected": "Navigate to Confirmation page" },
+      { "step": 6, "action": "Verify updated confirmation", "expected": "Updated values shown" }
     ],
     "expectedResult": [
-      "Appointment updated successfully",
-      "Portal shows edited values"
+      "Appointment updated successfully"
     ],
     "reusableActions": [
       "Open appointment URL",

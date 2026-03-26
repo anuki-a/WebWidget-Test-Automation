@@ -7,6 +7,7 @@ import { MeetingPreference } from '@/pages/MeetingPreferencePage';
 export const test = base.extend<{ 
   bookingData: BookingData;
   cancelPathBookingData: BookingData;
+  editBookingData: BookingData;
 }>({
   bookingData: async ({}, use: (data: BookingData) => Promise<void>) => {
     // Generate customer data using TestDataBuilder
@@ -111,6 +112,51 @@ export const test = base.extend<{
         date: nextBusinessDay,
         formattedDate: formattedDate.fullDateString,
         time: '10:00 AM',
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
+      meetingPreference: {
+        type: 'in-person',
+        displayName: MeetingPreference.IN_PERSON
+      }
+    };
+
+    await use(data);
+  },
+
+  editBookingData: async ({}, use: (data: BookingData) => Promise<void>) => {
+    // Generate customer data using TestDataBuilder for edit scenario
+    const customer = TestDataBuilder.generateCustomer();
+    
+    // Generate date/time data for edit scenario (use today to ensure availability)
+    const today = DateUtils.getToday();
+    const formattedDate = DateUtils.formatDateForUI(today);
+    
+    const rawName = 'Update Personal Account  60';
+    const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
+
+    // Create booking data specifically for edit scenario
+    // Using different location to avoid conflicts with other fixtures
+    const data: BookingData = {
+      service: {
+        category: 'Personal Accounts',
+        name: rawName,
+        displayName: cleanName,
+        duration: 60
+      },
+      location: {
+        code: '75071',
+        name: 'McKinney 2093 N. Central',
+        confirmationName: 'McKinney'
+      },
+      dateTime: {
+        date: today,
+        formattedDate: formattedDate.fullDateString,
+        time: '10:00 AM', // Original time for edit scenario
       },
       customer: {
         firstName: customer.firstName,

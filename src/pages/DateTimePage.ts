@@ -229,4 +229,20 @@ export class DateTimePage {
   getTimeSlot(): TimeSlotComponent {
     return this.timeSlotComponent;
   }
+
+  /**
+   * Submit the date and time selection to proceed to next step.
+   * @returns Promise resolving when submission is complete
+   */
+  async submit(): Promise<void> {
+    // Look for a continue/next button after date/time selection
+    const continueButton = this.page.getByRole('button', { name: 'Continue' })
+      .or(this.page.getByRole('button', { name: 'Next' }))
+      .or(this.page.getByRole('button', { name: 'Select Time' }))
+      .or(this.page.locator('button[type="submit"]'))
+      .first();
+    
+    await expect(continueButton).toBeVisible({ timeout: 10000 });
+    await continueButton.click();
+  }
 }
