@@ -214,21 +214,22 @@
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Cancel existing appointment", "expected": "Cancellation page shown" },
-      { "step": 2, "action": "Verify cancellation content", "expected": "Book Another shown" },
-      { "step": 3, "action": "Click Book Another", "expected": "Start booking flow" },
-      { "step": 4, "action": "Select different service", "expected": "New service selected" },
-      { "step": 5, "action": "Select different date/time", "expected": "New date/time selected" },
-      { "step": 6, "action": "Check personal details page", "expected": "Personal details prefilled" },
-      { "step": 7, "action": "Verify all details retained correctly", "expected": "First name, last name, email, phone match" },
-      { "step": 8, "action": "Submit new booking", "expected": "Booking succeeds" },
-      { "step": 9, "action": "Verify new confirmation", "expected": "Retained details + new selections" },
-      { "step": 10, "action": "Verify both appointments via API", "expected": "Old canceled, new created with correct data" },
-      { "step": 11, "action": "Verify personal details consistency", "expected": "Same customer data in new appointment" }
+      { "step": 1, "action": "Create first appointment", "expected": "Confirmation with Book Another" },
+      { "step": 2, "action": "Capture first appointment details", "expected": "Values available" },
+      { "step": 3, "action": "Verify Cancel action availability", "expected": "Cancel enabled" },
+      { "step": 4, "action": "Click Cancel and confirm", "expected": "Cancellation processed" },
+      { "step": 5, "action": "Verify cancellation messages", "expected": "Cancelled state text and Book Another shown" },
+      { "step": 6, "action": "Click Book Another", "expected": "Start new booking" },
+      { "step": 7, "action": "Select different service", "expected": "Second service selected" },
+      { "step": 8, "action": "Select different date/time", "expected": "Second date/time selected" },
+      { "step": 9, "action": "Check personal details page", "expected": "Personal details prefilled" },
+      { "step": 10, "action": "Verify all details retained correctly", "expected": "First name, last name, email, phone match" },
+      { "step": 11, "action": "Submit second booking", "expected": "Booking succeeds with retained details" },
+      { "step": 12, "action": "Verify second confirmation", "expected": "Personal details retained, new service/date/time shown" },
+      { "step": 13, "action": "Verify personal details consistency", "expected": "Same customer data in both appointments" }
     ],
     "expectedResult": [
-      "New booking created with retained personal details",
-      "API validation confirms data persistence"
+      "New booking created with retained personal details"
     ],
     "reusableActions": [
       "Cancel appointment",

@@ -204,7 +204,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 #### Multi-booking
 
 - [x] OAC-20005 → Book Another ✅ IMPLEMENTED
-- [ ] OAC-20006 → Book after cancel
+- [x] OAC-20006 → Book after cancel ✅ IMPLEMENTED
 
 #### Skip behavior
 
@@ -355,15 +355,36 @@ After Phase 3:
 
 ### Phase 1 Progress: ✅ 10/10 tasks completed
 
-### Phase 2 Progress: 🔄 3/20 tasks completed
+### Phase 2 Progress: 🔄 4/20 tasks completed
 
-### Overall Progress: 🔄 12/30 tasks completed
+### Overall Progress: 🔄 13/30 tasks completed
 
 **Current Focus:** Phase 2 - Functional Coverage Expansion
 
 ---
 
 ## 📝 Discovered During Work
+
+### OAC-20006 Book Another From Cancellation Page Implementation - March 26, 2026
+
+✅ **Cancellation + Book Another Functionality Complete**
+
+- Enhanced OAC-20006 test to include complete cancellation flow before Book Another functionality
+- Updated test case to match specification from `testcases_refined.json`:
+  - Step 1: Create first appointment and capture details
+  - Step 2: Verify cancel button availability
+  - Step 3: Click Cancel and confirm cancellation
+  - Step 4: Verify cancellation messages and Book Another shown
+  - Step 5: Click Book Another to start new booking
+  - Steps 6-13: Complete Book Another flow with personal details retention
+- Utilized existing ConfirmationPage methods:
+  - `testCancelAppointment()` - Complete cancellation flow with confirmation
+  - `waitForCancellationConfirmation()` - Wait for cancellation confirmation message
+  - `verifyAppointmentCancelled()` - Verify appointment is marked as cancelled
+- Added comprehensive verification for personal details consistency across both appointments
+- Ensured Book Another button appears after successful cancellation
+- Validated that customer data persists correctly through cancellation and rebooking process
+- Test now covers the complete user journey: booking → cancellation → rebooking with data retention
 
 ### OAC-20005 Book Another Implementation - March 26, 2026
 
