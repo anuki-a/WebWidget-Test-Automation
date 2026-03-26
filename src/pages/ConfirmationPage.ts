@@ -22,12 +22,95 @@ export interface ConfirmationDetails {
 export class ConfirmationPage {
   private page: Page;
 
+  // Locators for confirmation page elements
+  readonly confirmationHeading: Locator;
+  readonly confirmationNumber: Locator;
+  readonly confirmationNumberValue: Locator;
+  readonly dateTimeSection: Locator;
+  readonly editDateTimeLink: Locator;
+  readonly locationName: Locator;
+  readonly editLocationLink: Locator;
+  readonly locationAddress: Locator;
+  readonly addToOutlookLink: Locator;
+  readonly addToGoogleLink: Locator;
+  readonly addToiCalLink: Locator;
+  readonly requestedServiceSection: Locator;
+  readonly serviceName: Locator;
+  readonly serviceDuration: Locator;
+  readonly editServiceLink: Locator;
+  readonly meetingPreferenceSection: Locator;
+  readonly meetingPreferenceValue: Locator;
+  readonly editMeetingPreferenceLink: Locator;
+  readonly staffPreferenceSection: Locator;
+  readonly staffName: Locator;
+  readonly editStaffLink: Locator;
+  readonly personalDetailsSection: Locator;
+  readonly customerName: Locator;
+  readonly customerEmail: Locator;
+  readonly customerPhone: Locator;
+  readonly editPersonalDetailsLink: Locator;
+  readonly cancelButton: Locator;
+  readonly bookAnotherButton: Locator;
+  readonly inPersonAppointmentNote: Locator;
+  readonly cancellationPopupText: Locator;
+  readonly dismissPopupButton: Locator;
+  readonly confirmPopupButton: Locator;
+  readonly cancellationConfirmationMessage: Locator;
+  readonly cancelledIndicators: Locator[];
+
   /**
    * Initialize the confirmation page.
    * @param page - Playwright page object
    */
   constructor(page: Page) {
     this.page = page;
+    
+    // Initialize all locators
+    this.confirmationHeading = this.page.getByRole('heading', { name: /.*appointment has been scheduled/ });
+    this.confirmationNumber = this.page.locator('text=/Appointment Confirmation #/i');
+    this.confirmationNumberValue = this.page.locator('text=/\\w+\\d+/i').first();
+    this.dateTimeSection = this.page.locator('text=/\\w+day,\\s+\\w+\\s+\\d{1,2},\\s+\\d{4}\\s+at\\s+\\d{1,2}:\\d{2}\\s*(AM|PM)/i');
+    this.editDateTimeLink = this.page.getByRole('link', { name: 'Edit Date and Time' });
+    this.locationName = this.page.locator('strong').first();
+    this.editLocationLink = this.page.getByRole('link', { name: 'Edit Location' });
+    this.locationAddress = this.page.locator('text=/\\d+\\s+.*\\s+.*,\\s+.*\\s+\\d{5}/i');
+    this.addToOutlookLink = this.page.getByText('Add to Outlook');
+    this.addToGoogleLink = this.page.getByText('Add to Google');
+    this.addToiCalLink = this.page.getByText('Add to iCal');
+    this.requestedServiceSection = this.page.locator('text=/Requested Service/i');
+    this.serviceName = this.page.locator('text=/Update Personal Account/i');
+    this.serviceDuration = this.page.locator('text=/\\d+\\s+Mins/i');
+    this.editServiceLink = this.page.getByRole('link', { name: 'Edit Requested Service' });
+    this.meetingPreferenceSection = this.page.locator('text=/Meeting Preference/i');
+    this.meetingPreferenceValue = this.page.locator('text=/Meet in Person|Meet via Phone Call/i');
+    this.editMeetingPreferenceLink = this.page.getByRole('link', { name: 'Edit Requested Meeting Preference' });
+    this.staffPreferenceSection = this.page.locator('text=/Staff Preference/i');
+    this.staffName = this.page.locator('text=/Brandon Knowles|Christine Cashatt|Myrtle Nash|Quantasia Jasper/i');
+    this.editStaffLink = this.page.getByRole('link', { name: 'Edit Staff Requested' });
+    this.personalDetailsSection = this.page.locator('text=/Personal Details/i');
+    this.customerName = this.page.locator('text=/\\w+\\s+\\w+/i');
+    this.customerEmail = this.page.locator('text=/\\w+@\\w+\\.\\w+/i');
+    this.customerPhone = this.page.locator('text=/\\(\\d{3}\\)\\s+\\d{3}-\\d{4}/i');
+    this.editPersonalDetailsLink = this.page.getByRole('link', { name: 'Edit Personal Details' });
+    this.cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' });
+    this.bookAnotherButton = this.page.getByRole('button', { name: 'Book Another' });
+    this.inPersonAppointmentNote = this.page.getByText('This is an in-person appointment. We will see you at the location specified above.');
+    this.cancellationPopupText = this.page.locator('text=Appointment Cancellation');
+    this.dismissPopupButton = this.page.getByRole('button', { name: 'No' })
+      .or(this.page.getByRole('button', { name: 'Cancel' }))
+      .or(this.page.getByRole('button', { name: 'Dismiss' }))
+      .or(this.page.locator('[data-testid="cancel-dismiss"]'));
+    this.confirmPopupButton = this.page.getByRole('button', { name: 'Yes' })
+      .or(this.page.getByRole('button', { name: 'Confirm' }))
+      .or(this.page.getByRole('button', { name: 'Cancel Appointment' }))
+      .or(this.page.locator('[data-testid="cancel-confirm"]'));
+    this.cancellationConfirmationMessage = this.page.getByText(/This appointment has been cancelled. Do you want to book another?/i);
+    this.cancelledIndicators = [
+      this.page.getByText(/appointment.*cancel|cancel.*appointment/i),
+      this.page.getByText(/cancelled|canceled/i),
+      this.page.locator('[data-testid="appointment-cancelled"]'),
+      this.page.locator('.cancelled-appointment')
+    ];
   }
 
   /**
@@ -37,7 +120,7 @@ export class ConfirmationPage {
   async waitForConfirmationPage(timeout: number = 22000): Promise<void> {
     // Wait for confirmation heading with retry logic
     await expect(async () => {
-      await expect(this.page.getByRole('heading', { name: /.*appointment has been scheduled/ }))
+      await expect(this.confirmationHeading)
         .toBeVisible({ timeout: 10000 });
     }).toPass({ 
       timeout: timeout,
@@ -71,8 +154,7 @@ export class ConfirmationPage {
    */
   async getConfirmationNumber(): Promise<string | undefined> {
     try {
-      const confirmationElement = this.page.locator('text=/confirmation|confirmation #|#/i').first();
-      const text = await confirmationElement.textContent();
+      const text = await this.confirmationNumberValue.textContent();
       if (text) {
         // Extract confirmation number from text
         const match = text.match(/#?(\w+-?\d+)/i);
@@ -90,12 +172,8 @@ export class ConfirmationPage {
    */
   async getServiceName(): Promise<string | undefined> {
     try {
-      // Try test ID first, then class name
-      const serviceElement = this.page.locator('[data-testid="service-name"]').first()
-        .or(this.page.locator('.service-name').first());
-      
-      if (await serviceElement.isVisible()) {
-        const text = await serviceElement.textContent();
+      if (await this.serviceName.isVisible()) {
+        const text = await this.serviceName.textContent();
         return text || undefined;
       }
     } catch (error) {
@@ -110,12 +188,8 @@ export class ConfirmationPage {
    */
   async getLocationName(): Promise<string | undefined> {
     try {
-      // Try test ID first, then class name
-      const locationElement = this.page.locator('[data-testid="location-name"]').first()
-        .or(this.page.locator('.location-name').first());
-      
-      if (await locationElement.isVisible()) {
-        return await locationElement.textContent() || undefined;
+      if (await this.locationName.isVisible()) {
+        return await this.locationName.textContent() || undefined;
       }
     } catch (error) {
       // Return undefined if element not found
@@ -129,13 +203,8 @@ export class ConfirmationPage {
    */
   async getDateTime(): Promise<string | undefined> {
     try {
-      // Try date pattern first, then test ID, then class
-      const dateTimeElement = this.page.locator('text=/\d{1,2},\s*\d{4}\s+at\s+\d{1,2}:\d{2}\s*(AM|PM)/i').first()
-        .or(this.page.locator('[data-testid="date-time"]').first())
-        .or(this.page.locator('.date-time').first());
-      
-      if (await dateTimeElement.isVisible()) {
-        return await dateTimeElement.textContent() || undefined;
+      if (await this.dateTimeSection.isVisible()) {
+        return await this.dateTimeSection.textContent() || undefined;
       }
     } catch (error) {
       // Return undefined if element not found
@@ -149,11 +218,8 @@ export class ConfirmationPage {
    */
   async getCustomerName(): Promise<string | undefined> {
     try {
-      const customerElement = this.page.locator('[data-testid="customer-name"]').first()
-        .or(this.page.locator('.customer-name').first());
-      
-      if (await customerElement.isVisible()) {
-        return await customerElement.textContent() || undefined;
+      if (await this.customerName.isVisible()) {
+        return await this.customerName.textContent() || undefined;
       }
     } catch (error) {
       // Return undefined if element not found
@@ -167,13 +233,8 @@ export class ConfirmationPage {
    */
   async getCustomerEmail(): Promise<string | undefined> {
     try {
-      // Try email pattern first, then test ID, then class
-      const emailElement = this.page.locator('text=/\w+\.\w+@\w+\.\w+/i').first()
-        .or(this.page.locator('[data-testid="customer-email"]').first())
-        .or(this.page.locator('.customer-email').first());
-      
-      if (await emailElement.isVisible()) {
-        return await emailElement.textContent() || undefined;
+      if (await this.customerEmail.isVisible()) {
+        return await this.customerEmail.textContent() || undefined;
       }
     } catch (error) {
       // Return undefined if element not found
@@ -206,11 +267,8 @@ export class ConfirmationPage {
    */
   async getMeetingPreference(): Promise<string | undefined> {
     try {
-      const preferenceElement = this.page.locator('[data-testid="meeting-preference"]').first()
-        .or(this.page.locator('.meeting-preference').first());
-      
-      if (await preferenceElement.isVisible()) {
-        return await preferenceElement.textContent() || undefined;
+      if (await this.meetingPreferenceValue.isVisible()) {
+        return await this.meetingPreferenceValue.textContent() || undefined;
       }
     } catch (error) {
       // Return undefined if element not found
@@ -255,11 +313,7 @@ export class ConfirmationPage {
    * @returns Promise resolving to true if cancel button is visible
    */
   async isCancelButtonVisible(): Promise<boolean> {
-    // Try button text first, then test ID
-    const cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' })
-      .or(this.page.locator('[data-testid="cancel-appointment"]'));
-    
-    return await cancelButton.isVisible();
+    return await this.cancelButton.isVisible();
   }
 
   /**
@@ -267,12 +321,8 @@ export class ConfirmationPage {
    * @returns Promise resolving when cancel button is clicked
    */
   async clickCancelButton(): Promise<void> {
-    // Try button text first, then test ID
-    const cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' })
-      .or(this.page.locator('[data-testid="cancel-appointment"]'));
-    
-    await expect(cancelButton).toBeVisible();
-    await cancelButton.click();
+    await expect(this.cancelButton).toBeVisible();
+    await this.cancelButton.click();
   }
 
   /**
@@ -281,17 +331,10 @@ export class ConfirmationPage {
    */
   async dismissCancellationPopup(): Promise<void> {
     // Verify cancellation popup appeared
-    const appointmentText = this.page.locator('text=Appointment Cancellation');
-    await expect(appointmentText).toBeVisible({ timeout: 1000 });
-
-    // Try multiple dismiss button options
-    const dismissButton = this.page.getByRole('button', { name: 'No' })
-      .or(this.page.getByRole('button', { name: 'Cancel' }))
-      .or(this.page.getByRole('button', { name: 'Dismiss' }))
-      .or(this.page.locator('[data-testid="cancel-dismiss"]'));
+    await expect(this.cancellationPopupText).toBeVisible({ timeout: 1000 });
     
-    await expect(dismissButton).toBeVisible({ timeout: 10000 });
-    await dismissButton.click();
+    await expect(this.dismissPopupButton).toBeVisible({ timeout: 10000 });
+    await this.dismissPopupButton.click();
   }
 
   /**
@@ -299,14 +342,8 @@ export class ConfirmationPage {
    * @returns Promise resolving when cancellation is confirmed
    */
   async confirmCancellationPopup(): Promise<void> {
-    // Try multiple confirm button options
-    const confirmButton = this.page.getByRole('button', { name: 'Yes' })
-      .or(this.page.getByRole('button', { name: 'Confirm' }))
-      .or(this.page.getByRole('button', { name: 'Cancel Appointment' }))
-      .or(this.page.locator('[data-testid="cancel-confirm"]'));
-    
-    await expect(confirmButton).toBeVisible({ timeout: 10000 });
-    await confirmButton.click();
+    await expect(this.confirmPopupButton).toBeVisible({ timeout: 10000 });
+    await this.confirmPopupButton.click();
   }
 
   /**
@@ -315,8 +352,7 @@ export class ConfirmationPage {
    * @returns Promise resolving when cancellation confirmation is visible
    */
   async waitForCancellationConfirmation(timeout: number = 30000): Promise<void> {
-    const cancellationMessage = this.page.getByText(/This appointment has been cancelled. Do you want to book another?/i)
-    await expect(cancellationMessage).toBeVisible({ timeout });
+    await expect(this.cancellationConfirmationMessage).toBeVisible({ timeout });
   }
 
   /**
@@ -325,15 +361,7 @@ export class ConfirmationPage {
    */
   async verifyAppointmentCancelled(): Promise<boolean> {
     try {
-      // Check various cancellation indicators
-      const cancelledIndicators = [
-        this.page.getByText(/appointment.*cancel|cancel.*appointment/i),
-        this.page.getByText(/cancelled|canceled/i),
-        this.page.locator('[data-testid="appointment-cancelled"]'),
-        this.page.locator('.cancelled-appointment')
-      ];
-      
-      for (const indicator of cancelledIndicators) {
+      for (const indicator of this.cancelledIndicators) {
         if (await indicator.isVisible().catch(() => false)) {
           return true; // Found cancellation indicator
         }
@@ -350,8 +378,7 @@ export class ConfirmationPage {
    * @returns Promise resolving to true if Book Another button is visible
    */
   async isBookAnotherButtonVisible(): Promise<boolean> {
-    const bookAnotherButton = this.page.getByRole('button', { name: 'Book Another' })
-    return await bookAnotherButton.isVisible().catch(() => false); // Don't fail if not found
+    return await this.bookAnotherButton.isVisible().catch(() => false); // Don't fail if not found
   }
 
   /**
@@ -405,8 +432,7 @@ export class ConfirmationPage {
   async verifyConfirmationPageLoaded(): Promise<boolean> {
     try {
       await this.waitForConfirmationPage(10000);
-      const heading = this.page.getByRole('heading', { name: /.*appointment has been scheduled/ });
-      return await heading.isVisible();
+      return await this.confirmationHeading.isVisible();
     } catch (error) {
       // Return false if page verification fails
       return false;

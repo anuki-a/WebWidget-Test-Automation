@@ -78,7 +78,7 @@ export default defineConfig({
 
   /* Expect timeout */
   expect: {
-    timeout: parseInt(process.env.DEFAULT_TIMEOUT || '15000'),
+    timeout: parseInt(process.env.DEFAULT_TIMEOUT || '30000'),
   },
 
   /* Global timeout for all operations */

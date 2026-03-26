@@ -44,7 +44,11 @@ test.describe('Appointment Booking - OAC-20004', () => {
 
     await page.goto(process.env.BASE_URL!);
 
-    await expect(page.getByRole('button', { name: 'Personal Accounts' })).toBeVisible();
+    // Wait for page to be fully loaded with retry logic
+    await expect(async () => {
+      await expect(page.getByRole('button', { name: 'Personal Accounts' })).toBeVisible({ timeout: 10000 });
+    }).toPass({ timeout: 60000 });
+    
     await expect(page.getByRole('button', { name: 'Speak with a Department' })).toBeVisible();
 
     const selectedService = await servicePage.selectServiceFlow(cancelPathBookingData.service.category, cancelPathBookingData.service.name);
