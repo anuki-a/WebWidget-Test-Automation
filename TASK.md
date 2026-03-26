@@ -203,7 +203,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 #### Multi-booking
 
-- [ ] OAC-20005 → Book Another
+- [x] OAC-20005 → Book Another ✅ IMPLEMENTED
 - [ ] OAC-20006 → Book after cancel
 
 #### Skip behavior
@@ -355,7 +355,7 @@ After Phase 3:
 
 ### Phase 1 Progress: ✅ 10/10 tasks completed
 
-### Phase 2 Progress: 🔄 2/20 tasks completed
+### Phase 2 Progress: 🔄 3/20 tasks completed
 
 ### Overall Progress: 🔄 12/30 tasks completed
 
@@ -364,6 +364,22 @@ After Phase 3:
 ---
 
 ## 📝 Discovered During Work
+
+### OAC-20005 Book Another Implementation - March 26, 2026
+
+✅ **Book Another Functionality Complete**
+
+- Implemented comprehensive test for Book Another flow after successful booking
+- Added `clickBookAnother()` method to ConfirmationPage for navigation
+- Created complete test scenario covering:
+  - First appointment booking with standard flow
+  - Book Another button functionality and navigation
+  - Second booking with different service (Estate Accounts), date (tomorrow), and time (2:00 PM)
+  - Personal details persistence verification across bookings
+  - Confirmation details validation for both appointments
+- Utilizes existing PersonalDetailsPage methods (`getFirstName()`, `getLastName()`, `getEmail()`, `getPhone()`) for pre-filled data verification
+- Ensures customer data consistency while allowing service/date/time changes
+- Validates Book Another button availability after second booking
 
 ### OAC-20002 Edit Appointment Implementation - March 26, 2026
 

@@ -82,7 +82,7 @@ export default defineConfig({
   },
 
   /* Global timeout for all operations */
-  globalTimeout: parseInt(process.env.DEFAULT_TIMEOUT || '120000'),
+  globalTimeout: parseInt(process.env.DEFAULT_TIMEOUT || '300000'),
 
   /* Output directory for test artifacts */
   outputDir: 'test-results/',

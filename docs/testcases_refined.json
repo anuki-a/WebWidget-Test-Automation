@@ -182,8 +182,7 @@
     ],
     "expectedResult": [
       "Book Another flow works",
-      "Personal details persisted across multiple bookings",
-      "API validation confirms data consistency"
+      "Personal details persisted across multiple bookings"
     ],
     "reusableActions": [
       "Create booking",

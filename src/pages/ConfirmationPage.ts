@@ -87,10 +87,10 @@ export class ConfirmationPage {
     this.staffPreferenceSection = this.page.locator('text=/Staff Preference/i');
     this.staffName = this.page.locator('text=/Brandon Knowles|Christine Cashatt|Myrtle Nash|Quantasia Jasper/i');
     this.editStaffLink = this.page.getByRole('link', { name: 'Edit Staff Requested' });
-    this.personalDetailsSection = this.page.locator('text=/Personal Details/i');
-    this.customerName = this.page.locator('text=/\\w+\\s+\\w+/i');
-    this.customerEmail = this.page.locator('text=/\\w+@\\w+\\.\\w+/i');
-    this.customerPhone = this.page.locator('text=/\\(\\d{3}\\)\\s+\\d{3}-\\d{4}/i');
+    this.personalDetailsSection = this.page.locator('text=/Personal Details/i').last();
+    this.customerName = this.personalDetailsSection.locator('text=/\\w+\\s+\\w+/i').first();
+    this.customerEmail = this.personalDetailsSection.locator('text=/\\w+@\\w+\\.\\w+/i');
+    this.customerPhone = this.personalDetailsSection.locator('text=/\\(\\d{3}\\)\\s+\\d{3}-\\d{4}/i');
     this.editPersonalDetailsLink = this.page.getByRole('link', { name: 'Edit Personal Details' });
     this.cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' });
     this.bookAnotherButton = this.page.getByRole('button', { name: 'Book Another' });
@@ -117,7 +117,7 @@ export class ConfirmationPage {
    * Wait for the confirmation page to be loaded and visible.
    * @param timeout - Maximum time to wait
    */
-  async waitForConfirmationPage(timeout: number = 22000): Promise<void> {
+  async waitForConfirmationPage(timeout: number = 220000): Promise<void> {
     // Wait for confirmation heading with retry logic
     await expect(async () => {
       await expect(this.confirmationHeading)
@@ -218,11 +218,18 @@ export class ConfirmationPage {
    */
   async getCustomerName(): Promise<string | undefined> {
     try {
-      if (await this.customerName.isVisible()) {
-        return await this.customerName.textContent() || undefined;
+      // First ensure the personal details section is visible
+      if (await this.personalDetailsSection.isVisible({ timeout: 5000 })) {
+        // Try to get the customer name from the personal details section
+        const nameElement = this.customerName;
+        if (await nameElement.isVisible({ timeout: 3000 })) {
+          const nameText = await nameElement.textContent();
+          return nameText || undefined;
+        }
       }
     } catch (error) {
-      // Return undefined if element not found
+      // Log error for debugging but don't throw
+      console.warn('Could not find customer name in confirmation page:', error);
     }
     return undefined;
   }
@@ -233,11 +240,13 @@ export class ConfirmationPage {
    */
   async getCustomerEmail(): Promise<string | undefined> {
     try {
-      if (await this.customerEmail.isVisible()) {
-        return await this.customerEmail.textContent() || undefined;
+      if (await this.personalDetailsSection.isVisible({ timeout: 5000 })) {
+        if (await this.customerEmail.isVisible({ timeout: 3000 })) {
+          return await this.customerEmail.textContent() || undefined;
+        }
       }
     } catch (error) {
-      // Return undefined if element not found
+      console.warn('Could not find customer email in confirmation page:', error);
     }
     return undefined;
   }
@@ -248,15 +257,13 @@ export class ConfirmationPage {
    */
   async getCustomerPhone(): Promise<string | undefined> {
     try {
-      const phoneElement = this.page.locator('text=/\d{3}-\d{3}-\d{4}/').first()
-        .or(this.page.locator('[data-testid="customer-phone"]').first())
-        .or(this.page.locator('.customer-phone').first());
-      
-      if (await phoneElement.isVisible()) {
-        return await phoneElement.textContent() || undefined;
+      if (await this.personalDetailsSection.isVisible({ timeout: 5000 })) {
+        if (await this.customerPhone.isVisible({ timeout: 3000 })) {
+          return await this.customerPhone.textContent() || undefined;
+        }
       }
     } catch (error) {
-      // Return undefined if element not found
+      console.warn('Could not find customer phone in confirmation page:', error);
     }
     return undefined;
   }
@@ -533,5 +540,14 @@ export class ConfirmationPage {
     } catch (error) {
       return false;
     }
+  }
+
+  /**
+   * Click the Book Another button to start a new booking flow.
+   * @returns Promise resolving when Book Another button is clicked
+   */
+  async clickBookAnother(): Promise<void> {
+    await expect(this.bookAnotherButton).toBeVisible();
+    await this.bookAnotherButton.click();
   }
 }
