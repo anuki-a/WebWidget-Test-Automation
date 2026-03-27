@@ -30,4 +30,38 @@ export class ProductService {
     
     return response;
   }
+
+  /**
+   * Updates an existing service using the SaveService endpoint, with optional override for DisableAppointmentCancellationOrUpdate.
+   * Path: /OacWeb/oac/client/SaveService
+   * @param serviceData - The service entity data to update.
+   * @param saveOptions - The save options including tag information.
+   * @param disableCancellation - Optional override for DisableAppointmentCancellationOrUpdate field.
+   * @returns Promise resolving to the API response.
+   */
+  async UpdateService(serviceData: any, saveOptions: any, disableCancellation?: boolean) {
+    const endpoint = '/OacWeb/oac/client/SaveService';
+    
+    // Create a deep copy to avoid mutating the original data
+    const modifiedServiceData = JSON.parse(JSON.stringify(serviceData));
+    
+    // Override DisableAppointmentCancellationOrUpdate if provided
+    if (disableCancellation !== undefined) {
+      modifiedServiceData.DisableAppointmentCancellationOrUpdate = disableCancellation;
+      
+      // Also update the originalValuesMap to reflect the change
+      if (modifiedServiceData.entityAspect && modifiedServiceData.entityAspect.originalValuesMap) {
+        modifiedServiceData.entityAspect.originalValuesMap.DisableAppointmentCancellationOrUpdate = !disableCancellation;
+      }
+    }
+    
+    const requestBody = {
+      entities: [modifiedServiceData],
+      saveOptions: saveOptions
+    };
+
+    const response = await this.client.post(endpoint, requestBody);
+    
+    return response;
+  }
 }
