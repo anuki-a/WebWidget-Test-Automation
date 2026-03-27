@@ -300,6 +300,16 @@ export class ServicePage {
   }
 
   /**
+   * Click "No, continue with scheduling an appointment" button on skip popup.
+   * @returns Promise resolving when button is clicked
+   */
+  async clickSkipWaitNoButton(): Promise<void> {
+    const noButton = this.page.getByRole('button', { name: 'No, continue with scheduling an appointment' });
+    await expect(noButton).toBeVisible();
+    await noButton.click();
+  }
+
+  /**
    * Get all available service categories.
    * @returns Promise resolving to array of category names
    */

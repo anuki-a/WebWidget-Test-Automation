@@ -209,7 +209,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 #### Skip behavior
 
 - [x] OAC-20007 → Skip Yes → redirect ✅ IMPLEMENTED
-- [ ] OAC-20008 → Skip No → continue
+- [x] OAC-20008 → Skip No → continue ✅ IMPLEMENTED
 
 #### Validation rules
 
@@ -364,6 +364,38 @@ After Phase 3:
 ---
 
 ## 📝 Discovered During Work
+
+### OAC-20008 Skip Appointment Continue Booking Implementation - March 27, 2026
+
+✅ **Skip Appointment Continue Booking Functionality Complete**
+
+- Implemented comprehensive test for skip appointment continue booking flow using existing ServicePage locators and components
+- Used `skipEnabledBookingData` fixture to create booking data with skip-enabled service ("Update Personal Account")
+- Enhanced ServicePage with `clickSkipWaitNoButton()` method for clicking "No, continue with scheduling an appointment" button
+- Test follows complete standard booking flow after declining skip appointment:
+  - Step 1: Select service with appointment skip enabled ✓
+  - Step 2: Verify skip popup message displays correctly ✓
+  - Step 3: Choose 'No' on the skip popup ✓
+  - Step 4: Verify standard booking flow continues ✓
+  - Step 5: Continue booking - Location selection ✓
+  - Step 6: Continue booking - Meeting preference ✓
+  - Step 7: Continue booking - Date and time selection ✓
+  - Step 8: Continue booking - Personal details ✓
+  - Step 9: Complete booking - Wait for confirmation ✓
+  - Step 10: Verify confirmation ✓
+- Reuses all existing page objects and methods from OAC-20001 happy path booking:
+  - LocationPage: `searchAndSelectLocation()` and `waitForLocationPage()`
+  - MeetingPreferencePage: `selectInPerson()`
+  - DateTimePage: `selectDayAndFirstAvailableTime()`
+  - PersonalDetailsPage: `fillDetails()` and `submit()`
+  - ConfirmationPage: `waitForConfirmationPage()`, `verifyBooking()`, and `isCancelButtonVisible()`
+- Validates expected results:
+  - Skip popup displays configured message ✓
+  - No option continues standard booking flow ✓
+  - Booking completes successfully after declining skip ✓
+  - Cancel button available on confirmation page ✓
+- TypeScript compilation passes without errors
+- Test follows project conventions with proper JSDoc documentation and page object usage
 
 ### OAC-20007 Skip Appointment Redirect Implementation - March 27, 2026
 
