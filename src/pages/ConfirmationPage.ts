@@ -52,6 +52,8 @@ export class ConfirmationPage {
   readonly cancelButton: Locator;
   readonly bookAnotherButton: Locator;
   readonly inPersonAppointmentNote: Locator;
+  readonly nonEditableMessage: Locator;
+  readonly disabledCancelButton: Locator;
   readonly cancellationPopupText: Locator;
   readonly dismissPopupButton: Locator;
   readonly confirmPopupButton: Locator;
@@ -95,6 +97,8 @@ export class ConfirmationPage {
     this.cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' });
     this.bookAnotherButton = this.page.getByRole('button', { name: 'Book Another' });
     this.inPersonAppointmentNote = this.page.getByText('This is an in-person appointment. We will see you at the location specified above.');
+    this.nonEditableMessage = this.page.getByText('This appointment cannot be changed or cancelled.');
+    this.disabledCancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' });
     this.cancellationPopupText = this.page.locator('text=Appointment Cancellation');
     this.dismissPopupButton = this.page.getByRole('button', { name: 'No' })
       .or(this.page.getByRole('button', { name: 'Cancel' }))
@@ -549,5 +553,111 @@ export class ConfirmationPage {
   async clickBookAnother(): Promise<void> {
     await expect(this.bookAnotherButton).toBeVisible();
     await this.bookAnotherButton.click();
+  }
+
+  /**
+   * Verify that the appointment is in non-editable state.
+   * Checks for non-editable message, disabled cancel button, and absence of edit links.
+   * @returns Promise resolving to true if appointment is non-editable
+   */
+  async verifyNonEditableState(): Promise<boolean> {
+    try {
+      // Check for non-editable message
+      const nonEditableMessageVisible = await this.nonEditableMessage.isVisible().catch(() => false);
+      
+      // Check that cancel button is disabled
+      const cancelButtonDisabled = await this.disabledCancelButton.isDisabled().catch(() => false);
+      
+      // Check that edit links are NOT visible
+      const editDateTimeVisible = await this.editDateTimeLink.isVisible().catch(() => false);
+      const editLocationVisible = await this.editLocationLink.isVisible().catch(() => false);
+      const editServiceVisible = await this.editServiceLink.isVisible().catch(() => false);
+      const editPersonalDetailsVisible = await this.editPersonalDetailsLink.isVisible().catch(() => false);
+      const editMeetingPreferenceVisible = await this.editMeetingPreferenceLink.isVisible().catch(() => false);
+      const editStaffVisible = await this.editStaffLink.isVisible().catch(() => false);
+      
+      // Verify non-editable conditions
+      const hasNonEditableMessage = nonEditableMessageVisible;
+      const isCancelDisabled = cancelButtonDisabled;
+      const noEditLinksVisible = !editDateTimeVisible && !editLocationVisible && 
+                                !editServiceVisible && !editPersonalDetailsVisible && 
+                                !editMeetingPreferenceVisible && !editStaffVisible;
+      
+      return hasNonEditableMessage && isCancelDisabled && noEditLinksVisible;
+    } catch (error) {
+      // Return false if verification fails
+      return false;
+    }
+  }
+
+  /**
+   * Verify that all edit controls are not visible/accessible.
+   * @returns Promise resolving to true if no edit controls are visible
+   */
+  async verifyNoEditControlsVisible(): Promise<boolean> {
+    try {
+      const editLinksVisible = await this.areEditLinksVisible();
+      return !editLinksVisible; // Should be false for non-editable appointment
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Verify that cancel button is disabled.
+   * @returns Promise resolving to true if cancel button is disabled
+   */
+  async verifyCancelButtonDisabled(): Promise<boolean> {
+    try {
+      return await this.disabledCancelButton.isDisabled();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Verify that non-editable message is displayed.
+   * @returns Promise resolving to true if message is visible
+   */
+  async verifyNonEditableMessageDisplayed(): Promise<boolean> {
+    try {
+      return await this.nonEditableMessage.isVisible();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Attempt to interact with edit controls (should fail for non-editable appointments).
+   * @returns Promise resolving to true if interactions fail as expected
+   */
+  async verifyEditControlsNotInteractive(): Promise<boolean> {
+    try {
+      // Try to click edit links - they should not be visible or clickable
+      const editDateTimeClickable = await this.editDateTimeLink.isVisible().then(async (visible) => {
+        if (!visible) return false;
+        try {
+          await this.editDateTimeLink.click({ timeout: 1000 });
+          return true;
+        } catch {
+          return false;
+        }
+      }).catch(() => false);
+
+      const cancelClickable = await this.disabledCancelButton.isEnabled().then(async (enabled) => {
+        if (!enabled) return false;
+        try {
+          await this.disabledCancelButton.click({ timeout: 1000 });
+          return true;
+        } catch {
+          return false;
+        }
+      }).catch(() => false);
+
+      // For non-editable appointment, these should not be interactive
+      return !editDateTimeClickable && !cancelClickable;
+    } catch (error) {
+      return false;
+    }
   }
 }

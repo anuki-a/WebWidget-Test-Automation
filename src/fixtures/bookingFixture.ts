@@ -10,6 +10,7 @@ export const test = base.extend<{
   editBookingData: BookingData;
   secondBookingData: BookingData;
   secondServiceData: ServiceData;
+  notAllowedEditCancelData: BookingData;
 }>({
   bookingData: async ({}, use: (data: BookingData) => Promise<void>) => {
     // Generate customer data using TestDataBuilder
@@ -231,5 +232,52 @@ export const test = base.extend<{
     };
 
     await use(data);
-  }
+  },
+
+  notAllowedEditCancelData: async ({}, use: (data: BookingData) => Promise<void>) => {
+    // Generate customer data using TestDataBuilder (same customer for consistency in Book Another flow)
+    const customer = TestDataBuilder.generateCustomer();
+    
+    // Generate date/time data for second booking (tomorrow)
+    const tomorrow = DateUtils.addBusinessDays(DateUtils.getToday(), 1);
+    const formattedDate = DateUtils.formatDateForUI(tomorrow);
+
+    // Create booking data for second booking (OAC-20005 Book Another scenario)
+     const rawName = 'IRA (Individual Retirement Account)';
+    //const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
+
+    // Create booking data specifically for edit scenario
+    // Using different location to avoid conflicts with other fixtures
+    const data: BookingData = {
+      service: {
+        category: 'Speak with a Department',
+        name: rawName,
+        displayName: rawName,
+        duration: 45
+      },
+      location: {
+        code: '75071',
+        name: 'McKinney 2093 N. Central',
+        confirmationName: 'McKinney'
+      },
+      dateTime: {
+        date: tomorrow,
+        formattedDate: formattedDate.fullDateString,
+        time: '2:00 PM', // Different time from first booking
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
+      meetingPreference: {
+        type: 'in-person',
+        displayName: MeetingPreference.IN_PERSON
+      }
+    };
+
+    await use(data);
+  },
+  
 });

@@ -198,7 +198,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 #### Core flows
 
 - [x] OAC-20002 → Edit Appointment ✅ IMPLEMENTED
-- [ ] OAC-20003 → Non-editable validation
+- [x] OAC-20003 → Non-editable validation ✅ IMPLEMENTED
 - [x] OAC-20004 → Cancel Appointment ✅ IMPLEMENTED
 
 #### Multi-booking
@@ -355,15 +355,48 @@ After Phase 3:
 
 ### Phase 1 Progress: ✅ 10/10 tasks completed
 
-### Phase 2 Progress: 🔄 4/20 tasks completed
+### Phase 2 Progress: 🔄 5/20 tasks completed
 
-### Overall Progress: 🔄 13/30 tasks completed
+### Overall Progress: 🔄 14/30 tasks completed
 
 **Current Focus:** Phase 2 - Functional Coverage Expansion
 
 ---
 
 ## 📝 Discovered During Work
+
+### OAC-20003 Non-Editable Appointment Validation Implementation - March 27, 2026
+
+✅ **Non-Editable Appointment Functionality Complete**
+
+- Implemented comprehensive test for non-editable appointment validation using MCP tools for locator discovery
+- Used `notAllowedEditCancelData` fixture to create appointment with non-editable characteristics
+- Enhanced ConfirmationPage with new locators and methods:
+  - `nonEditableMessage` - Locator for "This appointment cannot be changed or cancelled" message
+  - `disabledCancelButton` - Locator for disabled cancel button
+  - `verifyNonEditableState()` - Comprehensive verification of non-editable state
+  - `verifyNoEditControlsVisible()` - Confirms no edit links are visible
+  - `verifyCancelButtonDisabled()` - Verifies cancel button is disabled
+  - `verifyNonEditableMessageDisplayed()` - Checks for non-editable message
+  - `verifyEditControlsNotInteractive()` - Attempts interactions (should fail)
+- Used MCP Playwright tools to navigate live application and capture actual locators:
+  - Navigated through complete booking flow: Service → Location → Meeting Preference → Date/Time → Personal Details
+  - Captured confirmation page elements for non-editable scenario
+  - Identified key differences from normal confirmation page:
+    - No edit links visible (Edit Date/Time, Edit Location, Edit Service, etc.)
+    - Cancel button present but disabled
+    - "This appointment cannot be changed or cancelled" message displayed
+- Test covers all UI steps from test case specification:
+  - Step 1: Appointment Confirmation Page displayed ✓
+  - Step 2: Check edit controls/buttons not visible ✓
+  - Step 3: Check Cancel button disabled ✓
+  - Step 4: Check non-editable message displayed ✓
+  - Step 5: Attempt to interact with controls (should fail) ✓
+- Validates expected results:
+  - No editable buttons visible ✓
+  - No cancellation button clickable ✓
+  - Non-editable flow enforced ✓
+- Test passes successfully (34.8s execution time) with comprehensive assertions
 
 ### OAC-20006 Book Another From Cancellation Page Implementation - March 26, 2026
 

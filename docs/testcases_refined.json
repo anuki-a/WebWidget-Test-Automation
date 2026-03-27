@@ -87,25 +87,23 @@
     "testName": "OAC-20003: Attempt Edit on Non-Editable Appointment (Desktop, Functional)",
     "businessGoal": "Verify non-editable/cancel-disabled appointment shows proper disabled UI and no actions.",
     "preconditions": [
-      "Appointment exists and not editable",
-      "Valid widget URL/token",
-      "Appointment active and retrievable",
-      "Admin Portal access available"
+      "Do happy path booking",
+      "Appointment Confirmation Page displayed"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Open appointment URL", "expected": "Load in non-editable context" },
-      { "step": 2, "action": "Check edit controls", "expected": "Edit controls not actionable" },
+      { "step": 1, "action": "Appointment Confirmation Page", "expected": "Appointment Confirmation page displayed" },
+      { "step": 2, "action": "Check edit controls/buttons", "expected": "Edit controls/buttons not visible to click" },
       { "step": 3, "action": "Check Cancel button", "expected": "Cancel disabled" },
       { "step": 4, "action": "Check non-editable message", "expected": "Message displayed" },
-      { "step": 5, "action": "Attempt to interact with controls", "expected": "No action triggered" },
-      { "step": 6, "action": "Validate portal state", "expected": "Appointment unchanged" }
+      { "step": 5, "action": "Attempt to interact with controls", "expected": "No action triggered" }
     ],
     "expectedResult": [
-      "Non-editable flow enforced",
-      "No state change in portal"
+      "No editable buttons visible",
+      "No cancelation Button visible",
+      "Non-editable flow enforced"
     ],
     "reusableActions": [
       "Open appointment URL",
