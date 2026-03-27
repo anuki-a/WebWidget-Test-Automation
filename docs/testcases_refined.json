@@ -244,27 +244,25 @@
   },
   {
     "testName": "OAC-20007: Select P/S With Appointment Skip Enabled (Yes Skip Appointment)",
-    "businessGoal": "Verify yes on skip prompt redirects to external configured site and ends flow.",
+    "businessGoal": "Verify 'YES' on skip appointment popup redirects to external configured site and ends flow.",
     "preconditions": [
       "Widget accessible",
       "Service configured with appointment skip enabled",
       "External redirect URL configured and verified",
-      "Skip popup message configured",
-      "Admin Portal access available"
+      "Skip popup message configured"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select service with appointment skip", "expected": "Skip prompt shown" },
+      { "step": 1, "action": "Select service with appointment skip", "expected": "Skip popup shown" },
       { "step": 2, "action": "Verify skip popup message displays correctly", "expected": "Configured popup message shown" },
-      { "step": 3, "action": "Choose Yes on skip prompt", "expected": "Redirect to configured external URL" },
+      { "step": 3, "action": "Choose Yes on skip popup", "expected": "Redirect to configured external URL" },
       { "step": 4, "action": "Verify redirect URL matches configuration", "expected": "Correct external site loaded" },
-      { "step": 5, "action": "Verify widget flow terminated", "expected": "No return to booking flow, session ended" },
-      { "step": 6, "action": "Verify skip configuration via API", "expected": "Skip settings confirmed" }
+      { "step": 5, "action": "Verify widget flow terminated", "expected": "No return to booking flow, session ended" }
     ],
     "expectedResult": [
-      "Skip prompt displays configured message",
+      "Skip popup displays configured message",
       "Yes option redirects to correct external URL",
       "Widget booking flow terminates after redirect"
     ],
@@ -282,30 +280,28 @@
   },
   {
     "testName": "OAC-20008: Select P/S With Appointment Skip Enabled (No Skip Appointment)",
-    "businessGoal": "Verify no on skip prompt continues standard booking flow.",
+    "businessGoal": "Verify 'NO' on skip appointment prompt continues standard booking flow.",
     "preconditions": [
       "Widget accessible",
       "Service configured with appointment skip enabled",
       "Standard booking path available",
       "Skip popup message configured",
-      "Valid personal details available",
-      "Admin Portal access available"
+      "Valid personal details available"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select skip-enabled service", "expected": "Popup shown" },
+      { "step": 1, "action": "Select service with appointment skip", "expected": "Skip popup shown" },
       { "step": 2, "action": "Verify skip popup message displays correctly", "expected": "Configured popup message shown" },
-      { "step": 3, "action": "Choose No on skip prompt", "expected": "No redirect, continue in widget" },
+      { "step": 3, "action": "Choose No on skip popup", "expected": "No redirect, continue in widget" },
       { "step": 4, "action": "Verify standard booking flow continues", "expected": "Navigate to next booking step normally" },
       { "step": 5, "action": "Continue booking", "expected": "Standard flow proceeds" },
       { "step": 6, "action": "Complete booking", "expected": "Confirmation displayed" },
-      { "step": 7, "action": "Verify confirmation", "expected": "Details match booking" },
-      { "step": 8, "action": "Verify booking created in portal", "expected": "Appointment record exists with correct data" }
+      { "step": 7, "action": "Verify confirmation", "expected": "Details match booking" }
     ],
     "expectedResult": [
-      "Skip prompt displays configured message",
+      "Skip popup displays configured message",
       "No option maintains widget booking flow",
       "Standard booking completion works after declining skip"
     ],

@@ -249,6 +249,57 @@ export class ServicePage {
   }
 
   /**
+   * Get the skip appointment dialog element.
+   * @returns Promise resolving to the dialog locator or null if not visible
+   */
+  async getSkipAppointmentDialog(): Promise<Locator | null> {
+    const dialog = this.page.getByRole('dialog');
+    if (await dialog.isVisible({ timeout: 2000 }).catch(() => false)) {
+      return dialog;
+    }
+    return null;
+  }
+
+  /**
+   * Verify skip popup message and buttons.
+   * @param serviceName - Service name expected in dialog title
+   * @returns Promise resolving to true if popup is properly displayed
+   */
+  async verifySkipPopup(serviceName: string): Promise<boolean> {
+    const dialog = await this.getSkipAppointmentDialog();
+    if (!dialog) return false;
+
+    try {
+      // Verify dialog title
+      await expect(dialog.getByRole('heading', { name: serviceName })).toBeVisible();
+      
+      // Verify popup message
+      const message = this.page.getByText('Good news! You can apply online right now, skipping the wait, in just a few minutes.');
+      await expect(message).toBeVisible();
+      
+      // Verify both buttons
+      const noButton = this.page.getByRole('button', { name: 'No, continue with scheduling an appointment' });
+      const yesButton = this.page.getByRole('button', { name: 'Yes, Skip the wait' });
+      await expect(noButton).toBeVisible();
+      await expect(yesButton).toBeVisible();
+      
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Click "Yes, Skip the wait" button on skip popup.
+   * @returns Promise resolving when button is clicked
+   */
+  async clickSkipWaitYesButton(): Promise<void> {
+    const yesButton = this.page.getByRole('button', { name: 'Yes, Skip the wait' });
+    await expect(yesButton).toBeVisible();
+    await yesButton.click();
+  }
+
+  /**
    * Get all available service categories.
    * @returns Promise resolving to array of category names
    */
@@ -331,12 +382,14 @@ export class ServicePage {
    * @param categoryName - Service category name
    * @param serviceName - Specific service name (optional, will select first if not provided)
    * @param continueWithScheduling - Whether to continue with scheduling when online application dialog appears
+   * @param handleSkipDialog - Whether to automatically handle the skip appointment dialog (default: true)
    * @returns Promise resolving to the selected service name
    */
   async selectServiceFlow(
     categoryName: string, 
     serviceName?: string,
-    continueWithScheduling: boolean = true
+    continueWithScheduling: boolean = true,
+    handleSkipDialog: boolean = true
   ): Promise<string> {
     // Select service category
     await this.selectServiceCategory(categoryName);
@@ -345,8 +398,10 @@ export class ServicePage {
     const selectedService = serviceName || await this.selectFirstAvailableService();
     await this.selectService(selectedService);
     
-    // Handle online application dialog if it appears
-    await this.handleSkipAppointmentDialog(continueWithScheduling);
+    // Handle online application dialog if it appears and handling is enabled
+    if (handleSkipDialog) {
+      await this.handleSkipAppointmentDialog(continueWithScheduling);
+    }
 
     return selectedService;
   }

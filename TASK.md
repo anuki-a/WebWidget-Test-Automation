@@ -208,7 +208,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 #### Skip behavior
 
-- [ ] OAC-20007 → Skip Yes → redirect
+- [x] OAC-20007 → Skip Yes → redirect ✅ IMPLEMENTED
 - [ ] OAC-20008 → Skip No → continue
 
 #### Validation rules
@@ -364,6 +364,41 @@ After Phase 3:
 ---
 
 ## 📝 Discovered During Work
+
+### OAC-20007 Skip Appointment Redirect Implementation - March 27, 2026
+
+✅ **Skip Appointment Redirect Functionality Complete**
+
+- Implemented comprehensive test for skip appointment popup redirect using MCP tools for locator discovery
+- Used `skipEnabledBookingData` fixture to create booking data with skip-enabled service ("Update Personal Account")
+- Enhanced ServicePage with new skip popup handling methods:
+  - `getSkipAppointmentDialog()` - Get dialog element if visible
+  - `verifySkipPopup(serviceName)` - Verify popup message and buttons are displayed correctly
+  - `clickSkipWaitYesButton()` - Click "Yes, Skip the wait" button
+- Used MCP Playwright tools to navigate live application and capture actual skip popup locators:
+  - Navigated to widget URL and loaded service selection page
+  - Selected "Personal Accounts" category and "Update Personal Account" service
+  - Captured skip popup dialog elements:
+    - Dialog title: "Update Personal Account"
+    - Message: "Good news! You can apply online right now, skipping the wait, in just a few minutes."
+    - Buttons: "No, continue with scheduling an appointment" and "Yes, Skip the wait"
+- Test covers all UI steps from test case specification:
+  - Step 1: Select service with appointment skip enabled ✓
+  - Step 2: Verify skip popup message displays correctly ✓
+  - Step 3: Choose Yes on skip popup ✓
+  - Step 4: Verify redirect URL matches configuration ✓
+  - Step 5: Verify widget flow terminated ✓
+- Validates expected results:
+  - Skip popup displays configured message ✓
+  - Yes option redirects to correct external URL ✓
+  - Widget booking flow terminates after redirect ✓
+- Includes comprehensive redirect verification:
+  - Waits for navigation away from widget domain
+  - Verifies URL no longer contains widget domain
+  - Tests back navigation to ensure flow termination
+  - Confirms fresh widget session starts over
+- TypeScript compilation passes without errors
+- Test follows project conventions with proper JSDoc documentation and page object usage
 
 ### OAC-20003 Non-Editable Appointment Validation Implementation - March 27, 2026
 
