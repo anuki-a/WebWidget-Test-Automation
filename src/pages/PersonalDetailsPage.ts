@@ -205,7 +205,7 @@ export class PersonalDetailsPage {
    */
   async waitForSubmissionComplete(timeout: number = 220000): Promise<void> {
     // Wait for confirmation page elements to appear
-    await this.page.waitForSelector('text=/.*appointment has been scheduled/, [data-testid="confirmation"]', {
+    await this.page.waitForSelector('text=/.*appointment has been scheduled/', {
       timeout,
       state: 'visible',
     });
@@ -282,6 +282,7 @@ export class PersonalDetailsPage {
       'text=Phone is invalid',
       'text=Please enter a valid phone number', 
       'text=Phone No. is required',
+      'text=Phone No. is invalid',
       'text=Valid phone required',
       '[data-testid="phone-error"]',
       '.phone-error',
@@ -329,5 +330,138 @@ export class PersonalDetailsPage {
       // If any error occurs, assume button is not enabled
       return false;
     }
+  }
+
+  /**
+   * Scenario: Leave both email, phone number blank and click 'book appointment'
+   * Expected: Submission not allowed. validation messages shown 'Email is required','Phone.No is required'
+   */
+  async validateBlankEmailPhoneFields(customerData: CustomerData): Promise<{emailErrors: string[], phoneErrors: string[]}> {
+    // Fill only name fields, leave email and phone blank
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    
+    // Clear email and phone fields
+    await this.emailInput.fill('');
+    await this.phoneInput.fill('');
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get validation errors
+    const emailErrors = await this.getEmailValidationErrorsComprehensive();
+    const phoneErrors = await this.getPhoneValidationErrorsComprehensive();
+    
+    return { emailErrors, phoneErrors };
+  }
+
+  /**
+   * Scenario: Invalid email and valid phone and click 'book appointment'
+   * Expected: Email format blocked
+   */
+  async validateInvalidEmailFormat(customerData: CustomerData, invalidEmail: string): Promise<string[]> {
+    // Fill name fields
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    
+    // Fill invalid email and valid phone
+    await this.fillEmail(invalidEmail);
+    await this.fillPhone(customerData.phone || '555-123-4567');
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get email validation errors
+    return await this.getEmailValidationErrorsComprehensive();
+  }
+
+  /**
+   * Scenario: Invalid phone and valid email and click 'book appointment'
+   * Expected: Phone format blocked
+   */
+  async validateInvalidPhoneFormat(customerData: CustomerData, invalidPhone: string): Promise<string[]> {
+    // Fill name fields
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    
+    // Fill valid email and invalid phone
+    await this.fillEmail(customerData.email || 'test@example.com');
+    await this.fillPhone(invalidPhone);
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get phone validation errors
+    return await this.getPhoneValidationErrorsComprehensive();
+  }
+
+  /**
+   * Scenario: Provide valid value for email and click 'book appointment'
+   * Expected: Submission not allowed. validation messages shown 'Phone.No is required'
+   */
+  async validateValidEmailMissingPhone(customerData: CustomerData): Promise<string[]> {
+    // Fill name fields and valid email
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    await this.fillEmail(customerData.email);
+    
+    // Clear phone field
+    await this.phoneInput.fill('');
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get phone validation errors
+    return await this.getPhoneValidationErrorsComprehensive();
+  }
+
+  /**
+   * Scenario: Provide valid value for phone and click 'book appointment'
+   * Expected: Submission not allowed. validation messages shown 'Email is required'
+   */
+  async validateValidPhoneMissingEmail(customerData: CustomerData): Promise<string[]> {
+    // Fill name fields and valid phone
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    await this.fillPhone(customerData.phone);
+    
+    // Clear email field
+    await this.emailInput.fill('');
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get email validation errors
+    return await this.getEmailValidationErrorsComprehensive();
+  }
+
+  /**
+   * Scenario: Provide valid values and click 'book appointment'
+   * Expected: Submission allowed, Navigated to Confirmation Page
+   */
+  async submitWithValidDetails(customerData: CustomerData): Promise<void> {
+    // Fill all fields with valid data
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    await this.fillEmail(customerData.email);
+    await this.fillPhone(customerData.phone);
+    
+    // Verify form is properly filled
+    const isFormValid = await this.validateFormFilled(customerData);
+    if (!isFormValid) {
+      throw new Error('Form validation failed - some fields are not properly filled');
+    }
+    
+    // Verify submit button is enabled
+    const isSubmitEnabled = await this.isSubmitEnabled();
+    if (!isSubmitEnabled) {
+      throw new Error('Submit button is not enabled');
+    }
+    
+    // Submit the form
+    await this.submit();
+    
+    // Wait for navigation to confirmation page
+    await this.waitForSubmissionComplete();
   }
 }

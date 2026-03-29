@@ -353,30 +353,28 @@
     ]
   },
   {
-    "testName": "OAC-20009-B: Personal Details Validation for Phone/Email Mandatory and Optional Configurations",
-    "businessGoal": "Verify email/phone required/optional behavior based on Admin Portal widget settings.",
+    "testName": "OAC-20009-B: Personal Details Validation for Phone/Email Mandatory Configurations",
+    "businessGoal": "Verify email/phone required behavior based on Admin Portal widget settings.",
     "preconditions": [
-      "Widget accessible",
-      "Bookable path to Personal Details page",
-      "Admin Portal access for widget settings",
-      "Test data for mandatory/optional cases",
-      "Tenant-wide widget settings configured",
-      "Service-level override settings documented"
+      "Widget accessible"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Set widget settings for each case", "expected": "Validation requirements match configuration" },
-      { "step": 2, "action": "Leave both blank and submit", "expected": "Case A required, Case B optional" },
-      { "step": 3, "action": "Invalid email and valid phone submit", "expected": "Email format blocked" },
-      { "step": 4, "action": "Invalid phone and valid email submit", "expected": "Phone format blocked" },
-      { "step": 5, "action": "Provide valid values and submit", "expected": "Success when valid" },
-      { "step": 6, "action": "Test tenant-wide mandatory email, optional phone", "expected": "Email required validation enforced, phone optional" },
-      { "step": 7, "action": "Test tenant-wide optional email, mandatory phone", "expected": "Phone required validation enforced, email optional" },
-      { "step": 8, "action": "Test both optional", "expected": "Submission allowed without email/phone" },
-      { "step": 9, "action": "Test both mandatory", "expected": "Both fields required for submission" },
-      { "step": 10, "action": "Validate confirmation and portal", "expected": "Values match case behavior" }
+
+      { "step": 1, "action": "Open web widget URL", "expected": "Service selection page displayed" },
+      { "step": 2, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 3, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 4, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 5, "action": "Select available future date", "expected": "Available slots displayed" },
+      { "step": 6, "action": "Select time slot and proceed", "expected": "Personal Details page displayed" },
+      { "step": 7, "action": "Leave both email, phone number blank and click 'book appointment'", "expected": "Submission not allowed. validation messages showen 'Email is required','Phone.No is required' " },
+      { "step": 8, "action": "Invalid email and valid phone and click 'book appointment'", "expected": "Email format blocked. " },
+      { "step": 9, "action": "Invalid phone and valid email and click 'book appointment'", "expected": "Phone format blocked. " },
+      { "step": 10, "action": "Provide valid value for email and click 'book appointment'", "expected": "Submission not allowed. validation messages showen 'Phone.No is required' " },
+      { "step": 11, "action": "Provide valid value for phone and click 'book appointment'", "expected": "Submission not allowed. validation messages showen 'Email is required' " },
+      { "step": 12, "action": "Provide valid values and click 'book appointment'", "expected": "Submission allowed,Navigated to Conformation Page" }
     ],
     "expectedResult": [
       "Email/phone rules enforced as configurable",
