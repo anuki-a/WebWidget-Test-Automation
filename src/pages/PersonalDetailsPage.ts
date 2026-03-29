@@ -231,6 +231,86 @@ export class PersonalDetailsPage {
   }
 
   /**
+   * Check for email validation errors using comprehensive selectors.
+   * @returns Promise resolving to array of email validation error messages
+   */
+  async getEmailValidationErrorsComprehensive(): Promise<string[]> {
+    const errors: string[] = [];
+    
+    const emailErrorSelectors = [
+      'text=Email is required',
+      'text=Email is invalid', 
+      'text=Please enter a valid email',
+      'text=Valid email required',
+      'text=Email address is required',
+      '[data-testid="email-error"]',
+      '.email-error',
+      '.error-message[data-field="email"]',
+      '[aria-label*="email error"]',
+      '.validation-error:has-text("email")',
+      'span.error:has-text("Email")',
+      '.field-error:has-text("Email")'
+    ];
+    
+    for (const selector of emailErrorSelectors) {
+      try {
+        const element = this.page.locator(selector);
+        if (await element.isVisible({ timeout: 1000 })) {
+          const text = await element.textContent();
+          if (text && text.trim()) {
+            errors.push(text.trim());
+            break; // Stop after finding first error
+          }
+        }
+      } catch (error) {
+        // Continue if selector not found
+      }
+    }
+    
+    return errors;
+  }
+
+  /**
+   * Check for phone validation errors using comprehensive selectors.
+   * @returns Promise resolving to array of phone validation error messages
+   */
+  async getPhoneValidationErrorsComprehensive(): Promise<string[]> {
+    const errors: string[] = [];
+    
+    const phoneErrorSelectors = [
+      'text=Phone is required',
+      'text=Phone is invalid',
+      'text=Please enter a valid phone number', 
+      'text=Phone No. is required',
+      'text=Valid phone required',
+      '[data-testid="phone-error"]',
+      '.phone-error',
+      '.error-message[data-field="phone"]',
+      '[aria-label*="phone error"]',
+      '.validation-error:has-text("phone")',
+      'span.error:has-text("Phone")',
+      '.field-error:has-text("Phone")'
+    ];
+    
+    for (const selector of phoneErrorSelectors) {
+      try {
+        const element = this.page.locator(selector);
+        if (await element.isVisible({ timeout: 1000 })) {
+          const text = await element.textContent();
+          if (text && text.trim()) {
+            errors.push(text.trim());
+            break; // Stop after finding first error
+          }
+        }
+      } catch (error) {
+        // Continue if selector not found
+      }
+    }
+    
+    return errors;
+  }
+
+  /**
    * Check if the submit button is enabled.
    * @returns Promise resolving to true if submit button is enabled
    */

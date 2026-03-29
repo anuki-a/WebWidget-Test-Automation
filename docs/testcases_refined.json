@@ -318,7 +318,42 @@
     ]
   },
   {
-    "testName": "OAC-20009: Personal Details Validation for Phone/Email Mandatory and Optional Configurations",
+    "testName": "OAC-20009-A: Personal Details Validation for Phone/Email Optional Configurations",
+    "businessGoal": "Verify email/phone optional behavior based on Admin Portal widget settings.",
+    "preconditions": [
+      "Widget accessible"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+      { "step": 1, "action": "Open web widget URL", "expected": "Service selection page displayed" },
+      { "step": 2, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 3, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 4, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 5, "action": "Select available future date", "expected": "Available slots displayed" },
+      { "step": 6, "action": "Select time slot and proceed", "expected": "Personal Details page displayed" },
+      { "step": 7, "action": "Leave both blank and submit", "expected": "Submission allowed" }
+    ],
+    "expectedResult": [
+      "Email/phone rules enforced",
+      "Email/phone validation combinations work correctly"
+    ],
+    "reusableActions": [
+      "Configure widget phone/email rules",
+      "Trigger validation errors",
+      "Submit and verify success",
+      "Validate portal record"
+    ],
+    "configurationDependencies": [
+      "Email/phone mandatory/optional widget settings",
+      "Tenant-wide widget email/phone requirements",
+      "Service-level validation overrides",
+      "Field validation rule priority"
+    ]
+  },
+  {
+    "testName": "OAC-20009-B: Personal Details Validation for Phone/Email Mandatory and Optional Configurations",
     "businessGoal": "Verify email/phone required/optional behavior based on Admin Portal widget settings.",
     "preconditions": [
       "Widget accessible",

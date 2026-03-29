@@ -12,6 +12,7 @@ export const test = base.extend<{
   secondServiceData: ServiceData;
   notAllowedEditCancelData: BookingData;
   skipEnabledBookingData: BookingData;
+  personalDetailsMandatory: BookingData;
 }>({
   bookingData: async ({}, use: (data: BookingData) => Promise<void>) => {
     // Generate customer data using TestDataBuilder
@@ -308,6 +309,51 @@ export const test = base.extend<{
       },
       dateTime: {
         date: today,
+        formattedDate: formattedDate.fullDateString,
+        time: '10:00 AM', // Original time for edit scenario
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
+      meetingPreference: {
+        type: 'in-person',
+        displayName: MeetingPreference.IN_PERSON
+      }
+    };
+
+    await use(data);
+  },
+
+  personalDetailsMandatory: async ({}, use: (data: BookingData) => Promise<void>) => {
+    // Generate customer data using TestDataBuilder for edit scenario
+    const customer = TestDataBuilder.generateCustomer();
+    
+    // Generate date/time data for edit scenario (use today to ensure availability)
+    const tomorrow = DateUtils.addBusinessDays(DateUtils.getToday(), 1);
+    const formattedDate = DateUtils.formatDateForUI(tomorrow);
+    
+    const rawName = 'Update Personal Account  60';
+    const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
+
+    // Create booking data specifically for edit scenario
+    // Using different location to avoid conflicts with other fixtures
+    const data: BookingData = {
+      service: {
+        category: 'Personal Accounts',
+        name: rawName,
+        displayName: cleanName,
+        duration: 60
+      },
+      location: {
+        code: '75071',
+        name: 'McKinney 2093 N. Central',
+        confirmationName: 'McKinney'
+      },
+      dateTime: {
+        date: tomorrow,
         formattedDate: formattedDate.fullDateString,
         time: '10:00 AM', // Original time for edit scenario
       },
