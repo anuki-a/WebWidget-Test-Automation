@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ApiClient } from '../../src/api/apiClient';
 import { ProductService } from '../../src/api/ProductService';
 import serviceData from '../../src/data/services.json';
+import { AdminService } from '@/api/AdminService';
 
 test('Verify service details via API setup', async ({ request }) => {
   const apiClient = new ApiClient(request);
@@ -13,6 +14,39 @@ test('Verify service details via API setup', async ({ request }) => {
   const data = await response.json();
   
   console.log(data);
+});
+
+
+test.describe('Admin System Settings Data Setup', () => {
+  let adminService: AdminService;
+
+  test.beforeEach(async ({ request }) => {
+    const apiClient = new ApiClient(request);
+    adminService = new AdminService(apiClient);
+  });
+
+  test('should enable email and phone requirements', async () => {
+    const response = await adminService.updateContactRequirements(true, true);
+    
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    
+    // Validate the response contains the updated values
+    const config = body.Entities[0];
+    expect(config.RequireCustomerEmail).toBe(true);
+    expect(config.RequireCustomerPhone).toBe(true);
+  });
+
+  test('should disable email and phone requirements', async () => {
+    const response = await adminService.updateContactRequirements(false, false);
+    
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    
+    const config = body.Entities[0];
+    expect(config.RequireCustomerEmail).toBe(false);
+    expect(config.RequireCustomerPhone).toBe(false);
+  });
 });
 
 

@@ -6,6 +6,8 @@ import { DateTimePage } from '../../src/pages/DateTimePage';
 import { PersonalDetailsPage } from '../../src/pages/PersonalDetailsPage';
 import { ConfirmationPage } from '../../src/pages/ConfirmationPage';
 import { expect } from '@playwright/test';
+import { AdminService } from '@/api/AdminService';
+import { ApiClient } from '@/api/apiClient';
 
 /**
  * OAC-20001: End-to-End Appointment Booking Test
@@ -34,6 +36,13 @@ import { expect } from '@playwright/test';
  * - User can cancel booking if needed
  */
 test.describe('Appointment Booking - OAC-20001', () => {
+
+    let adminService: AdminService;
+  
+    test.beforeEach(async ({ request }) => {
+      adminService = new AdminService(new ApiClient(request));
+    });
+    
   test('Complete booking with valid customer details', { tag: ['@smoke', '@functional'] }, async ({ page, bookingData }) => {
     const servicePage = new ServicePage(page);
     const locationPage = new LocationPage(page);
@@ -169,5 +178,24 @@ test.describe('Appointment Booking - OAC-20001', () => {
       // Verify successful booking
       await confirmationPage.waitForConfirmationPage();
     
+  });
+
+  test.afterEach(async ({}, testInfo) => {
+    // Only triggers for Test Case 4
+    if (testInfo.title.includes('Personal Details Validation - Optional Configurations')) {
+      console.log('Running Teardown for OAC-20009-A: setting Webwidget Settings...');
+      
+      try {
+        const response = await adminService.updateContactRequirements(true, true);
+        
+        // We log instead of using expect() here to prevent the teardown 
+        // itself from failing the test if the API is momentarily down.
+        if (response.status() !== 200) {
+          console.error('Teardown Warning: Failed to reset admin settings.');
+        }
+      } catch (error) {
+        console.error('Teardown Error:', error);
+      }
+    }
   });
 });

@@ -5,6 +5,8 @@ import { MeetingPreferencePage } from '../../src/pages/MeetingPreferencePage';
 import { DateTimePage } from '../../src/pages/DateTimePage';
 import { PersonalDetailsPage } from '../../src/pages/PersonalDetailsPage';
 import { expect } from '@playwright/test';
+import { AdminService } from '@/api/AdminService';
+import { ApiClient } from '@/api/apiClient';
 
 /**
  * OAC-20009-B: Personal Details Validation for Phone/Email Mandatory Configurations
@@ -29,6 +31,13 @@ import { expect } from '@playwright/test';
  * - All booking data properly selected and confirmed
  */
 test.describe('Personal Details Validation - OAC-20009-B', () => {
+  let adminService: AdminService;
+
+  test.beforeEach(async ({ request }) => {
+    adminService = new AdminService(new ApiClient(request));
+  });
+  
+  
   test('Navigate to Personal Details page with mandatory email/phone config', { tag: ['@validation', '@mandatory'] }, async ({ page, personalDetailsMandatory }) => {
     const servicePage = new ServicePage(page);
     const locationPage = new LocationPage(page);
@@ -143,5 +152,25 @@ test.describe('Personal Details Validation - OAC-20009-B', () => {
     
     console.log('Step 12 - Successful submission with valid email and phone');
     console.log('All validation scenarios completed successfully!');
+  });
+
+
+  test.afterEach(async ({}, testInfo) => {
+    // Only triggers for Test Case 4
+    if (testInfo.title.includes('Navigate to Personal Details page with mandatory email/phone config')) {
+      console.log('Running Teardown for OAC-20009-B: Resetting Admin Settings...');
+      
+      try {
+        const response = await adminService.updateContactRequirements(false, false);
+        
+        // We log instead of using expect() here to prevent the teardown 
+        // itself from failing the test if the API is momentarily down.
+        if (response.status() !== 200) {
+          console.error('Teardown Warning: Failed to reset admin settings.');
+        }
+      } catch (error) {
+        console.error('Teardown Error:', error);
+      }
+    }
   });
 });
