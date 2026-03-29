@@ -61,9 +61,7 @@ export class MeetingPreferencePage {
   async getAvailableMeetingPreferences(): Promise<string[]> {
     await this.waitForMeetingPreferencePage();
     
-    const preferenceButtons = this.page.locator('button').filter({ 
-      hasText: /^(Meet in Person|Virtual|Phone)/ 
-    });
+    const preferenceButtons = this.page.getByRole('button', { name: /Meet*/, exact: false });
     const preferences: string[] = [];
     
     const count = await preferenceButtons.count();
@@ -150,8 +148,8 @@ export class MeetingPreferencePage {
    * @param timeout - Maximum time to wait
    */
   async waitForMeetingPreferenceSelectionComplete(timeout: number = 30000): Promise<void> {
-    // Wait for calendar or date picker to appear
-    await this.page.waitForSelector('[data-testid="calendar"], .calendar, [data-testid="date-picker"]', {
+    // Wait for "Select a Date and Time" text to appear
+    await this.page.waitForSelector('text=Select a Date and Time', {
       timeout,
       state: 'visible',
     });

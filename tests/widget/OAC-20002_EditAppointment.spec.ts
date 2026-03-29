@@ -9,6 +9,36 @@ import { TestDataBuilder } from '../../src/utils/testDataBuilder';
 import { DateUtils } from '../../src/utils/dateUtils';
 import { expect } from '@playwright/test';
 
+/**
+ * OAC-20002: Edit Existing Appointment Test
+ * 
+ * Test Case: Complete appointment editing flow with valid modifications
+ * 
+ * Prerequisites:
+ * - Widget accessible via BASE_URL environment variable
+ * - Test data provisioned through editBookingData fixture
+ * - All page objects available and functional
+ * - Initial booking created successfully (precondition)
+ * 
+ * Test Flow:
+ * 1. Create initial appointment (precondition setup)
+ * 2. Verify edit links are available on confirmation page
+ * 3. Click edit date/time - navigate to DateTime page in edit mode
+ * 4. Change date/time to new slot and submit
+ * 5. Click edit personal details - navigate to Personal Details page
+ * 6. Update customer information and submit
+ * 7. Verify updated confirmation displays all changes
+ * 8. Validate edit links and cancel button remain available
+ * 
+ * Expected Results:
+ * - Edit links visible and functional on confirmation page
+ * - Date/time changes accepted and reflected
+ * - Personal details updates accepted and reflected
+ * - Confirmation page shows updated booking information
+ * - Edit functionality remains available after successful edits
+ * - Cancel button remains accessible throughout
+ */
+
 test.describe('Appointment Editing - OAC-20002', () => {
   test('Edit existing appointment from widget', { tag: ['@functional', '@edit'] }, async ({ page, editBookingData }) => {
     const servicePage = new ServicePage(page);
