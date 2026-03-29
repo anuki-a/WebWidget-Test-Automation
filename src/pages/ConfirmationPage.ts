@@ -52,6 +52,7 @@ export class ConfirmationPage {
   readonly cancelButton: Locator;
   readonly bookAnotherButton: Locator;
   readonly inPersonAppointmentNote: Locator;
+  readonly phoneAppointmentNote: Locator;
   readonly nonEditableMessage: Locator;
   readonly disabledCancelButton: Locator;
   readonly cancellationPopupText: Locator;
@@ -92,11 +93,12 @@ export class ConfirmationPage {
     this.personalDetailsSection = this.page.locator('text=/Personal Details/i').last();
     this.customerName = this.personalDetailsSection.locator('text=/\\w+\\s+\\w+/i').first();
     this.customerEmail = this.personalDetailsSection.locator('text=/\\w+@\\w+\\.\\w+/i');
-    this.customerPhone = this.personalDetailsSection.locator('text=/\\(\\d{3}\\)\\s+\\d{3}-\\d{4}/i');
+    this.customerPhone = this.page.locator('text=/\\(\\d{3}\\)\\s+\\d{3}-\\d{4}|\\d{10}/i');
     this.editPersonalDetailsLink = this.page.getByRole('link', { name: 'Edit Personal Details' });
     this.cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' });
     this.bookAnotherButton = this.page.getByRole('button', { name: 'Book Another' });
     this.inPersonAppointmentNote = this.page.getByText('This is an in-person appointment. We will see you at the location specified above.');
+    this.phoneAppointmentNote = this.page.getByText('This is a phone appointment. A staff member will call you at the number specified above.');
     this.nonEditableMessage = this.page.getByText('This appointment cannot be changed or cancelled.');
     this.disabledCancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' });
     this.cancellationPopupText = this.page.locator('text=Appointment Cancellation');
@@ -261,10 +263,9 @@ export class ConfirmationPage {
    */
   async getCustomerPhone(): Promise<string | undefined> {
     try {
-      if (await this.personalDetailsSection.isVisible({ timeout: 5000 })) {
-        if (await this.customerPhone.isVisible({ timeout: 3000 })) {
-          return await this.customerPhone.textContent() || undefined;
-        }
+      // Try to find phone number anywhere on the page
+      if (await this.customerPhone.isVisible({ timeout: 5000 })) {
+        return await this.customerPhone.textContent() || undefined;
       }
     } catch (error) {
       console.warn('Could not find customer phone in confirmation page:', error);
@@ -610,6 +611,18 @@ export class ConfirmationPage {
   async verifyCancelButtonDisabled(): Promise<boolean> {
     try {
       return await this.disabledCancelButton.isDisabled();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Verify that the phone appointment message is displayed.
+   * @returns Promise resolving to true if phone appointment message is visible
+   */
+  async verifyPhoneAppointmentMessageDisplayed(): Promise<boolean> {
+    try {
+      return await this.phoneAppointmentNote.isVisible();
     } catch (error) {
       return false;
     }

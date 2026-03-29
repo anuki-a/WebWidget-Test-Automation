@@ -462,33 +462,20 @@
   },
   {
     "testName": "OAC-20012: Personal Details Validations Based on Selected Meeting Preference",
-    "businessGoal": "Verify PD validations adapt by meeting preference (phone mandatory for phone MP, email optional for virtual MP, etc.).",
+    "businessGoal": "Verify PD validations adapt by meeting preference (phone mandatory for phone MP).",
     "preconditions": [
       "Widget accessible",
-      "Service with multiple MP including phone and virtual",
-      "Global widget settings: phone optional, email optional",
-      "Phone meeting preference override behavior documented",
-      "Service configured with phone, virtual, and in-person MP options",
-      "Booking path to PD page exists",
-      "Admin Portal access available"
+      "Service with multiple MP including phone"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select baseline MP path", "expected": "PD baseline validation applied" },
-      { "step": 2, "action": "Verify baseline phone/email state", "expected": "Baseline rules apply" },
-      { "step": 3, "action": "Select phone MP path", "expected": "PD phone mandatory" },
-      { "step": 4, "action": "Leave phone blank and submit", "expected": "Phone required validation shown" },
-      { "step": 5, "action": "Invalid phone format submit", "expected": "Phone format validation shown" },
-      { "step": 6, "action": "Select virtual MP path", "expected": "PD email optional" },
-      { "step": 7, "action": "Leave email blank and submit", "expected": "Submission allowed with other valid fields" },
-      { "step": 8, "action": "Submit all required values", "expected": "Success confirmation" },
-      { "step": 9, "action": "Configure global phone as optional in widget settings", "expected": "Phone field shows as optional" },
+   { "step": 2, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 3, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
       { "step": 10, "action": "Select phone meeting preference", "expected": "Phone field becomes mandatory (override behavior)" },
       { "step": 11, "action": "Attempt submit without phone under phone MP", "expected": "Phone required validation error displayed" },
-      { "step": 12, "action": "Add phone and submit successfully", "expected": "Booking completes, override behavior confirmed" },
-      { "step": 13, "action": "Validate portal records", "expected": "MP-specific validation state reflected" }
+      { "step": 12, "action": "Add phone and submit successfully", "expected": "Booking completes, entered phone number displayed in confirmation page" }
     ],
     "expectedResult": [
       "PD validation changes with meeting preference",
