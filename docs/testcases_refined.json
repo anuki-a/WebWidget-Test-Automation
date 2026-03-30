@@ -395,27 +395,24 @@
     ]
   },
   {
-    "testName": "OAC-20010: Select P/S Without Multiple Meeting Preference Enabled (MP Page Skipped)",
-    "businessGoal": "Verify MP page is skipped for services without multiple meeting preference option.",
+    "testName": "OAC-20010: Select P/S Without Multiple Meeting Preference Enabled (Meeting Preference Page Skipped)",
+    "businessGoal": "Verify Meeting Preference page is skipped for services without multiple meeting preference option.",
     "preconditions": [
       "Widget accessible",
-      "Service configured without MP choices",
-      "Downstream availability exists",
-      "Valid personal details available",
-      "Admin Portal access available"
+      "Service configured without Meeting Preference choices"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select service without MP options", "expected": "Flow continues without MP choice" },
+      { "step": 1, "action": "Select service without Meeting Preference options", "expected": "Flow continues without Meeting Preference choice" },
       { "step": 2, "action": "Continue booking", "expected": "Goes directly to date/time or next step" },
       { "step": 3, "action": "Complete booking", "expected": "Confirmation shown" },
-      { "step": 4, "action": "Verify confirmation", "expected": "No MP selection step in flow" },
+      { "step": 4, "action": "Verify confirmation", "expected": "No Meeting Preference selection step in flow" },
       { "step": 5, "action": "Validate portal", "expected": "Appointment created per config" }
     ],
     "expectedResult": [
-      "MP skip behavior works as expected"
+      "Meeting Preference skip behavior works as expected"
     ],
     "reusableActions": [
       "Select service",

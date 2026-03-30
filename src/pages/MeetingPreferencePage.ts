@@ -132,10 +132,12 @@ export class MeetingPreferencePage {
    * @returns Promise resolving to true if meeting preferences are skipped
    */
   async isMeetingPreferenceSkipped(): Promise<boolean> {
+    const timeout = 5000;
+    await this.page.waitForTimeout(timeout);
     try {
       // If "Select a Date and Time" is visible but "Select a Meeting Preference" is not, they're skipped
-      const calendarVisible = await this.page.getByText("Select a Date and Time").isVisible({ timeout: 5000 });
-      const preferencesVisible = await this.page.getByText("Select a Meeting Preference").isVisible({ timeout: 5000 });
+      const calendarVisible = await this.page.getByText("Select a Date and Time").isVisible({ timeout });
+      const preferencesVisible = await this.page.getByText("Select a Meeting Preference").isVisible({ timeout });
       
       return calendarVisible && !preferencesVisible;
     } catch (error) {

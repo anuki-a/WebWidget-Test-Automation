@@ -498,11 +498,12 @@ export const test = base.extend<{
         firstName: customer.firstName,
         lastName: customer.lastName,
         email: customer.email,
-        phone: customer.phone
+        phone: customer.phone,
+        notes: 'important note for booking'
       },
       meetingPreference: {
-        type: 'virtual', //in-person, phone, virtual
-        displayName: MeetingPreference.VIRTUAL
+        type: 'in-person', //in-person, phone, virtual
+        displayName: MeetingPreference.IN_PERSON
       }
     };
 

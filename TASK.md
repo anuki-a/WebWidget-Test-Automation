@@ -217,7 +217,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 #### Meeting preference
 
-- [ ] OAC-20010 → No MP
+- [x] OAC-20010 → No MP ✅ IMPLEMENTED
 - [ ] OAC-20011 → Multi MP
 - [ ] OAC-20012 → MP-based validation
 
@@ -364,6 +364,35 @@ After Phase 3:
 ---
 
 ## 📝 Discovered During Work
+
+### OAC-20010 Single Meeting Preference Skip Implementation - March 30, 2026
+
+✅ **Single Meeting Preference Skip Functionality Complete**
+
+- Implemented comprehensive test for verifying Meeting Preference page is skipped for services without multiple meeting preference options
+- Used `singleMeetingPreferenceBookingData` fixture which provides:
+  - Service: "Notary  30 Mins Notary" (configured without Meeting Preference choices)
+  - Location: "Northcliffe 22015 N IH 35" with code "78154"
+  - Virtual meeting preference (default for single preference service)
+  - Customer data and date/time for next business day at 10:00 AM
+- Test covers complete flow from service selection to confirmation:
+  - Step 1: Navigate to widget and select service without meeting preference options ✓
+  - Step 2: Search and select location ✓
+  - Step 3: Verify Meeting Preference page is skipped using `isMeetingPreferenceSkipped()` method ✓
+  - Step 4: Confirm direct navigation to date/time page ✓
+  - Step 5: Select date and time from fixture data ✓
+  - Step 6: Fill personal details and submit booking ✓
+  - Step 7: Verify confirmation page with appointment details ✓
+  - Step 8: Validate no Meeting Preference selection step appeared in flow ✓
+- Key validation points:
+  - `isMeetingPreferenceSkipped()` returns true (calendar visible, preferences not visible) ✓
+  - Direct transition from location selection to date/time selection ✓
+  - "Select a Meeting Preference" title never appears ✓
+  - Appointment created with virtual meeting preference (default) ✓
+  - All confirmation details displayed correctly ✓
+- Follows project architecture: Test → Fixture → Page → Component → UI
+- Uses existing page objects and methods with proper TypeScript typing
+- All assertions handle optional properties safely with null checks
 
 ### OAC-20008 Skip Appointment Continue Booking Implementation - March 27, 2026
 

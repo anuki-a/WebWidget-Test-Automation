@@ -13,6 +13,7 @@ export class PersonalDetailsPage {
   readonly lastNameInput: Locator;
   readonly emailInput: Locator;
   readonly phoneInput: Locator;
+  readonly notesInput: Locator;
   readonly bookAppointmentButton: Locator;
   readonly personalDetailsHeading: Locator;
 
@@ -28,6 +29,7 @@ export class PersonalDetailsPage {
     this.lastNameInput = page.getByRole("textbox", { name: "Last Name *" });
     this.emailInput = page.getByRole("textbox", { name: "Email" });
     this.phoneInput = page.getByRole("textbox", { name: "Phone No." });
+    this.notesInput = page.getByRole("textbox", { name: "Membership required. Please" }).or(page.getByRole("textbox", { name: "Notes" })).or(page.getByRole("textbox", { name: "Comments" })).or(page.getByRole("textbox", { name: "Additional Information" }));
     this.bookAppointmentButton = page.getByRole("button", {
       name: "Book My Appointment",
     });
@@ -68,6 +70,11 @@ export class PersonalDetailsPage {
     if (customerData.phone) {
       await this.fillPhone(customerData.phone);
     }
+    
+    // Fill notes (optional)
+    if (customerData.notes) {
+      await this.fillNotes(customerData.notes);
+    }
   }
 
   /**
@@ -105,6 +112,16 @@ export class PersonalDetailsPage {
   async fillPhone(phone: string): Promise<void> {
     if (await this.phoneInput.isVisible()) {
       await this.phoneInput.fill(phone);
+    }
+  }
+
+  /**
+   * Fill notes field.
+   * @param notes - Notes to fill
+   */
+  async fillNotes(notes: string): Promise<void> {
+    if (await this.notesInput.isVisible()) {
+      await this.notesInput.fill(notes);
     }
   }
 
@@ -166,6 +183,17 @@ export class PersonalDetailsPage {
   }
 
   /**
+   * Get the current value of the notes field.
+   * @returns Promise resolving to the notes value
+   */
+  async getNotes(): Promise<string> {
+    if (await this.notesInput.isVisible()) {
+      return await this.notesInput.inputValue();
+    }
+    return '';
+  }
+
+  /**
    * Check if the form is properly filled.
    * @param customerData - Customer data to validate against
    * @returns Promise resolving to true if form is correctly filled
@@ -176,11 +204,13 @@ export class PersonalDetailsPage {
       const currentLastName = await this.getLastName();
       const currentEmail = await this.getEmail();
       const currentPhone = await this.getPhone();
+      const currentNotes = await this.getNotes();
       
       return currentFirstName === customerData.firstName &&
              currentLastName === customerData.lastName &&
              (!customerData.email || currentEmail === customerData.email) &&
-             (!customerData.phone || currentPhone === customerData.phone);
+             (!customerData.phone || currentPhone === customerData.phone) &&
+             (!customerData.notes || currentNotes === customerData.notes);
     } catch (error) {
       return false;
     }
