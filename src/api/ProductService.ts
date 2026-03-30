@@ -39,7 +39,7 @@ export class ProductService {
    * @param disableCancellation - Optional override for DisableAppointmentCancellationOrUpdate field.
    * @returns Promise resolving to the API response.
    */
-  async UpdateService(serviceData: any, saveOptions: any, disableCancellation?: boolean) {
+  async UpdateServiceDisableAppointmentCancellationOrUpdate(serviceData: any, saveOptions: any, disableCancellation?: boolean) {
     const endpoint = '/OacWeb/oac/client/SaveService';
     
     // Create a deep copy to avoid mutating the original data
@@ -64,4 +64,21 @@ export class ProductService {
     
     return response;
   }
+
+    /**
+   * Saves or updates a service entity.
+   * Path: /OacWeb/oac/client/SaveService
+   * @param entities - Array of service objects to save.
+   * @param saveOptions - Save options (e.g., tag containing clientId, flag, locationId).
+   */
+  async saveService(entities: any[], saveOptions: any) {
+    const endpoint = '/OacWeb/oac/client/SaveService';
+    
+    const requestBody = {
+      entities: entities,
+      saveOptions: saveOptions
+    };
+    return await this.client.post(endpoint, requestBody);
+  }
+
 }

@@ -15,6 +15,8 @@ export const test = base.extend<{
   personalDetailsMandatory: BookingData;
   multipleMPBookingData: BookingData;
   pastDateBookingData: BookingData;
+  notaryServiceBookingData: BookingData;
+  singleMeetingPreferenceBookingData: BookingData;
 }>({
   bookingData: async ({}, use: (data: BookingData) => Promise<void>) => {
     // Generate customer data using TestDataBuilder
@@ -456,6 +458,51 @@ export const test = base.extend<{
       meetingPreference: {
         type: 'in-person',
         displayName: MeetingPreference.IN_PERSON
+      }
+    };
+
+    await use(data);
+  },
+
+
+  singleMeetingPreferenceBookingData: async ({}, use: (data: BookingData) => Promise<void>) => {
+    // Generate customer data using TestDataBuilder
+    const customer = TestDataBuilder.generateCustomer();
+    
+    // Generate date/time data
+    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 1)
+    const formattedDate = DateUtils.formatDateForUI(nextBusinessDay);
+    
+    const rawName = 'Notary  30 Mins Notary';
+    const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
+
+    // Create complete booking data for cancellation path (copy of bookingData)
+    const data: BookingData = {
+      service: {
+        category: 'Notary and Medallion Services',
+        name: rawName,
+        displayName: cleanName,
+        duration: 60
+      },
+      location: {
+        code: '78154',
+        name: 'Northcliffe 22015 N IH 35',
+        confirmationName: 'Northcliffe'
+      },
+      dateTime: {
+        date: nextBusinessDay,
+        formattedDate: formattedDate.fullDateString,
+        time: '10:00 AM',
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
+      meetingPreference: {
+        type: 'virtual', //in-person, phone, virtual
+        displayName: MeetingPreference.VIRTUAL
       }
     };
 
