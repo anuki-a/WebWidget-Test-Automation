@@ -8,6 +8,7 @@ import { expect } from '@playwright/test';
 import { AdminService } from '@/api/AdminService';
 import { ApiClient } from '@/api/apiClient';
 import { ConfirmationPage } from '@/pages/ConfirmationPage';
+import { ProductService } from '@/api/ProductService';
 
 /**
  * OAC-20010: Select P/S Without Multiple Meeting Preference Enabled (Meeting Preference Page Skipped)
@@ -36,8 +37,80 @@ import { ConfirmationPage } from '@/pages/ConfirmationPage';
 test.describe('Single Meeting Preference - OAC-20010', () => {
   let adminService: AdminService;
 
-  test.beforeEach(async ({ request }) => {
+  test.beforeEach(async ({ request, singleMeetingPreferenceBookingData }) => {
     adminService = new AdminService(new ApiClient(request));
+    
+    // Setup environment for OAC-20010
+    console.log('Running Setup for OAC-20010: configuring product preferences...');
+    
+    try {
+      const apiClient = new ApiClient(request);
+      const productService = new ProductService(apiClient);
+      
+      const clientId = 54;
+      const productId = 392; 
+      const targetLocationId = 26;
+
+      // 1. GET current data
+      const getResponse = await productService.getProductById(clientId, productId);
+      expect(getResponse.ok()).toBeTruthy();
+      const rawData = await getResponse.json();
+      const serviceEntity = Array.isArray(rawData) ? rawData[0] : rawData;
+
+      const { meetingPreference } = singleMeetingPreferenceBookingData;
+
+      // 2. CLEAN and CONSTRUCT the payload
+      // We use destructuring to strip out OData metadata and Navigation Properties
+      const { 
+        $id, $type,           // Metadata from OData/Breeze
+        Location, Service1,   // Navigation properties (The 500 Error Culprits)
+        Service2, ServiceCategory, 
+        ServiceType, User, 
+        User1, UserServices, 
+        AppointmentServiceRequests,
+        entityAspect: oldAspect, // We will replace this entirely
+        ...cleanEntity         // Everything else (the actual DB columns)
+      } = serviceEntity;
+
+      const modifiedService = {
+        ...cleanEntity,
+        FkLocationId: targetLocationId,
+        AllowInPersonAppointments: meetingPreference.type === 'in-person',  
+        AllowPhoneAppointments: meetingPreference.type === 'phone',
+        AllowVirtualAppointments: meetingPreference.type === 'virtual',
+        
+        // Reconstruct a clean entityAspect
+        entityAspect: {
+          entityTypeName: "Service:#Oac.Model.Data.ClientData",
+          defaultResourceName: "Services",
+          entityState: "Modified",
+          originalValuesMap: {
+            // As you noted, manage the true/false logic via fixtures
+            AllowPhoneAppointments: serviceEntity.AllowPhoneAppointments,
+            AllowInPersonAppointments: serviceEntity.AllowInPersonAppointments,
+            AllowVirtualAppointments: serviceEntity.AllowVirtualAppointments
+          }
+        }
+      };
+
+      // 3. POST back
+      const saveOptions = {
+        tag: `${clientId},false,${targetLocationId}`
+      };
+
+      console.log('Modified Service:', JSON.stringify(modifiedService, null, 2));
+      console.log('Save Options:', JSON.stringify(saveOptions, null, 2));
+      const saveResponse = await productService.saveService([modifiedService], saveOptions);
+
+      if (!saveResponse.ok()) {
+        console.error(`Setup Error - Status: ${saveResponse.status()}`);
+        console.error(`Setup Error - Body: ${await saveResponse.text()}`);
+        throw new Error('Failed to setup OAC-20010 environment');
+      }
+    } catch (error) {
+      console.error('Setup Error:', error);
+      throw error;
+    }
   });
   
   
