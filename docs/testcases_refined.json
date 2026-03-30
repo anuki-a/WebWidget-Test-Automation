@@ -598,10 +598,13 @@
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Open date/time page", "expected": "Calendar shown" },
-      { "step": 2, "action": "Attempt select past date", "expected": "Past date disabled/unselectable" },
-      { "step": 3, "action": "Attempt to proceed with past date", "expected": "Cannot proceed" },
-      { "step": 4, "action": "Select current/future date and continue", "expected": "Proceed normally" }
+      { "step": 1, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 2, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 3, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 4, "action": "Open date/time page", "expected": "Calendar shown" },
+      { "step": 5, "action": "Attempt select past date", "expected": "Past date disabled/unselectable" },
+      { "step": 6, "action": "Attempt to proceed with past date", "expected": "Cannot proceed" },
+      { "step": 7, "action": "Select current/future date and continue", "expected": "Proceed normally" }
     ],
     "expectedResult": [
       "Past dates blocked from booking"

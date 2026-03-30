@@ -109,14 +109,31 @@ export class CalendarComponent {
         exact: true 
       });
       
+      // Check if element exists first
+      const isVisible = await dateElement.isVisible();
+      
+      if (!isVisible) {
+        return true; // Date not found in calendar, likely disabled/past
+      }
+      
+      // Check if element is enabled - this is the key check for past dates
+      const isEnabled = await dateElement.isEnabled();
+      
+      // Get additional attributes for debugging
       const classes = await dateElement.getAttribute('class') || '';
       const ariaDisabled = await dateElement.getAttribute('aria-disabled');
+      const tabIndex = await dateElement.getAttribute('tabindex');
       
-      // Check various disabled indicators
-      return classes.includes('disabled') || 
-             classes.includes('past') || 
-             classes.includes('unavailable') ||
-             ariaDisabled === 'true';
+      // The primary check is whether the element is enabled
+      // Past dates are visible but not enabled
+      const isDisabled = !isEnabled || 
+                        classes.includes('disabled') || 
+                        classes.includes('past') || 
+                        classes.includes('unavailable') ||
+                        ariaDisabled === 'true' ||
+                        tabIndex === '-1';
+      
+      return isDisabled;
     } catch (error) {
       return true; // Assume disabled if not found
     }
@@ -143,15 +160,39 @@ export class CalendarComponent {
    * @returns Promise resolving to month and year string
    */
   async getCurrentMonthYear(): Promise<string> {
-    const monthYearElement = this.page.locator('.calendar-header, .month-year, [data-testid="month-year"]').first();
-    
-    if (await monthYearElement.isVisible()) {
-      return await monthYearElement.textContent() || '';
+    try {
+      // Try to find the calendar header with month/year
+      const monthYearElement = this.page.locator('.calendar-header, .month-year, [data-testid="month-year"]').first();
+      
+      if (await monthYearElement.isVisible()) {
+        return await monthYearElement.textContent() || '';
+      }
+
+      // Try to find any element containing month and year
+      const monthYearPattern = this.page.locator('text=/(January|February|March|April|May|June|July|August|September|October|November|December) \\d{4}/i').first();
+      
+      if (await monthYearPattern.isVisible()) {
+        return await monthYearPattern.textContent() || '';
+      }
+
+      // Fallback: check the navigation buttons to infer current month
+      const prevButton = this.page.getByRole('button', { name: /Go to \w+ \d{4}/i }).first();
+      if (await prevButton.isVisible()) {
+        const prevButtonText = await prevButton.textContent();
+        return prevButtonText || '';
+      }
+
+      // Final fallback: try the original month element approach
+      const monthElement = this.page.locator('text=/^(January|February|March|April|May|June|July|August|September|October|November|December)/i').first();
+      
+      if (await monthElement.isVisible()) {
+        return await monthElement.textContent() || '';
+      }
+
+      return '';
+    } catch (error) {
+      return '';
     }
-    
-    // Fallback: try to find any element containing month name
-    const monthElement = this.page.locator('text=/^(January|February|March|April|May|June|July|August|September|October|November|December)/i').first();
-    return await monthElement.textContent() || '';
   }
 
   /**

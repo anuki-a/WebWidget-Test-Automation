@@ -231,6 +231,15 @@ export class DateTimePage {
   }
 
   /**
+   * Check if a specific date is disabled in the calendar.
+   * @param date - Date to check
+   * @returns Promise resolving to true if date is disabled
+   */
+  async isDateDisabled(date: Date): Promise<boolean> {
+    return await this.calendarComponent.isDateDisabled(date);
+  }
+
+  /**
    * Submit the date and time selection to proceed to next step.
    * @returns Promise resolving when submission is complete
    */
