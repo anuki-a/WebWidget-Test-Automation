@@ -13,6 +13,7 @@ export class PersonalDetailsPage {
   readonly lastNameInput: Locator;
   readonly emailInput: Locator;
   readonly phoneInput: Locator;
+  readonly notesInput: Locator;
   readonly bookAppointmentButton: Locator;
   readonly personalDetailsHeading: Locator;
 
@@ -28,6 +29,7 @@ export class PersonalDetailsPage {
     this.lastNameInput = page.getByRole("textbox", { name: "Last Name *" });
     this.emailInput = page.getByRole("textbox", { name: "Email" });
     this.phoneInput = page.getByRole("textbox", { name: "Phone No." });
+    this.notesInput = page.getByRole("textbox", { name: "Membership required. Please" }).or(page.getByRole("textbox", { name: "Notes" })).or(page.getByRole("textbox", { name: "Comments" })).or(page.getByRole("textbox", { name: "Additional Information" }));
     this.bookAppointmentButton = page.getByRole("button", {
       name: "Book My Appointment",
     });
@@ -68,6 +70,11 @@ export class PersonalDetailsPage {
     if (customerData.phone) {
       await this.fillPhone(customerData.phone);
     }
+    
+    // Fill notes (optional)
+    if (customerData.notes) {
+      await this.fillNotes(customerData.notes);
+    }
   }
 
   /**
@@ -105,6 +112,16 @@ export class PersonalDetailsPage {
   async fillPhone(phone: string): Promise<void> {
     if (await this.phoneInput.isVisible()) {
       await this.phoneInput.fill(phone);
+    }
+  }
+
+  /**
+   * Fill notes field.
+   * @param notes - Notes to fill
+   */
+  async fillNotes(notes: string): Promise<void> {
+    if (await this.notesInput.isVisible()) {
+      await this.notesInput.fill(notes);
     }
   }
 
@@ -166,6 +183,17 @@ export class PersonalDetailsPage {
   }
 
   /**
+   * Get the current value of the notes field.
+   * @returns Promise resolving to the notes value
+   */
+  async getNotes(): Promise<string> {
+    if (await this.notesInput.isVisible()) {
+      return await this.notesInput.inputValue();
+    }
+    return '';
+  }
+
+  /**
    * Check if the form is properly filled.
    * @param customerData - Customer data to validate against
    * @returns Promise resolving to true if form is correctly filled
@@ -176,11 +204,13 @@ export class PersonalDetailsPage {
       const currentLastName = await this.getLastName();
       const currentEmail = await this.getEmail();
       const currentPhone = await this.getPhone();
+      const currentNotes = await this.getNotes();
       
       return currentFirstName === customerData.firstName &&
              currentLastName === customerData.lastName &&
              (!customerData.email || currentEmail === customerData.email) &&
-             (!customerData.phone || currentPhone === customerData.phone);
+             (!customerData.phone || currentPhone === customerData.phone) &&
+             (!customerData.notes || currentNotes === customerData.notes);
     } catch (error) {
       return false;
     }
@@ -205,7 +235,7 @@ export class PersonalDetailsPage {
    */
   async waitForSubmissionComplete(timeout: number = 220000): Promise<void> {
     // Wait for confirmation page elements to appear
-    await this.page.waitForSelector('text=/.*appointment has been scheduled/, [data-testid="confirmation"]', {
+    await this.page.waitForSelector('text=/.*appointment has been scheduled/', {
       timeout,
       state: 'visible',
     });
@@ -215,17 +245,96 @@ export class PersonalDetailsPage {
    * Check if there are any validation errors on the form.
    * @returns Promise resolving to array of error messages
    */
-  async getValidationErrors(): Promise<string[]> {
+  async getEmailValidationErrors(): Promise<string[]> {
+    const errors: string[] = [];
+    // Check specifically for "Email is invalid" text anywhere on the page
+    try {
+      const emailInvalidText = this.page.locator('text=Email is invalid');
+      if (await emailInvalidText.isVisible()) {
+        errors.push("Email is invalid");
+      }
+    } catch (error) {
+      // Continue if check fails
+    }
+    
+    return errors;
+  }
+
+  /**
+   * Check for email validation errors using comprehensive selectors.
+   * @returns Promise resolving to array of email validation error messages
+   */
+  async getEmailValidationErrorsComprehensive(): Promise<string[]> {
     const errors: string[] = [];
     
-    // Look for error messages
-    const errorElements = this.page.locator('.error, .validation-error, [data-testid="error"]');
-    const count = await errorElements.count();
+    const emailErrorSelectors = [
+      'text=Email is required',
+      'text=Email is invalid', 
+      'text=Please enter a valid email',
+      'text=Valid email required',
+      'text=Email address is required',
+      '[data-testid="email-error"]',
+      '.email-error',
+      '.error-message[data-field="email"]',
+      '[aria-label*="email error"]',
+      '.validation-error:has-text("email")',
+      'span.error:has-text("Email")',
+      '.field-error:has-text("Email")'
+    ];
     
-    for (let i = 0; i < count; i++) {
-      const errorText = await errorElements.nth(i).textContent();
-      if (errorText) {
-        errors.push(errorText.trim());
+    for (const selector of emailErrorSelectors) {
+      try {
+        const element = this.page.locator(selector);
+        if (await element.isVisible({ timeout: 1000 })) {
+          const text = await element.textContent();
+          if (text && text.trim()) {
+            errors.push(text.trim());
+            break; // Stop after finding first error
+          }
+        }
+      } catch (error) {
+        // Continue if selector not found
+      }
+    }
+    
+    return errors;
+  }
+
+  /**
+   * Check for phone validation errors using comprehensive selectors.
+   * @returns Promise resolving to array of phone validation error messages
+   */
+  async getPhoneValidationErrorsComprehensive(): Promise<string[]> {
+    const errors: string[] = [];
+    
+    const phoneErrorSelectors = [
+      'text=Phone is required',
+      'text=Phone is invalid',
+      'text=Please enter a valid phone number', 
+      'text=Phone No. is required',
+      'text=Phone No. is invalid',
+      'text=Valid phone required',
+      '[data-testid="phone-error"]',
+      '.phone-error',
+      '.error-message[data-field="phone"]',
+      '[aria-label*="phone error"]',
+      '.validation-error:has-text("phone")',
+      'span.error:has-text("Phone")',
+      '.field-error:has-text("Phone")'
+    ];
+    
+    for (const selector of phoneErrorSelectors) {
+      try {
+        const element = this.page.locator(selector);
+        if (await element.isVisible({ timeout: 1000 })) {
+          const text = await element.textContent();
+          if (text && text.trim()) {
+            errors.push(text.trim());
+            break; // Stop after finding first error
+          }
+        }
+      } catch (error) {
+        // Continue if selector not found
       }
     }
     
@@ -237,6 +346,152 @@ export class PersonalDetailsPage {
    * @returns Promise resolving to true if submit button is enabled
    */
   async isSubmitEnabled(): Promise<boolean> {
-    return !(await this.bookAppointmentButton.isDisabled());
+    try {
+      // First check if button is visible
+      const isVisible = await this.bookAppointmentButton.isVisible({ timeout: 5000 });
+      if (!isVisible) {
+        return false; // Button not visible means it's not enabled
+      }
+      
+      // Check if button is disabled
+      const isDisabled = await this.bookAppointmentButton.isDisabled();
+      return !isDisabled;
+    } catch (error) {
+      // If any error occurs, assume button is not enabled
+      return false;
+    }
+  }
+
+  /**
+   * Scenario: Leave both email, phone number blank and click 'book appointment'
+   * Expected: Submission not allowed. validation messages shown 'Email is required','Phone.No is required'
+   */
+  async validateBlankEmailPhoneFields(customerData: CustomerData): Promise<{emailErrors: string[], phoneErrors: string[]}> {
+    // Fill only name fields, leave email and phone blank
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    
+    // Clear email and phone fields
+    await this.emailInput.fill('');
+    await this.phoneInput.fill('');
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get validation errors
+    const emailErrors = await this.getEmailValidationErrorsComprehensive();
+    const phoneErrors = await this.getPhoneValidationErrorsComprehensive();
+    
+    return { emailErrors, phoneErrors };
+  }
+
+  /**
+   * Scenario: Invalid email and valid phone and click 'book appointment'
+   * Expected: Email format blocked
+   */
+  async validateInvalidEmailFormat(customerData: CustomerData, invalidEmail: string): Promise<string[]> {
+    // Fill name fields
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    
+    // Fill invalid email and valid phone
+    await this.fillEmail(invalidEmail);
+    await this.fillPhone(customerData.phone || '555-123-4567');
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get email validation errors
+    return await this.getEmailValidationErrorsComprehensive();
+  }
+
+  /**
+   * Scenario: Invalid phone and valid email and click 'book appointment'
+   * Expected: Phone format blocked
+   */
+  async validateInvalidPhoneFormat(customerData: CustomerData, invalidPhone: string): Promise<string[]> {
+    // Fill name fields
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    
+    // Fill valid email and invalid phone
+    await this.fillEmail(customerData.email || 'test@example.com');
+    await this.fillPhone(invalidPhone);
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get phone validation errors
+    return await this.getPhoneValidationErrorsComprehensive();
+  }
+
+  /**
+   * Scenario: Provide valid value for email and click 'book appointment'
+   * Expected: Submission not allowed. validation messages shown 'Phone.No is required'
+   */
+  async validateValidEmailMissingPhone(customerData: CustomerData): Promise<string[]> {
+    // Fill name fields and valid email
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    await this.fillEmail(customerData.email);
+    
+    // Clear phone field
+    await this.phoneInput.fill('');
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get phone validation errors
+    return await this.getPhoneValidationErrorsComprehensive();
+  }
+
+  /**
+   * Scenario: Provide valid value for phone and click 'book appointment'
+   * Expected: Submission not allowed. validation messages shown 'Email is required'
+   */
+  async validateValidPhoneMissingEmail(customerData: CustomerData): Promise<string[]> {
+    // Fill name fields and valid phone
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    await this.fillPhone(customerData.phone);
+    
+    // Clear email field
+    await this.emailInput.fill('');
+    
+    // Try to submit
+    await this.submit();
+    
+    // Get email validation errors
+    return await this.getEmailValidationErrorsComprehensive();
+  }
+
+  /**
+   * Scenario: Provide valid values and click 'book appointment'
+   * Expected: Submission allowed, Navigated to Confirmation Page
+   */
+  async submitWithValidDetails(customerData: CustomerData): Promise<void> {
+    // Fill all fields with valid data
+    await this.fillFirstName(customerData.firstName);
+    await this.fillLastName(customerData.lastName);
+    await this.fillEmail(customerData.email);
+    await this.fillPhone(customerData.phone);
+    
+    // Verify form is properly filled
+    const isFormValid = await this.validateFormFilled(customerData);
+    if (!isFormValid) {
+      throw new Error('Form validation failed - some fields are not properly filled');
+    }
+    
+    // Verify submit button is enabled
+    const isSubmitEnabled = await this.isSubmitEnabled();
+    if (!isSubmitEnabled) {
+      throw new Error('Submit button is not enabled');
+    }
+    
+    // Submit the form
+    await this.submit();
+    
+    // Wait for navigation to confirmation page
+    await this.waitForSubmissionComplete();
   }
 }

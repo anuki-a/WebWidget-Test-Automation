@@ -61,9 +61,7 @@ export class MeetingPreferencePage {
   async getAvailableMeetingPreferences(): Promise<string[]> {
     await this.waitForMeetingPreferencePage();
     
-    const preferenceButtons = this.page.locator('button').filter({ 
-      hasText: /^(Meet in Person|Virtual|Phone)/ 
-    });
+    const preferenceButtons = this.page.getByRole('button', { name: /Meet*/, exact: false });
     const preferences: string[] = [];
     
     const count = await preferenceButtons.count();
@@ -134,10 +132,12 @@ export class MeetingPreferencePage {
    * @returns Promise resolving to true if meeting preferences are skipped
    */
   async isMeetingPreferenceSkipped(): Promise<boolean> {
+    const timeout = 5000;
+    await this.page.waitForTimeout(timeout);
     try {
       // If "Select a Date and Time" is visible but "Select a Meeting Preference" is not, they're skipped
-      const calendarVisible = await this.page.getByText("Select a Date and Time").isVisible({ timeout: 5000 });
-      const preferencesVisible = await this.page.getByText("Select a Meeting Preference").isVisible({ timeout: 5000 });
+      const calendarVisible = await this.page.getByText("Select a Date and Time").isVisible({ timeout });
+      const preferencesVisible = await this.page.getByText("Select a Meeting Preference").isVisible({ timeout });
       
       return calendarVisible && !preferencesVisible;
     } catch (error) {
@@ -150,8 +150,8 @@ export class MeetingPreferencePage {
    * @param timeout - Maximum time to wait
    */
   async waitForMeetingPreferenceSelectionComplete(timeout: number = 30000): Promise<void> {
-    // Wait for calendar or date picker to appear
-    await this.page.waitForSelector('[data-testid="calendar"], .calendar, [data-testid="date-picker"]', {
+    // Wait for "Select a Date and Time" text to appear
+    await this.page.waitForSelector('text=Select a Date and Time', {
       timeout,
       state: 'visible',
     });

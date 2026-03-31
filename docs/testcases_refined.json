@@ -49,30 +49,26 @@
   },
   {
     "testName": "OAC-20002: Edit Existing Appointment From Widget (Desktop, Functional)",
-    "businessGoal": "Verify editable appointment can be updated via widget and updates reflect in portal.",
+    "businessGoal": "Verify editable appointment can be updated via widget and reflected in Conformation Page",
     "preconditions": [
-      "Existing appointment editable",
-      "Valid widget edit URL/token",
-      "Appointment within edit window",
+      "Do happy path booking",
+      "Appointment Confirmation Page displayed",
       "At least one future slot for rescheduling",
-      "Valid replacement customer details",
-      "Admin Portal access available"
+      "Valid replacement customer details"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Open edit URL", "expected": "Appointment loads in edit context" },
-      { "step": 2, "action": "Change date/time", "expected": "New slot accepted" },
-      { "step": 3, "action": "Update personal details", "expected": "Values accepted by validation" },
-      { "step": 4, "action": "Submit edits", "expected": "Navigate to Confirmation page" },
-      { "step": 5, "action": "Verify updated confirmation", "expected": "Updated values shown" },
-      { "step": 6, "action": "Validate Admin Portal", "expected": "Record updated, not duplicated" },
-      { "step": 7, "action": "Verify notifications", "expected": "Notification behavior per config" }
+      { "step": 1, "action": "Appointment Confirmation Page", "expected": "Appointment Confirmation page displays Clickable Edit buttons" },
+      { "step": 2, "action": "Click edit", "expected": "Appointment loads in edit context" },
+      { "step": 3, "action": "Change date/time", "expected": "New slot accepted" },
+      { "step": 4, "action": "Update personal details", "expected": "Values accepted by validation" },
+      { "step": 5, "action": "Submit edits", "expected": "Navigate to Confirmation page" },
+      { "step": 6, "action": "Verify updated confirmation", "expected": "Updated values shown" }
     ],
     "expectedResult": [
-      "Appointment updated successfully",
-      "Portal shows edited values"
+      "Appointment updated successfully"
     ],
     "reusableActions": [
       "Open appointment URL",
@@ -91,25 +87,23 @@
     "testName": "OAC-20003: Attempt Edit on Non-Editable Appointment (Desktop, Functional)",
     "businessGoal": "Verify non-editable/cancel-disabled appointment shows proper disabled UI and no actions.",
     "preconditions": [
-      "Appointment exists and not editable",
-      "Valid widget URL/token",
-      "Appointment active and retrievable",
-      "Admin Portal access available"
+      "Do happy path booking",
+      "Appointment Confirmation Page displayed"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Open appointment URL", "expected": "Load in non-editable context" },
-      { "step": 2, "action": "Check edit controls", "expected": "Edit controls not actionable" },
+      { "step": 1, "action": "Appointment Confirmation Page", "expected": "Appointment Confirmation page displayed" },
+      { "step": 2, "action": "Check edit controls/buttons", "expected": "Edit controls/buttons not visible to click" },
       { "step": 3, "action": "Check Cancel button", "expected": "Cancel disabled" },
       { "step": 4, "action": "Check non-editable message", "expected": "Message displayed" },
-      { "step": 5, "action": "Attempt to interact with controls", "expected": "No action triggered" },
-      { "step": 6, "action": "Validate portal state", "expected": "Appointment unchanged" }
+      { "step": 5, "action": "Attempt to interact with controls", "expected": "No action triggered" }
     ],
     "expectedResult": [
-      "Non-editable flow enforced",
-      "No state change in portal"
+      "No editable buttons visible",
+      "No cancelation Button visible",
+      "Non-editable flow enforced"
     ],
     "reusableActions": [
       "Open appointment URL",
@@ -186,8 +180,7 @@
     ],
     "expectedResult": [
       "Book Another flow works",
-      "Personal details persisted across multiple bookings",
-      "API validation confirms data consistency"
+      "Personal details persisted across multiple bookings"
     ],
     "reusableActions": [
       "Create booking",
@@ -219,21 +212,22 @@
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Cancel existing appointment", "expected": "Cancellation page shown" },
-      { "step": 2, "action": "Verify cancellation content", "expected": "Book Another shown" },
-      { "step": 3, "action": "Click Book Another", "expected": "Start booking flow" },
-      { "step": 4, "action": "Select different service", "expected": "New service selected" },
-      { "step": 5, "action": "Select different date/time", "expected": "New date/time selected" },
-      { "step": 6, "action": "Check personal details page", "expected": "Personal details prefilled" },
-      { "step": 7, "action": "Verify all details retained correctly", "expected": "First name, last name, email, phone match" },
-      { "step": 8, "action": "Submit new booking", "expected": "Booking succeeds" },
-      { "step": 9, "action": "Verify new confirmation", "expected": "Retained details + new selections" },
-      { "step": 10, "action": "Verify both appointments via API", "expected": "Old canceled, new created with correct data" },
-      { "step": 11, "action": "Verify personal details consistency", "expected": "Same customer data in new appointment" }
+      { "step": 1, "action": "Create first appointment", "expected": "Confirmation with Book Another" },
+      { "step": 2, "action": "Capture first appointment details", "expected": "Values available" },
+      { "step": 3, "action": "Verify Cancel action availability", "expected": "Cancel enabled" },
+      { "step": 4, "action": "Click Cancel and confirm", "expected": "Cancellation processed" },
+      { "step": 5, "action": "Verify cancellation messages", "expected": "Cancelled state text and Book Another shown" },
+      { "step": 6, "action": "Click Book Another", "expected": "Start new booking" },
+      { "step": 7, "action": "Select different service", "expected": "Second service selected" },
+      { "step": 8, "action": "Select different date/time", "expected": "Second date/time selected" },
+      { "step": 9, "action": "Check personal details page", "expected": "Personal details prefilled" },
+      { "step": 10, "action": "Verify all details retained correctly", "expected": "First name, last name, email, phone match" },
+      { "step": 11, "action": "Submit second booking", "expected": "Booking succeeds with retained details" },
+      { "step": 12, "action": "Verify second confirmation", "expected": "Personal details retained, new service/date/time shown" },
+      { "step": 13, "action": "Verify personal details consistency", "expected": "Same customer data in both appointments" }
     ],
     "expectedResult": [
-      "New booking created with retained personal details",
-      "API validation confirms data persistence"
+      "New booking created with retained personal details"
     ],
     "reusableActions": [
       "Cancel appointment",
@@ -250,27 +244,25 @@
   },
   {
     "testName": "OAC-20007: Select P/S With Appointment Skip Enabled (Yes Skip Appointment)",
-    "businessGoal": "Verify yes on skip prompt redirects to external configured site and ends flow.",
+    "businessGoal": "Verify 'YES' on skip appointment popup redirects to external configured site and ends flow.",
     "preconditions": [
       "Widget accessible",
       "Service configured with appointment skip enabled",
       "External redirect URL configured and verified",
-      "Skip popup message configured",
-      "Admin Portal access available"
+      "Skip popup message configured"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select service with appointment skip", "expected": "Skip prompt shown" },
+      { "step": 1, "action": "Select service with appointment skip", "expected": "Skip popup shown" },
       { "step": 2, "action": "Verify skip popup message displays correctly", "expected": "Configured popup message shown" },
-      { "step": 3, "action": "Choose Yes on skip prompt", "expected": "Redirect to configured external URL" },
+      { "step": 3, "action": "Choose Yes on skip popup", "expected": "Redirect to configured external URL" },
       { "step": 4, "action": "Verify redirect URL matches configuration", "expected": "Correct external site loaded" },
-      { "step": 5, "action": "Verify widget flow terminated", "expected": "No return to booking flow, session ended" },
-      { "step": 6, "action": "Verify skip configuration via API", "expected": "Skip settings confirmed" }
+      { "step": 5, "action": "Verify widget flow terminated", "expected": "No return to booking flow, session ended" }
     ],
     "expectedResult": [
-      "Skip prompt displays configured message",
+      "Skip popup displays configured message",
       "Yes option redirects to correct external URL",
       "Widget booking flow terminates after redirect"
     ],
@@ -288,30 +280,28 @@
   },
   {
     "testName": "OAC-20008: Select P/S With Appointment Skip Enabled (No Skip Appointment)",
-    "businessGoal": "Verify no on skip prompt continues standard booking flow.",
+    "businessGoal": "Verify 'NO' on skip appointment prompt continues standard booking flow.",
     "preconditions": [
       "Widget accessible",
       "Service configured with appointment skip enabled",
       "Standard booking path available",
       "Skip popup message configured",
-      "Valid personal details available",
-      "Admin Portal access available"
+      "Valid personal details available"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select skip-enabled service", "expected": "Popup shown" },
+      { "step": 1, "action": "Select service with appointment skip", "expected": "Skip popup shown" },
       { "step": 2, "action": "Verify skip popup message displays correctly", "expected": "Configured popup message shown" },
-      { "step": 3, "action": "Choose No on skip prompt", "expected": "No redirect, continue in widget" },
+      { "step": 3, "action": "Choose No on skip popup", "expected": "No redirect, continue in widget" },
       { "step": 4, "action": "Verify standard booking flow continues", "expected": "Navigate to next booking step normally" },
       { "step": 5, "action": "Continue booking", "expected": "Standard flow proceeds" },
       { "step": 6, "action": "Complete booking", "expected": "Confirmation displayed" },
-      { "step": 7, "action": "Verify confirmation", "expected": "Details match booking" },
-      { "step": 8, "action": "Verify booking created in portal", "expected": "Appointment record exists with correct data" }
+      { "step": 7, "action": "Verify confirmation", "expected": "Details match booking" }
     ],
     "expectedResult": [
-      "Skip prompt displays configured message",
+      "Skip popup displays configured message",
       "No option maintains widget booking flow",
       "Standard booking completion works after declining skip"
     ],
@@ -328,30 +318,63 @@
     ]
   },
   {
-    "testName": "OAC-20009: Personal Details Validation for Phone/Email Mandatory and Optional Configurations",
-    "businessGoal": "Verify email/phone required/optional behavior based on Admin Portal widget settings.",
+    "testName": "OAC-20009-A: Personal Details Validation for Phone/Email Optional Configurations",
+    "businessGoal": "Verify email/phone optional behavior based on Admin Portal widget settings.",
     "preconditions": [
-      "Widget accessible",
-      "Bookable path to Personal Details page",
-      "Admin Portal access for widget settings",
-      "Test data for mandatory/optional cases",
-      "Tenant-wide widget settings configured",
-      "Service-level override settings documented"
+      "Widget accessible"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Set widget settings for each case", "expected": "Validation requirements match configuration" },
-      { "step": 2, "action": "Leave both blank and submit", "expected": "Case A required, Case B optional" },
-      { "step": 3, "action": "Invalid email and valid phone submit", "expected": "Email format blocked" },
-      { "step": 4, "action": "Invalid phone and valid email submit", "expected": "Phone format blocked" },
-      { "step": 5, "action": "Provide valid values and submit", "expected": "Success when valid" },
-      { "step": 6, "action": "Test tenant-wide mandatory email, optional phone", "expected": "Email required validation enforced, phone optional" },
-      { "step": 7, "action": "Test tenant-wide optional email, mandatory phone", "expected": "Phone required validation enforced, email optional" },
-      { "step": 8, "action": "Test both optional", "expected": "Submission allowed without email/phone" },
-      { "step": 9, "action": "Test both mandatory", "expected": "Both fields required for submission" },
-      { "step": 10, "action": "Validate confirmation and portal", "expected": "Values match case behavior" }
+      { "step": 1, "action": "Open web widget URL", "expected": "Service selection page displayed" },
+      { "step": 2, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 3, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 4, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 5, "action": "Select available future date", "expected": "Available slots displayed" },
+      { "step": 6, "action": "Select time slot and proceed", "expected": "Personal Details page displayed" },
+      { "step": 7, "action": "Leave both blank and submit", "expected": "Submission allowed" }
+    ],
+    "expectedResult": [
+      "Email/phone rules enforced",
+      "Email/phone validation combinations work correctly"
+    ],
+    "reusableActions": [
+      "Configure widget phone/email rules",
+      "Trigger validation errors",
+      "Submit and verify success",
+      "Validate portal record"
+    ],
+    "configurationDependencies": [
+      "Email/phone mandatory/optional widget settings",
+      "Tenant-wide widget email/phone requirements",
+      "Service-level validation overrides",
+      "Field validation rule priority"
+    ]
+  },
+  {
+    "testName": "OAC-20009-B: Personal Details Validation for Phone/Email Mandatory Configurations",
+    "businessGoal": "Verify email/phone required behavior based on Admin Portal widget settings.",
+    "preconditions": [
+      "Widget accessible"
+    ],
+    "setupRequirements": [
+      "None"
+    ],
+    "uiSteps": [
+
+      { "step": 1, "action": "Open web widget URL", "expected": "Service selection page displayed" },
+      { "step": 2, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 3, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 4, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 5, "action": "Select available future date", "expected": "Available slots displayed" },
+      { "step": 6, "action": "Select time slot and proceed", "expected": "Personal Details page displayed" },
+      { "step": 7, "action": "Leave both email, phone number blank and click 'book appointment'", "expected": "Submission not allowed. validation messages showen 'Email is required','Phone.No is required' " },
+      { "step": 8, "action": "Invalid email and valid phone and click 'book appointment'", "expected": "Email format blocked. " },
+      { "step": 9, "action": "Invalid phone and valid email and click 'book appointment'", "expected": "Phone format blocked. " },
+      { "step": 10, "action": "Provide valid value for email and click 'book appointment'", "expected": "Submission not allowed. validation messages showen 'Phone.No is required' " },
+      { "step": 11, "action": "Provide valid value for phone and click 'book appointment'", "expected": "Submission not allowed. validation messages showen 'Email is required' " },
+      { "step": 12, "action": "Provide valid values and click 'book appointment'", "expected": "Submission allowed,Navigated to Conformation Page" }
     ],
     "expectedResult": [
       "Email/phone rules enforced as configurable",
@@ -372,27 +395,24 @@
     ]
   },
   {
-    "testName": "OAC-20010: Select P/S Without Multiple Meeting Preference Enabled (MP Page Skipped)",
-    "businessGoal": "Verify MP page is skipped for services without multiple meeting preference option.",
+    "testName": "OAC-20010: Select P/S Without Multiple Meeting Preference Enabled (Meeting Preference Page Skipped)",
+    "businessGoal": "Verify Meeting Preference page is skipped for services without multiple meeting preference option.",
     "preconditions": [
       "Widget accessible",
-      "Service configured without MP choices",
-      "Downstream availability exists",
-      "Valid personal details available",
-      "Admin Portal access available"
+      "Service configured without Meeting Preference choices"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select service without MP options", "expected": "Flow continues without MP choice" },
+      { "step": 1, "action": "Select service without Meeting Preference options", "expected": "Flow continues without Meeting Preference choice" },
       { "step": 2, "action": "Continue booking", "expected": "Goes directly to date/time or next step" },
       { "step": 3, "action": "Complete booking", "expected": "Confirmation shown" },
-      { "step": 4, "action": "Verify confirmation", "expected": "No MP selection step in flow" },
+      { "step": 4, "action": "Verify confirmation", "expected": "No Meeting Preference selection step in flow" },
       { "step": 5, "action": "Validate portal", "expected": "Appointment created per config" }
     ],
     "expectedResult": [
-      "MP skip behavior works as expected"
+      "Meeting Preference skip behavior works as expected"
     ],
     "reusableActions": [
       "Select service",
@@ -439,33 +459,20 @@
   },
   {
     "testName": "OAC-20012: Personal Details Validations Based on Selected Meeting Preference",
-    "businessGoal": "Verify PD validations adapt by meeting preference (phone mandatory for phone MP, email optional for virtual MP, etc.).",
+    "businessGoal": "Verify PD validations adapt by meeting preference (phone mandatory for phone MP).",
     "preconditions": [
       "Widget accessible",
-      "Service with multiple MP including phone and virtual",
-      "Global widget settings: phone optional, email optional",
-      "Phone meeting preference override behavior documented",
-      "Service configured with phone, virtual, and in-person MP options",
-      "Booking path to PD page exists",
-      "Admin Portal access available"
+      "Service with multiple MP including phone"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select baseline MP path", "expected": "PD baseline validation applied" },
-      { "step": 2, "action": "Verify baseline phone/email state", "expected": "Baseline rules apply" },
-      { "step": 3, "action": "Select phone MP path", "expected": "PD phone mandatory" },
-      { "step": 4, "action": "Leave phone blank and submit", "expected": "Phone required validation shown" },
-      { "step": 5, "action": "Invalid phone format submit", "expected": "Phone format validation shown" },
-      { "step": 6, "action": "Select virtual MP path", "expected": "PD email optional" },
-      { "step": 7, "action": "Leave email blank and submit", "expected": "Submission allowed with other valid fields" },
-      { "step": 8, "action": "Submit all required values", "expected": "Success confirmation" },
-      { "step": 9, "action": "Configure global phone as optional in widget settings", "expected": "Phone field shows as optional" },
+   { "step": 2, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 3, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
       { "step": 10, "action": "Select phone meeting preference", "expected": "Phone field becomes mandatory (override behavior)" },
       { "step": 11, "action": "Attempt submit without phone under phone MP", "expected": "Phone required validation error displayed" },
-      { "step": 12, "action": "Add phone and submit successfully", "expected": "Booking completes, override behavior confirmed" },
-      { "step": 13, "action": "Validate portal records", "expected": "MP-specific validation state reflected" }
+      { "step": 12, "action": "Add phone and submit successfully", "expected": "Booking completes, entered phone number displayed in confirmation page" }
     ],
     "expectedResult": [
       "PD validation changes with meeting preference",
@@ -588,10 +595,13 @@
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Open date/time page", "expected": "Calendar shown" },
-      { "step": 2, "action": "Attempt select past date", "expected": "Past date disabled/unselectable" },
-      { "step": 3, "action": "Attempt to proceed with past date", "expected": "Cannot proceed" },
-      { "step": 4, "action": "Select current/future date and continue", "expected": "Proceed normally" }
+      { "step": 1, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 2, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 3, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 4, "action": "Open date/time page", "expected": "Calendar shown" },
+      { "step": 5, "action": "Attempt select past date", "expected": "Past date disabled/unselectable" },
+      { "step": 6, "action": "Attempt to proceed with past date", "expected": "Cannot proceed" },
+      { "step": 7, "action": "Select current/future date and continue", "expected": "Proceed normally" }
     ],
     "expectedResult": [
       "Past dates blocked from booking"

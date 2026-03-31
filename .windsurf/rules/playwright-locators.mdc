@@ -1,0 +1,16 @@
+---
+description: Playwright locator best practices
+trigger: always_on
+---
+
+# Locator Best Practices
+
+## Prefer User-Facing Locators
+- Use `getByRole()`, `getByLabel()`, `getByText()` over CSS selectors
+- Use `getByTestId()` when semantic locators aren't available
+- Avoid fragile selectors like `locator('div').nth(5)`
+
+## Auto-Wait Behavior
+- Locators auto-wait - never use `waitForSelector()` before actions
+- Don't use `sleep()` or `waitForTimeout()` - use proper waits
+- Chain locators for specificity: `page.getByRole('dialog').getByRole('button', { name: 'Save' })`

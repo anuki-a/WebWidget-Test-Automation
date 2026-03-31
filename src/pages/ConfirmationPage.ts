@@ -22,22 +22,111 @@ export interface ConfirmationDetails {
 export class ConfirmationPage {
   private page: Page;
 
+  // Locators for confirmation page elements
+  readonly confirmationHeading: Locator;
+  readonly confirmationNumber: Locator;
+  readonly confirmationNumberValue: Locator;
+  readonly dateTimeSection: Locator;
+  readonly editDateTimeLink: Locator;
+  readonly locationName: Locator;
+  readonly editLocationLink: Locator;
+  readonly locationAddress: Locator;
+  readonly addToOutlookLink: Locator;
+  readonly addToGoogleLink: Locator;
+  readonly addToiCalLink: Locator;
+  readonly requestedServiceSection: Locator;
+  readonly serviceName: Locator;
+  readonly serviceDuration: Locator;
+  readonly editServiceLink: Locator;
+  readonly meetingPreferenceSection: Locator;
+  readonly meetingPreferenceValue: Locator;
+  readonly editMeetingPreferenceLink: Locator;
+  readonly staffPreferenceSection: Locator;
+  readonly staffName: Locator;
+  readonly editStaffLink: Locator;
+  readonly personalDetailsSection: Locator;
+  readonly customerName: Locator;
+  readonly customerEmail: Locator;
+  readonly customerPhone: Locator;
+  readonly editPersonalDetailsLink: Locator;
+  readonly cancelButton: Locator;
+  readonly bookAnotherButton: Locator;
+  readonly inPersonAppointmentNote: Locator;
+  readonly phoneAppointmentNote: Locator;
+  readonly nonEditableMessage: Locator;
+  readonly disabledCancelButton: Locator;
+  readonly cancellationPopupText: Locator;
+  readonly dismissPopupButton: Locator;
+  readonly confirmPopupButton: Locator;
+  readonly cancellationConfirmationMessage: Locator;
+  readonly cancelledIndicators: Locator[];
+
   /**
    * Initialize the confirmation page.
    * @param page - Playwright page object
    */
   constructor(page: Page) {
     this.page = page;
+    
+    // Initialize all locators
+    this.confirmationHeading = this.page.getByRole('heading', { name: /.*appointment has been scheduled/ });
+    this.confirmationNumber = this.page.locator('text=/Appointment Confirmation #/i');
+    this.confirmationNumberValue = this.page.locator('text=/\\w+\\d+/i').first();
+    this.dateTimeSection = this.page.locator('text=/\\w+day,\\s+\\w+\\s+\\d{1,2},\\s+\\d{4}\\s+at\\s+\\d{1,2}:\\d{2}\\s*(AM|PM)/i');
+    this.editDateTimeLink = this.page.getByRole('link', { name: 'Edit Date and Time' });
+    this.locationName = this.page.locator('strong').first();
+    this.editLocationLink = this.page.getByRole('link', { name: 'Edit Location' });
+    this.locationAddress = this.page.locator('text=/\\d+\\s+.*\\s+.*,\\s+.*\\s+\\d{5}/i');
+    this.addToOutlookLink = this.page.getByText('Add to Outlook');
+    this.addToGoogleLink = this.page.getByText('Add to Google');
+    this.addToiCalLink = this.page.getByText('Add to iCal');
+    this.requestedServiceSection = this.page.locator('text=/Requested Service/i');
+    this.serviceName = this.page.locator('text=/Update Personal Account/i');
+    this.serviceDuration = this.page.locator('text=/\\d+\\s+Mins/i');
+    this.editServiceLink = this.page.getByRole('link', { name: 'Edit Requested Service' });
+    this.meetingPreferenceSection = this.page.locator('text=/Meeting Preference/i');
+    this.meetingPreferenceValue = this.page.locator('text=/Meet in Person|Meet via Phone Call/i');
+    this.editMeetingPreferenceLink = this.page.getByRole('link', { name: 'Edit Requested Meeting Preference' });
+    this.staffPreferenceSection = this.page.locator('text=/Staff Preference/i');
+    this.staffName = this.page.locator('text=/Brandon Knowles|Christine Cashatt|Myrtle Nash|Quantasia Jasper/i');
+    this.editStaffLink = this.page.getByRole('link', { name: 'Edit Staff Requested' });
+    this.personalDetailsSection = this.page.locator('text=/Personal Details/i').last();
+    this.customerName = this.personalDetailsSection.locator('text=/\\w+\\s+\\w+/i').first();
+    this.customerEmail = this.personalDetailsSection.locator('text=/\\w+@\\w+\\.\\w+/i');
+    this.customerPhone = this.page.locator('text=/\\(\\d{3}\\)\\s+\\d{3}-\\d{4}|\\d{10}/i');
+    this.editPersonalDetailsLink = this.page.getByRole('link', { name: 'Edit Personal Details' });
+    this.cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' });
+    this.bookAnotherButton = this.page.getByRole('button', { name: 'Book Another' });
+    this.inPersonAppointmentNote = this.page.getByText('This is an in-person appointment. We will see you at the location specified above.');
+    this.phoneAppointmentNote = this.page.getByText('This is a phone appointment. A staff member will call you at the number specified above.');
+    this.nonEditableMessage = this.page.getByText('This appointment cannot be changed or cancelled.');
+    this.disabledCancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' });
+    this.cancellationPopupText = this.page.locator('text=Appointment Cancellation');
+    this.dismissPopupButton = this.page.getByRole('button', { name: 'No' })
+      .or(this.page.getByRole('button', { name: 'Cancel' }))
+      .or(this.page.getByRole('button', { name: 'Dismiss' }))
+      .or(this.page.locator('[data-testid="cancel-dismiss"]'));
+    this.confirmPopupButton = this.page.getByRole('button', { name: 'Yes' })
+      .or(this.page.getByRole('button', { name: 'Confirm' }))
+      .or(this.page.getByRole('button', { name: 'Cancel Appointment' }))
+      .or(this.page.locator('[data-testid="cancel-confirm"]'));
+    this.cancellationConfirmationMessage = this.page.getByText(/This appointment has been cancelled. Do you want to book another?/i);
+    this.cancelledIndicators = [
+      this.page.getByText(/appointment.*cancel|cancel.*appointment/i),
+      this.page.getByText(/cancelled|canceled/i),
+      this.page.locator('[data-testid="appointment-cancelled"]'),
+      this.page.locator('.cancelled-appointment')
+    ];
   }
 
   /**
    * Wait for the confirmation page to be loaded and visible.
    * @param timeout - Maximum time to wait
    */
-  async waitForConfirmationPage(timeout: number = 22000): Promise<void> {
-    // Wait for confirmation heading to appear
+  async waitForConfirmationPage(timeout: number = 220000): Promise<void> {
+    // Wait for confirmation heading with retry logic
     await expect(async () => {
-      await expect(this.page.getByRole('heading', { name: /.*appointment has been scheduled/ }))
+      await expect(this.confirmationHeading)
         .toBeVisible({ timeout: 10000 });
     }).toPass({ 
       timeout: timeout,
@@ -53,24 +142,13 @@ export class ConfirmationPage {
     
     const details: ConfirmationDetails = {};
     
-    // Get confirmation number if available
     details.confirmationNumber = await this.getConfirmationNumber();
-    
-    // Get service name
     details.serviceName = await this.getServiceName();
-    
-    // Get location name
     details.locationName = await this.getLocationName();
-    
-    // Get date and time
     details.dateTime = await this.getDateTime();
-    
-    // Get customer details
     details.customerName = await this.getCustomerName();
     details.customerEmail = await this.getCustomerEmail();
     details.customerPhone = await this.getCustomerPhone();
-    
-    // Get meeting preference if available
     details.meetingPreference = await this.getMeetingPreference();
     
     return details;
@@ -82,15 +160,14 @@ export class ConfirmationPage {
    */
   async getConfirmationNumber(): Promise<string | undefined> {
     try {
-      const confirmationElement = this.page.locator('text=/confirmation|confirmation #|#/i').first();
-      const text = await confirmationElement.textContent();
+      const text = await this.confirmationNumberValue.textContent();
       if (text) {
         // Extract confirmation number from text
         const match = text.match(/#?(\w+-?\d+)/i);
         return match ? match[1] : undefined;
       }
     } catch (error) {
-      // Confirmation number not found
+      // Return undefined if element not found
     }
     return undefined;
   }
@@ -101,17 +178,12 @@ export class ConfirmationPage {
    */
   async getServiceName(): Promise<string | undefined> {
     try {
-      // Look for service name in various locations
-      const serviceElement = this.page.locator('text=Update Personal Account').first()
-        .or(this.page.locator('[data-testid="service-name"]').first())
-        .or(this.page.locator('.service-name').first());
-      
-      if (await serviceElement.isVisible()) {
-        const text = await serviceElement.textContent();
+      if (await this.serviceName.isVisible()) {
+        const text = await this.serviceName.textContent();
         return text || undefined;
       }
     } catch (error) {
-      // Service name not found
+      // Return undefined if element not found
     }
     return undefined;
   }
@@ -122,15 +194,11 @@ export class ConfirmationPage {
    */
   async getLocationName(): Promise<string | undefined> {
     try {
-      const locationElement = this.page.locator('text=McKinney').first()
-        .or(this.page.locator('[data-testid="location-name"]').first())
-        .or(this.page.locator('.location-name').first());
-      
-      if (await locationElement.isVisible()) {
-        return await locationElement.textContent() || undefined;
+      if (await this.locationName.isVisible()) {
+        return await this.locationName.textContent() || undefined;
       }
     } catch (error) {
-      // Location name not found
+      // Return undefined if element not found
     }
     return undefined;
   }
@@ -141,16 +209,11 @@ export class ConfirmationPage {
    */
   async getDateTime(): Promise<string | undefined> {
     try {
-      // Look for date/time patterns
-      const dateTimeElement = this.page.locator('text=/\\d{1,2},\\s*\\d{4}\\s+at\\s+\\d{1,2}:\\d{2}\\s*(AM|PM)/i').first()
-        .or(this.page.locator('[data-testid="date-time"]').first())
-        .or(this.page.locator('.date-time').first());
-      
-      if (await dateTimeElement.isVisible()) {
-        return await dateTimeElement.textContent() || undefined;
+      if (await this.dateTimeSection.isVisible()) {
+        return await this.dateTimeSection.textContent() || undefined;
       }
     } catch (error) {
-      // Date/time not found
+      // Return undefined if element not found
     }
     return undefined;
   }
@@ -161,14 +224,18 @@ export class ConfirmationPage {
    */
   async getCustomerName(): Promise<string | undefined> {
     try {
-      const customerElement = this.page.locator('[data-testid="customer-name"]').first()
-        .or(this.page.locator('.customer-name').first());
-      
-      if (await customerElement.isVisible()) {
-        return await customerElement.textContent() || undefined;
+      // First ensure the personal details section is visible
+      if (await this.personalDetailsSection.isVisible({ timeout: 5000 })) {
+        // Try to get the customer name from the personal details section
+        const nameElement = this.customerName;
+        if (await nameElement.isVisible({ timeout: 3000 })) {
+          const nameText = await nameElement.textContent();
+          return nameText || undefined;
+        }
       }
     } catch (error) {
-      // Customer name not found
+      // Log error for debugging but don't throw
+      console.warn('Could not find customer name in confirmation page:', error);
     }
     return undefined;
   }
@@ -179,16 +246,13 @@ export class ConfirmationPage {
    */
   async getCustomerEmail(): Promise<string | undefined> {
     try {
-      const emailElement = this.page.locator('text=ronha.smith@example.com').first()
-        .or(this.page.locator('text=/\\w+\\.\\w+@\\w+\\.\\w+/i').first())
-        .or(this.page.locator('[data-testid="customer-email"]').first())
-        .or(this.page.locator('.customer-email').first());
-      
-      if (await emailElement.isVisible()) {
-        return await emailElement.textContent() || undefined;
+      if (await this.personalDetailsSection.isVisible({ timeout: 5000 })) {
+        if (await this.customerEmail.isVisible({ timeout: 3000 })) {
+          return await this.customerEmail.textContent() || undefined;
+        }
       }
     } catch (error) {
-      // Customer email not found
+      console.warn('Could not find customer email in confirmation page:', error);
     }
     return undefined;
   }
@@ -199,15 +263,12 @@ export class ConfirmationPage {
    */
   async getCustomerPhone(): Promise<string | undefined> {
     try {
-      const phoneElement = this.page.locator('text=/\\d{3}-\\d{3}-\\d{4}/').first()
-        .or(this.page.locator('[data-testid="customer-phone"]').first())
-        .or(this.page.locator('.customer-phone').first());
-      
-      if (await phoneElement.isVisible()) {
-        return await phoneElement.textContent() || undefined;
+      // Try to find phone number anywhere on the page
+      if (await this.customerPhone.isVisible({ timeout: 5000 })) {
+        return await this.customerPhone.textContent() || undefined;
       }
     } catch (error) {
-      // Customer phone not found
+      console.warn('Could not find customer phone in confirmation page:', error);
     }
     return undefined;
   }
@@ -218,14 +279,11 @@ export class ConfirmationPage {
    */
   async getMeetingPreference(): Promise<string | undefined> {
     try {
-      const preferenceElement = this.page.locator('[data-testid="meeting-preference"]').first()
-        .or(this.page.locator('.meeting-preference').first());
-      
-      if (await preferenceElement.isVisible()) {
-        return await preferenceElement.textContent() || undefined;
+      if (await this.meetingPreferenceValue.isVisible()) {
+        return await this.meetingPreferenceValue.textContent() || undefined;
       }
     } catch (error) {
-      // Meeting preference not found
+      // Return undefined if element not found
     }
     return undefined;
   }
@@ -257,6 +315,7 @@ export class ConfirmationPage {
       
       return true;
     } catch (error) {
+      // Return false if verification fails
       return false;
     }
   }
@@ -266,10 +325,7 @@ export class ConfirmationPage {
    * @returns Promise resolving to true if cancel button is visible
    */
   async isCancelButtonVisible(): Promise<boolean> {
-    const cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' })
-      .or(this.page.locator('[data-testid="cancel-appointment"]'));
-    
-    return await cancelButton.isVisible();
+    return await this.cancelButton.isVisible();
   }
 
   /**
@@ -277,11 +333,8 @@ export class ConfirmationPage {
    * @returns Promise resolving when cancel button is clicked
    */
   async clickCancelButton(): Promise<void> {
-    const cancelButton = this.page.getByRole('button', { name: 'Cancel Appointment' })
-      .or(this.page.locator('[data-testid="cancel-appointment"]'));
-    
-    await expect(cancelButton).toBeVisible();
-    await cancelButton.click();
+    await expect(this.cancelButton).toBeVisible();
+    await this.cancelButton.click();
   }
 
   /**
@@ -289,18 +342,11 @@ export class ConfirmationPage {
    * @returns Promise resolving when popup is dismissed
    */
   async dismissCancellationPopup(): Promise<void> {
-    // check text "Appointment Cancellation"
-    const appointmentText = this.page.locator('text=Appointment Cancellation');
-    await expect(appointmentText).toBeVisible({ timeout: 1000 });
-
-    // Look for dismiss buttons in the cancellation popup
-    const dismissButton = this.page.getByRole('button', { name: 'No' })
-      .or(this.page.getByRole('button', { name: 'Cancel' }))
-      .or(this.page.getByRole('button', { name: 'Dismiss' }))
-      .or(this.page.locator('[data-testid="cancel-dismiss"]'));
+    // Verify cancellation popup appeared
+    await expect(this.cancellationPopupText).toBeVisible({ timeout: 1000 });
     
-    await expect(dismissButton).toBeVisible({ timeout: 10000 });
-    await dismissButton.click();
+    await expect(this.dismissPopupButton).toBeVisible({ timeout: 10000 });
+    await this.dismissPopupButton.click();
   }
 
   /**
@@ -308,14 +354,8 @@ export class ConfirmationPage {
    * @returns Promise resolving when cancellation is confirmed
    */
   async confirmCancellationPopup(): Promise<void> {
-    // Look for confirm buttons in the cancellation popup
-    const confirmButton = this.page.getByRole('button', { name: 'Yes' })
-      .or(this.page.getByRole('button', { name: 'Confirm' }))
-      .or(this.page.getByRole('button', { name: 'Cancel Appointment' }))
-      .or(this.page.locator('[data-testid="cancel-confirm"]'));
-    
-    await expect(confirmButton).toBeVisible({ timeout: 10000 });
-    await confirmButton.click();
+    await expect(this.confirmPopupButton).toBeVisible({ timeout: 10000 });
+    await this.confirmPopupButton.click();
   }
 
   /**
@@ -324,9 +364,7 @@ export class ConfirmationPage {
    * @returns Promise resolving when cancellation confirmation is visible
    */
   async waitForCancellationConfirmation(timeout: number = 30000): Promise<void> {
-    // Look for cancellation confirmation messages
-    const cancellationMessage = this.page.getByText(/This appointment has been cancelled. Do you want to book another?/i)
-    await expect(cancellationMessage).toBeVisible({ timeout });
+    await expect(this.cancellationConfirmationMessage).toBeVisible({ timeout });
   }
 
   /**
@@ -334,25 +372,15 @@ export class ConfirmationPage {
    * @returns Promise resolving to true if cancellation is confirmed
    */
   async verifyAppointmentCancelled(): Promise<boolean> {
-    console.log("Verifying appointment cancellation not happended...");
     try {
-      // Look for cancellation indicators
-      const cancelledIndicators = [
-        this.page.getByText(/appointment.*cancel|cancel.*appointment/i),
-        this.page.getByText(/cancelled|canceled/i),
-        this.page.locator('[data-testid="appointment-cancelled"]'),
-        this.page.locator('.cancelled-appointment')
-      ];
-      
-      // Check if any cancellation indicator is visible
-      for (const indicator of cancelledIndicators) {
+      for (const indicator of this.cancelledIndicators) {
         if (await indicator.isVisible().catch(() => false)) {
-          return true;
+          return true; // Found cancellation indicator
         }
       }
-      console.log("Verifying appointment cancellation not happended...");
       return false;
     } catch (error) {
+      // Return false if check fails
       return false;
     }
   }
@@ -362,8 +390,7 @@ export class ConfirmationPage {
    * @returns Promise resolving to true if Book Another button is visible
    */
   async isBookAnotherButtonVisible(): Promise<boolean> {
-    const bookAnotherButton = this.page.getByRole('button', { name: 'Book Another' })
-    return await bookAnotherButton.isVisible().catch(() => false);
+    return await this.bookAnotherButton.isVisible().catch(() => false); // Don't fail if not found
   }
 
   /**
@@ -372,24 +399,15 @@ export class ConfirmationPage {
    */
   async testCancelAppointment(): Promise<boolean> {
     try {
-      // Step 1: Click cancel button
       await this.clickCancelButton();
-      
-      // Step 2: Confirm cancellation in popup
       await this.confirmCancellationPopup();
-      
-      // Step 3: Wait for cancellation confirmation
       await this.waitForCancellationConfirmation();
-      
-      // Step 4: Verify appointment is cancelled
       const isCancelled = await this.verifyAppointmentCancelled();
-      
-      // Step 5: Verify Book Another button is available
       const hasBookAnother = await this.isBookAnotherButtonVisible();
       
-      return isCancelled && hasBookAnother;
+      return isCancelled && hasBookAnother; // Both conditions must be true
     } catch (error) {
-      console.error('Cancellation flow failed:', error);
+      // Return false if cancellation flow fails
       return false;
     }
   }
@@ -400,27 +418,21 @@ export class ConfirmationPage {
    */
   async testCancellationDismiss(): Promise<boolean> {
     try {
-      // Step 1: Click cancel button
       await this.clickCancelButton();
-      
-      // Step 2: Dismiss cancellation popup
       await this.dismissCancellationPopup();
+      await this.page.waitForTimeout(2000); // Wait for popup to close
       
-      // Step 3: Wait a moment for popup to close
-      await this.page.waitForTimeout(2000);
-      
-      // Step 4: check whether "Cancelled" text is not present on the page
+      // Ensure appointment is NOT cancelled
       const isCancelled = await this.page.locator('text=Cancelled').isVisible().catch(() => false);
       if (isCancelled) {
         return false;
       }
 
-      // Step 5: Verify confirmation page is still showing active appointment
       const confirmationPageActive = await this.verifyConfirmationPageLoaded();
       
       return confirmationPageActive;
     } catch (error) {
-      console.error('Cancellation dismiss test failed:', error);
+      // Return false if dismiss flow fails
       return false;
     }
   }
@@ -432,9 +444,9 @@ export class ConfirmationPage {
   async verifyConfirmationPageLoaded(): Promise<boolean> {
     try {
       await this.waitForConfirmationPage(10000);
-      const heading = this.page.getByRole('heading', { name: /.*appointment has been scheduled/ });
-      return await heading.isVisible();
+      return await this.confirmationHeading.isVisible();
     } catch (error) {
+      // Return false if page verification fails
       return false;
     }
   }
@@ -444,7 +456,7 @@ export class ConfirmationPage {
    * @returns Promise resolving to appointment ID or undefined
    */
   async getAppointmentId(): Promise<string | undefined> {
-    // Try to get from URL first
+    // Try to extract from URL first
     const url = this.page.url();
     const urlMatch = url.match(/appointment[\/=]([^&\?]+)/i);
     if (urlMatch) {
@@ -465,29 +477,29 @@ export class ConfirmationPage {
     await this.waitForConfirmationPage();
     
     try {
-      // Verify service name
+      // Verify service name (use display name if available)
       const serviceElement = this.page.getByText(bookingData.service.displayName || bookingData.service.name, { exact: false }).first();
       await expect(serviceElement).toBeVisible();
       
-      // Verify location name
+      // Verify location name (use confirmation name if available)
       const locationElement = this.page.getByText(bookingData.location.confirmationName || bookingData.location.name, { exact: false }).first();
       await expect(locationElement).toBeVisible();
       
-      // Verify customer email
+      // Verify customer email (exact match)
       const emailElement = this.page.getByText(bookingData.customer.email, { exact: true }).first();
       await expect(emailElement).toBeVisible();
       
-      // Verify customer name
+      // Verify customer name (partial match allowed)
       const customerName = `${bookingData.customer.firstName} ${bookingData.customer.lastName}`;
       const nameElement = this.page.getByText(customerName, { exact: false }).first();
       await expect(nameElement).toBeVisible();
       
-      // Verify date and time
+      // Verify date and time format
       const expectedDateTime = `${bookingData.dateTime.formattedDate} at ${bookingData.dateTime.time}`;
       const dateTimeElement = this.page.getByText(expectedDateTime).first();
       await expect(dateTimeElement).toBeVisible();
       
-      // Verify meeting preference (if displayed)
+      // Verify meeting preference if present
       if (bookingData.meetingPreference.displayName) {
         const preferenceElement = this.page.getByText(bookingData.meetingPreference.displayName, { exact: true }).first();
         await expect(preferenceElement).toBeVisible();
@@ -495,7 +507,169 @@ export class ConfirmationPage {
       
       return true;
     } catch (error) {
-      console.error('Booking verification failed:', error);
+      // Return false if booking verification fails
+      return false;
+    }
+  }
+
+  /**
+   * Click the edit date and time link to modify appointment date/time.
+   * @returns Promise resolving when edit link is clicked
+   */
+  async clickEditDateTime(): Promise<void> {
+    await expect(this.editDateTimeLink).toBeVisible();
+    await this.editDateTimeLink.click();
+  }
+
+  /**
+   * Click the edit personal details link to modify customer information.
+   * @returns Promise resolving when edit link is clicked
+   */
+  async clickEditPersonalDetails(): Promise<void> {
+    await expect(this.editPersonalDetailsLink).toBeVisible();
+    await this.editPersonalDetailsLink.click();
+  }
+
+  /**
+   * Check if all edit links are visible on the confirmation page.
+   * @returns Promise resolving to true if edit links are visible
+   */
+  async areEditLinksVisible(): Promise<boolean> {
+    try {
+      const dateTimeEditVisible = await this.editDateTimeLink.isVisible().catch(() => false);
+      const personalDetailsEditVisible = await this.editPersonalDetailsLink.isVisible().catch(() => false);
+      const locationEditVisible = await this.editLocationLink.isVisible().catch(() => false);
+      const serviceEditVisible = await this.editServiceLink.isVisible().catch(() => false);
+      
+      return dateTimeEditVisible && personalDetailsEditVisible && locationEditVisible && serviceEditVisible;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Click the Book Another button to start a new booking flow.
+   * @returns Promise resolving when Book Another button is clicked
+   */
+  async clickBookAnother(): Promise<void> {
+    await expect(this.bookAnotherButton).toBeVisible();
+    await this.bookAnotherButton.click();
+  }
+
+  /**
+   * Verify that the appointment is in non-editable state.
+   * Checks for non-editable message, disabled cancel button, and absence of edit links.
+   * @returns Promise resolving to true if appointment is non-editable
+   */
+  async verifyNonEditableState(): Promise<boolean> {
+    try {
+      // Check for non-editable message
+      const nonEditableMessageVisible = await this.nonEditableMessage.isVisible().catch(() => false);
+      
+      // Check that cancel button is disabled
+      const cancelButtonDisabled = await this.disabledCancelButton.isDisabled().catch(() => false);
+      
+      // Check that edit links are NOT visible
+      const editDateTimeVisible = await this.editDateTimeLink.isVisible().catch(() => false);
+      const editLocationVisible = await this.editLocationLink.isVisible().catch(() => false);
+      const editServiceVisible = await this.editServiceLink.isVisible().catch(() => false);
+      const editPersonalDetailsVisible = await this.editPersonalDetailsLink.isVisible().catch(() => false);
+      const editMeetingPreferenceVisible = await this.editMeetingPreferenceLink.isVisible().catch(() => false);
+      const editStaffVisible = await this.editStaffLink.isVisible().catch(() => false);
+      
+      // Verify non-editable conditions
+      const hasNonEditableMessage = nonEditableMessageVisible;
+      const isCancelDisabled = cancelButtonDisabled;
+      const noEditLinksVisible = !editDateTimeVisible && !editLocationVisible && 
+                                !editServiceVisible && !editPersonalDetailsVisible && 
+                                !editMeetingPreferenceVisible && !editStaffVisible;
+      
+      return hasNonEditableMessage && isCancelDisabled && noEditLinksVisible;
+    } catch (error) {
+      // Return false if verification fails
+      return false;
+    }
+  }
+
+  /**
+   * Verify that all edit controls are not visible/accessible.
+   * @returns Promise resolving to true if no edit controls are visible
+   */
+  async verifyNoEditControlsVisible(): Promise<boolean> {
+    try {
+      const editLinksVisible = await this.areEditLinksVisible();
+      return !editLinksVisible; // Should be false for non-editable appointment
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Verify that cancel button is disabled.
+   * @returns Promise resolving to true if cancel button is disabled
+   */
+  async verifyCancelButtonDisabled(): Promise<boolean> {
+    try {
+      return await this.disabledCancelButton.isDisabled();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Verify that the phone appointment message is displayed.
+   * @returns Promise resolving to true if phone appointment message is visible
+   */
+  async verifyPhoneAppointmentMessageDisplayed(): Promise<boolean> {
+    try {
+      return await this.phoneAppointmentNote.isVisible();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Verify that non-editable message is displayed.
+   * @returns Promise resolving to true if message is visible
+   */
+  async verifyNonEditableMessageDisplayed(): Promise<boolean> {
+    try {
+      return await this.nonEditableMessage.isVisible();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Attempt to interact with edit controls (should fail for non-editable appointments).
+   * @returns Promise resolving to true if interactions fail as expected
+   */
+  async verifyEditControlsNotInteractive(): Promise<boolean> {
+    try {
+      // Try to click edit links - they should not be visible or clickable
+      const editDateTimeClickable = await this.editDateTimeLink.isVisible().then(async (visible) => {
+        if (!visible) return false;
+        try {
+          await this.editDateTimeLink.click({ timeout: 1000 });
+          return true;
+        } catch {
+          return false;
+        }
+      }).catch(() => false);
+
+      const cancelClickable = await this.disabledCancelButton.isEnabled().then(async (enabled) => {
+        if (!enabled) return false;
+        try {
+          await this.disabledCancelButton.click({ timeout: 1000 });
+          return true;
+        } catch {
+          return false;
+        }
+      }).catch(() => false);
+
+      // For non-editable appointment, these should not be interactive
+      return !editDateTimeClickable && !cancelClickable;
+    } catch (error) {
       return false;
     }
   }

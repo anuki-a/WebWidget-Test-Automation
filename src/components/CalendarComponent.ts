@@ -33,8 +33,9 @@ export class CalendarComponent {
   }
 
   /**
-   * Select a given date.
-   * @returns Promise resolving when a given date is selected
+   * Select a given date (alias for selectDate method).
+   * @param day - Date to select
+   * @returns Promise resolving when date is selected
    */
   async selectDay(day: Date): Promise<void> {
     await this.selectDate(day);
@@ -82,12 +83,11 @@ export class CalendarComponent {
    * @returns Promise resolving when calendar is ready
    */
   async waitForCalendar(timeout: number = 10000): Promise<void> {
-    // Wait for calendar container to be visible
+    // Try specific selectors first, then fallback
     await this.page.waitForSelector('[data-testid="calendar"], .calendar, .date-picker', {
       timeout,
       state: 'visible',
     }).catch(() => {
-      // If no specific calendar selector found, wait for any date-related element
       return this.page.waitForSelector('[role="grid"], [role="table"]', {
         timeout,
         state: 'visible',
@@ -109,15 +109,33 @@ export class CalendarComponent {
         exact: true 
       });
       
+      // Check if element exists first
+      const isVisible = await dateElement.isVisible();
+      
+      if (!isVisible) {
+        return true; // Date not found in calendar, likely disabled/past
+      }
+      
+      // Check if element is enabled - this is the key check for past dates
+      const isEnabled = await dateElement.isEnabled();
+      
+      // Get additional attributes for debugging
       const classes = await dateElement.getAttribute('class') || '';
       const ariaDisabled = await dateElement.getAttribute('aria-disabled');
+      const tabIndex = await dateElement.getAttribute('tabindex');
       
-      return classes.includes('disabled') || 
-             classes.includes('past') || 
-             classes.includes('unavailable') ||
-             ariaDisabled === 'true';
+      // The primary check is whether the element is enabled
+      // Past dates are visible but not enabled
+      const isDisabled = !isEnabled || 
+                        classes.includes('disabled') || 
+                        classes.includes('past') || 
+                        classes.includes('unavailable') ||
+                        ariaDisabled === 'true' ||
+                        tabIndex === '-1';
+      
+      return isDisabled;
     } catch (error) {
-      return true; // Assume disabled if we can't find it
+      return true; // Assume disabled if not found
     }
   }
 
@@ -127,7 +145,6 @@ export class CalendarComponent {
    */
   async navigateToNextMonth(): Promise<void> {
     await this.page.getByRole('button', { name: /next|>/i }).click();
-    //await this.waitForCalendar();
   }
 
   /**
@@ -136,7 +153,6 @@ export class CalendarComponent {
    */
   async navigateToPreviousMonth(): Promise<void> {
     await this.page.getByRole('button', { name: /previous|</i }).click();
-    //await this.waitForCalendar();
   }
 
   /**
@@ -144,15 +160,39 @@ export class CalendarComponent {
    * @returns Promise resolving to month and year string
    */
   async getCurrentMonthYear(): Promise<string> {
-    const monthYearElement = this.page.locator('.calendar-header, .month-year, [data-testid="month-year"]').first();
-    
-    if (await monthYearElement.isVisible()) {
-      return await monthYearElement.textContent() || '';
+    try {
+      // Try to find the calendar header with month/year
+      const monthYearElement = this.page.locator('.calendar-header, .month-year, [data-testid="month-year"]').first();
+      
+      if (await monthYearElement.isVisible()) {
+        return await monthYearElement.textContent() || '';
+      }
+
+      // Try to find any element containing month and year
+      const monthYearPattern = this.page.locator('text=/(January|February|March|April|May|June|July|August|September|October|November|December) \\d{4}/i').first();
+      
+      if (await monthYearPattern.isVisible()) {
+        return await monthYearPattern.textContent() || '';
+      }
+
+      // Fallback: check the navigation buttons to infer current month
+      const prevButton = this.page.getByRole('button', { name: /Go to \w+ \d{4}/i }).first();
+      if (await prevButton.isVisible()) {
+        const prevButtonText = await prevButton.textContent();
+        return prevButtonText || '';
+      }
+
+      // Final fallback: try the original month element approach
+      const monthElement = this.page.locator('text=/^(January|February|March|April|May|June|July|August|September|October|November|December)/i').first();
+      
+      if (await monthElement.isVisible()) {
+        return await monthElement.textContent() || '';
+      }
+
+      return '';
+    } catch (error) {
+      return '';
     }
-    
-    // Fallback: try to find any element containing month name
-    const monthElement = this.page.locator('text=/^(January|February|March|April|May|June|July|August|September|October|November|December)/i').first();
-    return await monthElement.textContent() || '';
   }
 
   /**
@@ -165,10 +205,9 @@ export class CalendarComponent {
   async selectDateWithRetry(date: Date, maxRetries: number = 3, retryDelay: number = 1000): Promise<void> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        //await this.waitForCalendar();
         await this.selectDate(date);
         
-        // Verify the date was selected
+        // Verify selection worked
         const selected = await this.getSelectedDate();
         if (selected && selected.toDateString() === date.toDateString()) {
           return; // Success
@@ -179,7 +218,7 @@ export class CalendarComponent {
         }
       } catch (error) {
         if (attempt === maxRetries) {
-          throw error;
+          throw error; // Final attempt failed
         }
         await this.page.waitForTimeout(retryDelay);
       }
@@ -194,21 +233,16 @@ export class CalendarComponent {
    * @returns Promise resolving to the selected date or null if no available date found
    */
   async selectFirstAvailableDate(maxDaysToSearch: number = 30): Promise<Date | null> {
-    //await this.waitForCalendar();
-    
     for (let daysAhead = 0; daysAhead <= maxDaysToSearch; daysAhead++) {
       const testDate = DateUtils.getFutureDate(daysAhead);
-      
-      // Skip weekends if needed (optional logic)
-      // if (DateUtils.isWeekend(testDate)) continue;
       
       const isDisabled = await this.isDateDisabled(testDate);
       if (!isDisabled) {
         await this.selectDate(testDate);
-        return testDate;
+        return testDate; // Found available date
       }
     }
     
-    return null; // No available date found
+    return null; // No dates available
   }
 }

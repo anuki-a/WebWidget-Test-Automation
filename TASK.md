@@ -197,19 +197,19 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 #### Core flows
 
-- [ ] OAC-20002 → Edit Appointment
-- [ ] OAC-20003 → Non-editable validation
+- [x] OAC-20002 → Edit Appointment ✅ IMPLEMENTED
+- [x] OAC-20003 → Non-editable validation ✅ IMPLEMENTED
 - [x] OAC-20004 → Cancel Appointment ✅ IMPLEMENTED
 
 #### Multi-booking
 
-- [ ] OAC-20005 → Book Another
-- [ ] OAC-20006 → Book after cancel
+- [x] OAC-20005 → Book Another ✅ IMPLEMENTED
+- [x] OAC-20006 → Book after cancel ✅ IMPLEMENTED
 
 #### Skip behavior
 
-- [ ] OAC-20007 → Skip Yes → redirect
-- [ ] OAC-20008 → Skip No → continue
+- [x] OAC-20007 → Skip Yes → redirect ✅ IMPLEMENTED
+- [x] OAC-20008 → Skip No → continue ✅ IMPLEMENTED
 
 #### Validation rules
 
@@ -217,7 +217,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 #### Meeting preference
 
-- [ ] OAC-20010 → No MP
+- [x] OAC-20010 → No MP ✅ IMPLEMENTED
 - [ ] OAC-20011 → Multi MP
 - [ ] OAC-20012 → MP-based validation
 
@@ -355,15 +355,194 @@ After Phase 3:
 
 ### Phase 1 Progress: ✅ 10/10 tasks completed
 
-### Phase 2 Progress: 🔄 1/20 tasks completed
+### Phase 2 Progress: 🔄 5/20 tasks completed
 
-### Overall Progress: 🔄 11/30 tasks completed
+### Overall Progress: 🔄 14/30 tasks completed
 
 **Current Focus:** Phase 2 - Functional Coverage Expansion
 
 ---
 
 ## 📝 Discovered During Work
+
+### OAC-20010 Single Meeting Preference Skip Implementation - March 30, 2026
+
+✅ **Single Meeting Preference Skip Functionality Complete**
+
+- Implemented comprehensive test for verifying Meeting Preference page is skipped for services without multiple meeting preference options
+- Used `singleMeetingPreferenceBookingData` fixture which provides:
+  - Service: "Notary  30 Mins Notary" (configured without Meeting Preference choices)
+  - Location: "Northcliffe 22015 N IH 35" with code "78154"
+  - Virtual meeting preference (default for single preference service)
+  - Customer data and date/time for next business day at 10:00 AM
+- Test covers complete flow from service selection to confirmation:
+  - Step 1: Navigate to widget and select service without meeting preference options ✓
+  - Step 2: Search and select location ✓
+  - Step 3: Verify Meeting Preference page is skipped using `isMeetingPreferenceSkipped()` method ✓
+  - Step 4: Confirm direct navigation to date/time page ✓
+  - Step 5: Select date and time from fixture data ✓
+  - Step 6: Fill personal details and submit booking ✓
+  - Step 7: Verify confirmation page with appointment details ✓
+  - Step 8: Validate no Meeting Preference selection step appeared in flow ✓
+- Key validation points:
+  - `isMeetingPreferenceSkipped()` returns true (calendar visible, preferences not visible) ✓
+  - Direct transition from location selection to date/time selection ✓
+  - "Select a Meeting Preference" title never appears ✓
+  - Appointment created with virtual meeting preference (default) ✓
+  - All confirmation details displayed correctly ✓
+- Follows project architecture: Test → Fixture → Page → Component → UI
+- Uses existing page objects and methods with proper TypeScript typing
+- All assertions handle optional properties safely with null checks
+
+### OAC-20008 Skip Appointment Continue Booking Implementation - March 27, 2026
+
+✅ **Skip Appointment Continue Booking Functionality Complete**
+
+- Implemented comprehensive test for skip appointment continue booking flow using existing ServicePage locators and components
+- Used `skipEnabledBookingData` fixture to create booking data with skip-enabled service ("Update Personal Account")
+- Enhanced ServicePage with `clickSkipWaitNoButton()` method for clicking "No, continue with scheduling an appointment" button
+- Test follows complete standard booking flow after declining skip appointment:
+  - Step 1: Select service with appointment skip enabled ✓
+  - Step 2: Verify skip popup message displays correctly ✓
+  - Step 3: Choose 'No' on the skip popup ✓
+  - Step 4: Verify standard booking flow continues ✓
+  - Step 5: Continue booking - Location selection ✓
+  - Step 6: Continue booking - Meeting preference ✓
+  - Step 7: Continue booking - Date and time selection ✓
+  - Step 8: Continue booking - Personal details ✓
+  - Step 9: Complete booking - Wait for confirmation ✓
+  - Step 10: Verify confirmation ✓
+- Reuses all existing page objects and methods from OAC-20001 happy path booking:
+  - LocationPage: `searchAndSelectLocation()` and `waitForLocationPage()`
+  - MeetingPreferencePage: `selectInPerson()`
+  - DateTimePage: `selectDayAndFirstAvailableTime()`
+  - PersonalDetailsPage: `fillDetails()` and `submit()`
+  - ConfirmationPage: `waitForConfirmationPage()`, `verifyBooking()`, and `isCancelButtonVisible()`
+- Validates expected results:
+  - Skip popup displays configured message ✓
+  - No option continues standard booking flow ✓
+  - Booking completes successfully after declining skip ✓
+  - Cancel button available on confirmation page ✓
+- TypeScript compilation passes without errors
+- Test follows project conventions with proper JSDoc documentation and page object usage
+
+### OAC-20007 Skip Appointment Redirect Implementation - March 27, 2026
+
+✅ **Skip Appointment Redirect Functionality Complete**
+
+- Implemented comprehensive test for skip appointment popup redirect using MCP tools for locator discovery
+- Used `skipEnabledBookingData` fixture to create booking data with skip-enabled service ("Update Personal Account")
+- Enhanced ServicePage with new skip popup handling methods:
+  - `getSkipAppointmentDialog()` - Get dialog element if visible
+  - `verifySkipPopup(serviceName)` - Verify popup message and buttons are displayed correctly
+  - `clickSkipWaitYesButton()` - Click "Yes, Skip the wait" button
+- Used MCP Playwright tools to navigate live application and capture actual skip popup locators:
+  - Navigated to widget URL and loaded service selection page
+  - Selected "Personal Accounts" category and "Update Personal Account" service
+  - Captured skip popup dialog elements:
+    - Dialog title: "Update Personal Account"
+    - Message: "Good news! You can apply online right now, skipping the wait, in just a few minutes."
+    - Buttons: "No, continue with scheduling an appointment" and "Yes, Skip the wait"
+- Test covers all UI steps from test case specification:
+  - Step 1: Select service with appointment skip enabled ✓
+  - Step 2: Verify skip popup message displays correctly ✓
+  - Step 3: Choose Yes on skip popup ✓
+  - Step 4: Verify redirect URL matches configuration ✓
+  - Step 5: Verify widget flow terminated ✓
+- Validates expected results:
+  - Skip popup displays configured message ✓
+  - Yes option redirects to correct external URL ✓
+  - Widget booking flow terminates after redirect ✓
+- Includes comprehensive redirect verification:
+  - Waits for navigation away from widget domain
+  - Verifies URL no longer contains widget domain
+  - Tests back navigation to ensure flow termination
+  - Confirms fresh widget session starts over
+- TypeScript compilation passes without errors
+- Test follows project conventions with proper JSDoc documentation and page object usage
+
+### OAC-20003 Non-Editable Appointment Validation Implementation - March 27, 2026
+
+✅ **Non-Editable Appointment Functionality Complete**
+
+- Implemented comprehensive test for non-editable appointment validation using MCP tools for locator discovery
+- Used `notAllowedEditCancelData` fixture to create appointment with non-editable characteristics
+- Enhanced ConfirmationPage with new locators and methods:
+  - `nonEditableMessage` - Locator for "This appointment cannot be changed or cancelled" message
+  - `disabledCancelButton` - Locator for disabled cancel button
+  - `verifyNonEditableState()` - Comprehensive verification of non-editable state
+  - `verifyNoEditControlsVisible()` - Confirms no edit links are visible
+  - `verifyCancelButtonDisabled()` - Verifies cancel button is disabled
+  - `verifyNonEditableMessageDisplayed()` - Checks for non-editable message
+  - `verifyEditControlsNotInteractive()` - Attempts interactions (should fail)
+- Used MCP Playwright tools to navigate live application and capture actual locators:
+  - Navigated through complete booking flow: Service → Location → Meeting Preference → Date/Time → Personal Details
+  - Captured confirmation page elements for non-editable scenario
+  - Identified key differences from normal confirmation page:
+    - No edit links visible (Edit Date/Time, Edit Location, Edit Service, etc.)
+    - Cancel button present but disabled
+    - "This appointment cannot be changed or cancelled" message displayed
+- Test covers all UI steps from test case specification:
+  - Step 1: Appointment Confirmation Page displayed ✓
+  - Step 2: Check edit controls/buttons not visible ✓
+  - Step 3: Check Cancel button disabled ✓
+  - Step 4: Check non-editable message displayed ✓
+  - Step 5: Attempt to interact with controls (should fail) ✓
+- Validates expected results:
+  - No editable buttons visible ✓
+  - No cancellation button clickable ✓
+  - Non-editable flow enforced ✓
+- Test passes successfully (34.8s execution time) with comprehensive assertions
+
+### OAC-20006 Book Another From Cancellation Page Implementation - March 26, 2026
+
+✅ **Cancellation + Book Another Functionality Complete**
+
+- Enhanced OAC-20006 test to include complete cancellation flow before Book Another functionality
+- Updated test case to match specification from `testcases_refined.json`:
+  - Step 1: Create first appointment and capture details
+  - Step 2: Verify cancel button availability
+  - Step 3: Click Cancel and confirm cancellation
+  - Step 4: Verify cancellation messages and Book Another shown
+  - Step 5: Click Book Another to start new booking
+  - Steps 6-13: Complete Book Another flow with personal details retention
+- Utilized existing ConfirmationPage methods:
+  - `testCancelAppointment()` - Complete cancellation flow with confirmation
+  - `waitForCancellationConfirmation()` - Wait for cancellation confirmation message
+  - `verifyAppointmentCancelled()` - Verify appointment is marked as cancelled
+- Added comprehensive verification for personal details consistency across both appointments
+- Ensured Book Another button appears after successful cancellation
+- Validated that customer data persists correctly through cancellation and rebooking process
+- Test now covers the complete user journey: booking → cancellation → rebooking with data retention
+
+### OAC-20005 Book Another Implementation - March 26, 2026
+
+✅ **Book Another Functionality Complete**
+
+- Implemented comprehensive test for Book Another flow after successful booking
+- Added `clickBookAnother()` method to ConfirmationPage for navigation
+- Created complete test scenario covering:
+  - First appointment booking with standard flow
+  - Book Another button functionality and navigation
+  - Second booking with different service (Estate Accounts), date (tomorrow), and time (2:00 PM)
+  - Personal details persistence verification across bookings
+  - Confirmation details validation for both appointments
+- Utilizes existing PersonalDetailsPage methods (`getFirstName()`, `getLastName()`, `getEmail()`, `getPhone()`) for pre-filled data verification
+- Ensures customer data consistency while allowing service/date/time changes
+- Validates Book Another button availability after second booking
+
+### OAC-20002 Edit Appointment Implementation - March 26, 2026
+
+✅ **Edit Functionality Complete**
+
+- Created comprehensive test for editing existing appointments from widget
+- Added edit functionality to ConfirmationPage:
+  - `clickEditDateTime()` - Navigate to edit date/time
+  - `clickEditPersonalDetails()` - Navigate to edit customer info
+  - `areEditLinksVisible()` - Verify edit controls are available
+- Enhanced DateTimePage with `submit()` method for edit flow
+- Implemented two test scenarios:
+  - **Happy Path Edit**: Complete edit flow with date/time and personal details changes
 
 ### Phase 1 Completion - March 25, 2026
 
@@ -392,3 +571,19 @@ After Phase 3:
 - 5 test files created (2 functional, 1 verification, 1 API health check)
 - Complete fixture system with booking data generation
 - All planned pages and components are functional
+
+---
+
+## 🛠 Infrastructure Setup
+
+### MCP Server Integration - March 25, 2026
+
+✅ **Playwright MCP Server Installed**
+
+- Installed `@executeautomation/playwright-mcp-server` globally
+- Created `.windsurf/windsurf.config.json` with Playwright MCP configuration
+- MCP server provides browser automation capabilities via Model Context Protocol
+- Configuration includes:
+  - Command: `npx @executeautomation/playwright-mcp-server`
+  - Environment: `PLAYWRIGHT_BROWSER=chromium`
+- Ready for AI-assisted browser automation and testing workflows

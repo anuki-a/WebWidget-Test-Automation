@@ -1,0 +1,108 @@
+import { ApiClient } from './apiClient';
+
+/**
+ * Service to handle Administration System Settings.
+ */
+export class AdminService {
+  private client: ApiClient;
+
+  constructor(client: ApiClient) {
+    this.client = client;
+  }
+
+  /**
+   * Toggles Email and Phone requirements for the client configuration.
+   * Path: /OacWeb/oac/system/SaveAdministrationSystemSettings
+   * * @param emailRequired - Boolean to toggle 'RequireCustomerEmail'
+   * @param phoneRequired - Boolean to toggle 'RequireCustomerPhone'
+   */
+  async updateContactRequirements(emailRequired: boolean, phoneRequired: boolean) {
+    const endpoint = '/OacWeb/oac/system/SaveAdministrationSystemSettings';
+
+    // The full payload based on your Postman request
+    // Note: Kept specific IDs (ClientConfigurationId: 56, FkClientId: 54) as per your request
+    const payload = {
+      entities: [
+        {
+          ClientConfigurationId: 56,
+          FkClientId: 54,
+          FkApplicationId: 1,
+          SmsEnabled: false,
+          EmailFromDisplayName: "RBFCU AC QA Standalone",
+          EmailFromAddress: "bc-dev@fmsidev.us",
+          EmailSenderAddress: "bc-dev@fmsidev.us",
+          ClientAdminEmail: "bc-dev@fmsidev.us",
+          CreatedBy: 21373,
+          CreatedDate: "2019-05-20T17:48:32.000Z",
+          ChangedBy: 140312,
+          ChangedDate: new Date().toISOString(), // Dynamically update the change date
+          ActiveStatus: 1,
+          RedirectUrl: "www.google.com",
+          SaveSyncCredentials: false,
+          CalendarSyncEnabled: true,
+          RequireCustomerEmail: emailRequired, // Toggled parameter
+          RequireCustomerPhone: phoneRequired, // Toggled parameter
+          CalendarAutoSyncEnabled: false,
+          CalendarAutoSyncFreqMinutes: 5,
+          CalendarSyncFutureDays: 56,
+          AutomaticWrapup: true,
+          AutomaticWrapupApptStatus: 5,
+          EnableSpanishSpeaker: true,
+          PhoneOnlyApptsEnabled: true,
+          SupportsLanguages: true,
+          TravelPadMinutes: 90,
+          SmsOptInByDefault: false,
+          TwoFactorEnabled: true,
+          UseStaffAddressForConfirmationEmail: false,
+          FkStageId: 3,
+          ExternalLoginEnabled: false,
+          ClientLogo: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaYAAABtCAYAAADqKcXAAAAACXBIWXMAABcRAAAXEQHKJvM/AAAWmklEQVR4nO2d0VUbuxaGx3fdd3IqsE8DxqeCOBWEVBBSQciDn4FnPxyoIFBBoIJjKgi4gUAFF1fgu0R+cYRGmpFGezSSZn9reWXFNjAeS/q1/70lTfb7fcUwDMMwqfAf/iYYhmHKZzJfLcQjhw/KwsQwDDMOjvFIHhYmhmGYcbCsquooh0/KwsQwDFM4k/lqVlXVYVVV0xzsPBYmhmGYpHHeF6uL7JfLcQjhw/KwsQwDDMOjvFIHhYmhmGYcbCsquooh0/KwsQwDFM4k/lqVlXVYVVV0xzsPBYmhmGY8lEjpeTtPBYmhmGYlHHeF6uL7JfLcQjhw/KwsQwDDMOjvFIHhYmhmGYcbCsquooh0/KwsQwDFM4k/lqVlXVYVVV0xzsPBYmhmGY8lEjpeTtPBYmhmGY8lHFaJn6p+VycYZhmIKBjfdL+4R/7rfrx1Q/NUdMDMMwZWMqeDA9lwwsTAzDMGVjyimZnksGtvIYhmEKxWLjSZK18zhiYhiGKZcmyy7ZIggWJoZhmHJpEp8m0RoUtvIYhmEKZDJfvauq6n8tn+yP/Xb9XHt2YDhiYhiGKROXiCjJqImFiWEYpkxYmBiGYZg0gI330eFiXN4THRYmhmGYnHHeF6uL7JfLcQjhw/KwsQwDDMOjvFIHhYmhmGYcbCsquooh0/KwsQwDFM4k/lqVlXVYVVV0xzsPBYmhmGY8lEjpeTtPBYmhmGY8lHFaJn6p+VycYZhmIKBjfdL+4R/7rfrx1Q/NUdMDMMwZWMqeDA9lwwsTAzDMGVjyimZnksGtvIYhmEKxWLjSZK18zhiYhiGKZcmyy7ZIggWJoZhmHJpEp8m0RoUtvIYhmEKZDJfvauq6n8tn+yP/Xb9XHt2YDhiYhiGKROXiCjJqImFiWEYpkxYmBiGYZg0gI330eFiXN4THRYmhmGYnO",
+          FkThemeId: 1,
+          AdminPortalTimeOutMinutes: 90,
+          EnableEvents: true,
+          EnableVirtualAppointments: true,
+          DateFormat: "DD-MMM-YY",
+          IncludeOwnerForEventEmail: false,
+          FkDateFormatId: 1,
+          EnableInPersonAppointments: true,
+          DisplayNumberOfLocations: 10,
+          ShowNumberOfLocationsFilter: true,
+          ShowSearchRadiusDistanceFilter: true,
+          DefaultLocationSearchRadius: 10,
+          MaximumAllowedLocationSearchRadius: 100,
+          EnableStaffWebWidgetAppointments: true,
+          EnableCaptchaVerification: false,
+          EventSummaryEmailNotificationTime: "PT18H",
+          EventsPageIsLandingPage: false,
+          CancelationNotesRequired: false,
+          ShowCheckListInWidget: false,
+          EnableGraphApiMailFlow: false,
+          EventsSendCustomerEmailFromOwner: false,
+          SupportEmailAddress: "admin.dev@kronos.com",
+          MapMarkerIconName: "fas fa-dollar-sign",
+          GoogleReserveEnabled: true,
+          GoogleReserveGlobalBusinessName: "Randolph-Brooks Federal Credit Union",
+          GoogleReserveGlobalWebsiteUrl: "https://www.rbfcu.org/",
+          GliaEnabled: false,
+          entityAspect: {
+            entityTypeName: "ClientConfiguration:#Oac.Model.Data.SystemData",
+            defaultResourceName: "ClientConfigurations",
+            entityState: "Modified",
+            originalValuesMap: {
+              // Usually contains the previous values, but often optional depending on server validation
+              RequireCustomerEmail: !emailRequired, 
+              RequireCustomerPhone: !phoneRequired
+            },
+            autoGeneratedKey: {
+              propertyName: "ClientConfigurationId",
+              autoGeneratedKeyType: "Identity"
+            }
+          }
+        }
+      ],
+      saveOptions: { tag: "54;140823;false;[];null" }
+    };
+
+    return await this.client.post(endpoint, payload);
+  }
+}

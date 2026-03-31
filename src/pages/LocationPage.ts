@@ -7,12 +7,28 @@ import { Page, Locator, expect } from '@playwright/test';
 export class LocationPage {
   private page: Page;
 
+  // Locators for location page elements
+  readonly searchTextBox: Locator;
+  readonly locationsDropdown: Locator;
+  readonly distanceSlider: Locator;
+  readonly locationButtons: Locator;
+  readonly mapRegion: Locator;
+  readonly locationList: Locator;
+
   /**
    * Initialize the location page.
    * @param page - Playwright page object
    */
   constructor(page: Page) {
     this.page = page;
+    
+    // Initialize locators
+    this.searchTextBox = page.getByRole('textbox', { name: 'Enter city and state, or ZIP Code' });
+    this.locationsDropdown = page.getByRole('combobox', { name: 'Locations' });
+    this.distanceSlider = page.getByRole('slider');
+    this.locationButtons = page.locator('button').filter({ hasText: /\b(TX|Texas)\b|\b\d{5}\b/ });
+    this.mapRegion = page.getByRole('region', { name: 'map' });
+    this.locationList = page.locator('[data-testid="location-list"], .location-list');
   }
 
   /**
@@ -21,15 +37,11 @@ export class LocationPage {
    */
   async waitForLocationPage(timeout: number = 30000): Promise<void> {
     // Wait for location buttons to be visible
-    await this.page.waitForSelector('[data-testid="location"], .location, button:has-text("2093")', {
+    await expect(this.locationButtons.first()).toBeVisible({
       timeout,
-      state: 'visible',
     }).catch(() => {
-      // Fallback: wait for any button with location indicators
-      return this.page.waitForSelector('button:has-text("McKinney"), button:has-text("Dallas")', {
-        timeout,
-        state: 'visible',
-      });
+      // Fallback: wait for search textbox as indicator of page load
+      return expect(this.searchTextBox).toBeVisible({ timeout });
     });
   }
 
@@ -53,14 +65,19 @@ export class LocationPage {
   async getAvailableLocations(): Promise<string[]> {
     await this.waitForLocationPage();
     
-    const locationButtons = this.page.locator('button').filter({ hasText: /^(McKinney|Dallas|Plano|Frisco|Allen)/ });
+    // Use a more reliable selector for location buttons
+    const locationButtons = this.page.locator('button').filter({ hasText: /\b(TX|Texas)\b|\b\d{5}\b/ });
     const locations: string[] = [];
     
     const count = await locationButtons.count();
     for (let i = 0; i < count; i++) {
       const text = await locationButtons.nth(i).textContent();
       if (text) {
-        locations.push(text.trim());
+        // Extract just the location name (first line before the address)
+        const locationName = text.split('\n')[0]?.trim();
+        if (locationName && !locations.includes(locationName)) {
+          locations.push(locationName);
+        }
       }
     }
     
@@ -124,20 +141,17 @@ export class LocationPage {
    */
   async searchAndSelectLocation(locationCode: string, locationName: string): Promise<string> {
     
-    // Get the search textbox
-    const searchBox = this.page.getByRole("textbox", {
-      name: "Enter city and state, or ZIP",
-    });
+    // Use the search textbox locator
     const mileText = this.page.getByText("mile");
 
     // Wait for search box to be visible
-    await expect(searchBox).toBeVisible();
+    await expect(this.searchTextBox).toBeVisible();
     await expect(mileText.first()).toBeVisible({ timeout: 10000 });
 
     // Clear any existing text and enter location code
-    await searchBox.clear();
-    await searchBox.fill(locationCode);
-    await searchBox.press('Enter');
+    await this.searchTextBox.clear();
+    await this.searchTextBox.fill(locationCode);
+    await this.searchTextBox.press('Enter');
     
     // Wait for search results to load
     await this.page.waitForTimeout(1000);
@@ -172,5 +186,65 @@ export class LocationPage {
         state: 'visible',
       });
     });
+  }
+
+  /**
+   * Set the number of locations to display.
+   * @param count - Number of locations to display (5, 10, 15, 25, or 50)
+   */
+  async setLocationsCount(count: number): Promise<void> {
+    await expect(this.locationsDropdown).toBeVisible();
+    await this.locationsDropdown.selectOption(count.toString());
+  }
+
+  /**
+   * Set the distance radius for location search.
+   * @param miles - Distance in miles (1-100)
+   */
+  async setDistanceRadius(miles: number): Promise<void> {
+    await expect(this.distanceSlider).toBeVisible();
+    await this.distanceSlider.fill(miles.toString());
+  }
+
+  /**
+   * Get the current distance radius value.
+   * @returns Promise resolving to the current distance in miles
+   */
+  async getDistanceRadius(): Promise<number> {
+    await expect(this.distanceSlider).toBeVisible();
+    const value = await this.distanceSlider.inputValue();
+    return parseInt(value, 10);
+  }
+
+  /**
+   * Check if the map is visible.
+   * @returns Promise resolving to true if map is visible
+   */
+  async isMapVisible(): Promise<boolean> {
+    return await this.mapRegion.isVisible();
+  }
+
+  /**
+   * Select a location by its index in the list.
+   * @param index - Zero-based index of the location to select
+   * @returns Promise resolving to the selected location name
+   */
+  async selectLocationByIndex(index: number): Promise<string> {
+    await this.waitForLocationPage();
+    
+    const count = await this.locationButtons.count();
+    if (index >= count) {
+      throw new Error(`Index ${index} is out of range. Only ${count} locations available.`);
+    }
+    
+    const locationButton = this.locationButtons.nth(index);
+    const locationName = await locationButton.textContent();
+    
+    if (!locationName) {
+      throw new Error(`Location at index ${index} has no text content.`);
+    }
+    
+    await locationButton.click();
+    return locationName.trim();
   }
 }

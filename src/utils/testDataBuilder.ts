@@ -6,6 +6,7 @@ export interface CustomerData {
   lastName: string;
   email: string;
   phone: string;
+  notes?: string;
 }
 
 /**

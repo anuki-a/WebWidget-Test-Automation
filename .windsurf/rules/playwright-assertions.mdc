@@ -1,0 +1,39 @@
+---
+description: Playwright assertion patterns
+trigger: always_on
+---
+
+# Assertions Best Practices
+
+## Web-First Assertions
+- ✅ `await expect(locator).toBeVisible()` 
+- ✅ `await expect(locator).toHaveText('text')`
+- ❌ `expect(await locator.isVisible()).toBe(true)` - anti-pattern
+
+## Explicit Timeouts
+- Add timeout for slow operations: `await expect(element).toBeVisible({ timeout: 15000 })`
+- Default expect timeout is 10000ms (from config)
+
+## Common Patterns
+- Use `toContainText()` for partial text matches
+- Use `toHaveCount()` for validating lists/tables
+- Check visibility before interactions when needed
+
+## Assertion Location
+- ✅ **ALWAYS put assertions in test files**, not page objects
+- ✅ Page objects should return locators or values, tests should assert on them
+- ❌ Never include `expect()` statements inside page object methods
+
+### Pattern:
+```typescript
+// Page Object - returns locator
+getErrorMessage() {
+  return this.iframe.getByText('error notification:');
+}
+
+// Test File - contains assertion
+await expect(portalSettingPage.getErrorMessage()).toBeVisible();
+```
+
+### Exception:
+- Helper methods that use `expect()` for waiting (not verification) are acceptable if clearly named (e.g., `waitForButtonEnabled()`)

@@ -1,0 +1,23 @@
+---
+description: Error handling and debugging patterns
+trigger: always_on
+---
+
+# Error Handling & Debugging
+
+## Debugging Tools
+- `await page.pause()` - opens Playwright Inspector
+- Screenshots captured automatically on failure (configured)
+- Use `test.slow()` to triple timeout for known slow tests
+
+## Timeout Management
+- Global timeout: 30000ms (from config)
+- Action timeout: 10000ms (from config)
+- Extend per test: `test.setTimeout(160000)` (as you do in portalSetting.spec.ts)
+- Extend per action: `{ timeout: 20000 }` in options
+
+## Common Issues
+- Timeout errors: Check if element is in correct frame context
+- Element not found: Verify iframe context (page vs page1)
+- Flaky tests: Add proper waits, check test isolation
+
