@@ -105,4 +105,23 @@ export class AdminService {
 
     return await this.client.post(endpoint, payload);
   }
+
+  /**
+   * Adds a new holiday or updates an existing one.
+   * Path: /OacWeb/oac/client/SaveHoliday
+   * @param holidayData - The holiday entity object (e.g., HolidayId, HolidayName, Date, etc.)
+   * @param saveOptions - The save options containing the tag (e.g., { tag: "54,1" })
+   * @returns Promise resolving to the API response.
+   */
+  async saveHoliday(holidayData: any, saveOptions: any) {
+    const endpoint = '/OacWeb/oac/client/SaveHoliday';
+
+    const requestBody = {
+      entities: [holidayData],
+      saveOptions: saveOptions,
+    };
+
+    // The ApiClient automatically handles the full URL and authentication
+    return await this.client.post(endpoint, requestBody);
+  }
 }
