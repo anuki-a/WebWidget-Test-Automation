@@ -124,4 +124,28 @@ export class AdminService {
     // The ApiClient automatically handles the full URL and authentication
     return await this.client.post(endpoint, requestBody);
   }
+
+/**
+   * Fetches all holidays based on year and location.
+   * Path: /OacWeb/oac/client/AllHolidays
+   * @param year - The year to filter holidays (e.g., 2026)
+   * @param clientId - The unique identifier for the client
+   * @param currentLocationId - The current location ID
+   * @returns Promise resolving to the API response.
+   */
+  async getAllHolidays(year: number | string, clientId: string | number, currentLocationId: string | number) {
+    const endpoint = '/OacWeb/oac/client/AllHolidays';
+
+    // Constructing query parameters based on the curl request
+    const params = {
+      '$filter': `year(Date) eq ${year}`,
+      '$orderby': 'Location/FkLocationTypeId',
+      '$expand': 'Location',
+      'clientId': clientId.toString(),
+      'currentLocationId': currentLocationId.toString(),
+    };
+
+    // ApiClient handles the baseURL, auth headers, and logging
+    return await this.client.get(endpoint, params);
+  }
 }

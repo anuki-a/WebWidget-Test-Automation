@@ -200,6 +200,37 @@ bookingTest('should add a new holiday 2 business days from now', async ({ reques
   expect(response.ok()).toBeTruthy();
 });
 
+test('should verify the holiday exists in the list', async ({ request }) => {
+  const apiClient = new ApiClient(request);
+  const adminService = new AdminService(apiClient);
+
+  const year = 2026;
+  const clientId = 54;
+  const locationId = 1;
+
+  const response = await adminService.getAllHolidays(year, clientId, locationId);
+  
+  expect(response.ok()).toBeTruthy();
+  
+  const data = await response.json();
+  
+  // Check if data exists and is an array
+  if (!data || !Array.isArray(data)) {
+    console.error('Expected array but got:', typeof data, data);
+    throw new Error(`Expected array but got ${typeof data}`);
+  }
+  
+  // Verify we have holidays in the response
+  expect(data.length).toBeGreaterThan(0);
+  
+  // Check that holidays have valid names
+  const holidayExists = data.some((h: any) => h.HolidayName && h.HolidayName.length > 0);
+  expect(holidayExists).toBe(true);
+  
+  // Optional: Log found holidays for debugging
+  const holidayNames = data.map((h: any) => h.HolidayName).filter(name => name);
+  console.log('Found holidays:', holidayNames);
+});
 
 // // guessing that these created a data issue in some survices. therefore keeping them commented.
 // test('Update service via API- DisableAppointmentCancellationOrUpdate=false', async ({ request }) => {
