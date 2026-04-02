@@ -17,6 +17,15 @@ export class PersonalDetailsPage {
   readonly bookAppointmentButton: Locator;
   readonly personalDetailsHeading: Locator;
 
+  // Spanish locators
+  readonly firstNameInputSpanish: Locator;
+  readonly lastNameInputSpanish: Locator;
+  readonly emailInputSpanish: Locator;
+  readonly phoneInputSpanish: Locator;
+  readonly notesInputSpanish: Locator;
+  readonly bookAppointmentButtonSpanish: Locator;
+  readonly personalDetailsHeadingSpanish: Locator;
+
   /**
    * Initialize the personal details page.
    * @param page - Playwright page object
@@ -35,6 +44,19 @@ export class PersonalDetailsPage {
     });
     this.personalDetailsHeading = page.getByRole("heading", {
       name: "Personal Details",
+    });
+
+    // Initialize Spanish locators
+    this.firstNameInputSpanish = page.getByRole("textbox", { name: "Primer Nombre *" });
+    this.lastNameInputSpanish = page.getByRole("textbox", { name: "Apellido *" });
+    this.emailInputSpanish = page.getByRole("textbox", { name: "Correo electrónico *" });
+    this.phoneInputSpanish = page.getByRole("textbox", { name: "Número de teléfono *" });
+    this.notesInputSpanish = page.getByRole("textbox", { name: "Por favor proporcione detalles adicionales:" });
+    this.bookAppointmentButtonSpanish = page.getByRole("button", {
+      name: "Reservar mi sita",
+    });
+    this.personalDetailsHeadingSpanish = page.getByRole("heading", {
+      name: "Detalles personales",
     });
   }
 
@@ -87,12 +109,30 @@ export class PersonalDetailsPage {
   }
 
   /**
+   * Fill first name field in Spanish.
+   * @param firstName - First name to fill
+   */
+  async fillFirstNameSpanish(firstName: string): Promise<void> {
+    await expect(this.firstNameInputSpanish).toBeVisible();
+    await this.firstNameInputSpanish.fill(firstName);
+  }
+
+  /**
    * Fill last name field.
    * @param lastName - Last name to fill
    */
   async fillLastName(lastName: string): Promise<void> {
     await expect(this.lastNameInput).toBeVisible();
     await this.lastNameInput.fill(lastName);
+  }
+
+  /**
+   * Fill last name field in Spanish.
+   * @param lastName - Last name to fill
+   */
+  async fillLastNameSpanish(lastName: string): Promise<void> {
+    await expect(this.lastNameInputSpanish).toBeVisible();
+    await this.lastNameInputSpanish.fill(lastName);
   }
 
   /**
@@ -106,12 +146,32 @@ export class PersonalDetailsPage {
   }
 
   /**
+   * Fill email field in Spanish.
+   * @param email - Email to fill
+   */
+  async fillEmailSpanish(email: string): Promise<void> {
+    if (await this.emailInputSpanish.isVisible()) {
+      await this.emailInputSpanish.fill(email);
+    }
+  }
+
+  /**
    * Fill phone field.
    * @param phone - Phone number to fill
    */
   async fillPhone(phone: string): Promise<void> {
     if (await this.phoneInput.isVisible()) {
       await this.phoneInput.fill(phone);
+    }
+  }
+
+  /**
+   * Fill phone field in Spanish.
+   * @param phone - Phone number to fill
+   */
+  async fillPhoneSpanish(phone: string): Promise<void> {
+    if (await this.phoneInputSpanish.isVisible()) {
+      await this.phoneInputSpanish.fill(phone);
     }
   }
 
@@ -132,6 +192,15 @@ export class PersonalDetailsPage {
   async submit(): Promise<void> {
     await expect(this.bookAppointmentButton).toBeVisible();
     await this.bookAppointmentButton.click();
+  }
+
+  /**
+   * Submit the booking form in Spanish.
+   * @returns Promise resolving when form is submitted
+   */
+  async submitSpanish(): Promise<void> {
+    await expect(this.bookAppointmentButtonSpanish).toBeVisible();
+    await this.bookAppointmentButtonSpanish.click();
   }
 
   /**

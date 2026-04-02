@@ -32,6 +32,14 @@ export class DateTimePage {
   }
 
   /**
+   * Wait for the date time page to be loaded and visible (Spanish version).
+   * @param timeout - Maximum time to wait
+   */
+  async waitForDateTimePageSpanish(timeout: number = 30000): Promise<void> {
+    await expect(this.page.getByText("Elige una fecha y hora")).toBeVisible({ timeout });
+  }
+
+  /**
    * Select a specific date and time.
    * @param date - Date to select
    * @param timeString - Time string to select (e.g., "6:15 AM")
@@ -42,6 +50,26 @@ export class DateTimePage {
     
     // Select date
     await this.calendarComponent.selectDate(date);
+    
+    // Select time slot
+    await this.timeSlotComponent.selectTimeSlot(timeString);
+    
+    return {
+      date,
+      time: timeString,
+    };
+  }
+
+  /**
+   * Select a specific date and time (Spanish version).
+   * @param date - Date to select
+   * @param timeString - Time string to select (e.g., "6:15 AM")
+   * @returns Promise resolving to the selected date and time
+   */
+  async selectDateAndTimeSpanish(date: Date, timeString: string): Promise<{ date: Date; time: string }> {
+    await this.waitForDateTimePageSpanish();
+    // Select date using Spanish method
+    await this.calendarComponent.selectDateSpanish(date);
     
     // Select time slot
     await this.timeSlotComponent.selectTimeSlot(timeString);
@@ -209,6 +237,18 @@ export class DateTimePage {
   async waitForDateTimeSelectionComplete(timeout: number = 30000): Promise<void> {
     // Wait for personal details form to appear
     await this.page.waitForSelector('[data-testid="personal-details"], input[name="firstName"], input:has-text("First Name")', {
+      timeout,
+      state: 'visible',
+    });
+  }
+
+  /**
+   * Wait for date time selection to complete and next step to load (Spanish version).
+   * @param timeout - Maximum time to wait
+   */
+  async waitForDateTimeSelectionCompleteSpanish(timeout: number = 30000): Promise<void> {
+    // Wait for personal details form to appear in Spanish
+    await this.page.waitForSelector('[data-testid="personal-details"], input[name="firstName"], input:has-text("Primer Nombre")', {
       timeout,
       state: 'visible',
     });

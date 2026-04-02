@@ -33,6 +33,20 @@ export class CalendarComponent {
   }
 
   /**
+   * Select a specific date in the calendar (Spanish version).
+   * @param date - Date to select
+   * @returns Promise resolving when date is selected
+   */
+  async selectDateSpanish(date: Date): Promise<void> {
+    const formattedDate = DateUtils.formatDateForUISpanish(date);
+    // Click on the date picker label (e.g., "3 de abr. de 2026")
+    await this.page.getByLabel(formattedDate.datePickerLabel, { exact: true }).getByRole('link', { 
+      name: formattedDate.dayNumber.toString(), 
+      exact: true 
+    }).click();
+  }
+
+  /**
    * Select a given date (alias for selectDate method).
    * @param day - Date to select
    * @returns Promise resolving when date is selected

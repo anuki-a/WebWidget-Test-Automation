@@ -47,3 +47,148 @@ export interface DateTimeData {
   formattedDate: string;
   time: string;
 }
+
+/**
+ * Spanish translations for navigation bar and page elements.
+ */
+export interface SpanishTranslationsOfPages {
+  // Navigation Bar
+  serviceSelection: {
+    english: string;
+    spanish: string;
+  };
+  location: {
+    english: string;
+    spanish: string;
+  };
+  meetingPreference: {
+    english: string;
+    spanish: string;
+  };
+  dateTime: {
+    english: string;
+    spanish: string;
+  };
+  personalDetails: {
+    english: string;
+    spanish: string;
+  };
+  confirmation: {
+    english: string;
+    spanish: string;
+  };
+
+  // Service Page
+  serviceSelectionHeader: {
+    english: string;
+    spanish: string;
+  };
+  userInsertedTranslation: {
+    english: string;
+    spanish: string;
+  };
+  skipAppointmentDialog: {
+    english: string;
+    spanish: string;
+  };
+  continueSchedulingButton: {
+    english: string;
+    spanish: string;
+  };
+  skipWaitButton: {
+    english: string;
+    spanish: string;
+  };
+
+  // Location Page
+  selectLocation: {
+    english: string;
+    spanish: string;
+  };
+  searchLocationPlaceholder: {
+    english: string;
+    spanish: string;
+  };
+  locationsDropdown: {
+    english: string;
+    spanish: string;
+  };
+
+  // Meeting Preference Page
+  meetingPreferenceHeader: {
+    english: string;
+    spanish: string;
+  };
+  inPersonOption: {
+    english: string;
+    spanish: string;
+  };
+  virtualOption: {
+    english: string;
+    spanish: string;
+  };
+  phoneCallOption: {
+    english: string;
+    spanish: string;
+  };
+
+  // Date & Time Page
+  dateTimeHeader: {
+    english: string;
+    spanish: string;
+  };
+
+  // Personal Details Page
+  personalDetailsHeader: {
+    english: string;
+    spanish: string;
+  };
+  firstNameLabel: {
+    english: string;
+    spanish: string;
+  };
+  lastNameLabel: {
+    english: string;
+    spanish: string;
+  };
+  emailLabel: {
+    english: string;
+    spanish: string;
+  };
+  phoneLabel: {
+    english: string;
+    spanish: string;
+  };
+  notesLabel: {
+    english: string;
+    spanish: string;
+  };
+  bookAppointmentButton: {
+    english: string;
+    spanish: string;
+  };
+
+  // Confirmation Page
+  confirmationHeader: {
+    english: string;
+    spanish: string;
+  };
+
+  // Footer
+  footer: {
+    english: string;
+    spanish: string;
+  };
+
+  // Language Selector
+  languageOption: {
+    english: string;
+    spanish: string;
+  };
+
+  // Date formatting (Spanish months)
+  spanishMonths: {
+    [key: string]: string;
+  };
+}
+

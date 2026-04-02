@@ -76,10 +76,44 @@ export class DateUtils {
       month: 'long', 
       day: 'numeric', 
       year: 'numeric' 
-    });
+    }) || date.toLocaleDateString('en-US') || '';
 
     // ISO string for API calls
-    const isoString = date.toISOString();
+    const isoString = date.toISOString() || '';
+
+    return {
+      shortMonth,
+      dayNumber: dayNum,
+      datePickerLabel,
+      fullDateString,
+      isoString,
+    };
+  }
+
+  /**
+   * Format date for UI interactions in Spanish.
+   * @param date - Date to format
+   * @returns Formatted date object with Spanish string representations
+   */
+  static formatDateForUISpanish(date: Date): FormattedDate {
+    // Spanish month abbreviations (with period)
+    const spanishMonths = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+    const shortMonth = spanishMonths[date.getMonth()] || '';
+    const dayNum = date.getDate();
+    const year = date.getFullYear();
+    // Format: "3 de abr. de 2026"
+    const datePickerLabel = `${dayNum} de ${shortMonth} de ${year}`;
+
+    // For Assertion: "jueves, 5 de abril de 2026"
+    const fullDateString = date.toLocaleDateString('es-ES', { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    }) || date.toLocaleDateString('es-ES') || '';
+
+    // ISO string for API calls
+    const isoString = date.toISOString() || '';
 
     return {
       shortMonth,

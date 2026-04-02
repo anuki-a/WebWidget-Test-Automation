@@ -249,6 +249,29 @@ export class ServicePage {
   }
 
   /**
+   * Handle the Spanish online application dialog if it appears.
+   * @param continueWithScheduling - Whether to continue with scheduling (true) or handle online application
+   * @returns Promise resolving when dialog is handled
+   */
+  async handleSpanishSkipAppointmentDialog(continueWithScheduling: boolean = true): Promise<void> {
+      // Wait for the Spanish dialog to appear (timeout is short since it may not appear)
+      const spanishDialogText = "¡Buenas Noticias! Usted puede aplicar en linea ahora, saltando la espera";
+      const dialog = this.page.getByText(spanishDialogText, { exact: false });
+
+      await dialog.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {
+        // We catch the error internally so the test doesn't fail if it's missing
+      });
+
+      const dialogButton = continueWithScheduling 
+        ? this.page.getByRole('button', { name: 'No, continuar con la planificación de una cita' })
+        : this.page.getByRole('button', { name: 'Sí, omitir la espera' });
+
+      if (await dialog.isVisible()) {
+        await dialogButton.click();
+      }
+  }
+
+  /**
    * Get the skip appointment dialog element.
    * @returns Promise resolving to the dialog locator or null if not visible
    */
