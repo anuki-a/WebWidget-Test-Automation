@@ -148,4 +148,39 @@ export class AdminService {
     // ApiClient handles the baseURL, auth headers, and logging
     return await this.client.get(endpoint, params);
   }
+
+  /**
+ * Deletes a holiday by sending the entity with a 'Deleted' state.
+ * Path: /OacWeb/oac/client/DeleteHoliday
+ * @param holidayData - The full holiday object retrieved from the GET call
+ * @param clientId - The client ID for the saveOptions tag
+ */
+async deleteHoliday(holidayData: any, clientId: string | number) {
+  const endpoint = '/OacWeb/oac/client/DeleteHoliday';
+
+  const requestBody = {
+  entities: [
+    {
+      ...holidayData, // Spread the existing holiday properties
+      entityAspect: {
+        entityTypeName: "Holiday:#Oac.Model.Data.ClientData",
+        defaultResourceName: "Holidays",
+        entityState: "Deleted", // CRITICAL: This tells the server to delete it
+        originalValuesMap: {
+            // Some APIs require the original Start/End times to verify concurrency
+            StartTime: holidayData.StartTime,
+            EndTime: holidayData.EndTime
+        }
+      }
+    }
+  ],
+  saveOptions: { 
+    tag: Number(clientId) // Ensure this is a number, not a string
+  }
+};
+  console.log("------------------------------ ");
+  console.log("requestBody : ",requestBody);
+
+  return await this.client.post(endpoint, requestBody);
+}
 }

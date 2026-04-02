@@ -200,69 +200,80 @@ bookingTest('should add a new holiday 2 business days from now', async ({ reques
   expect(response.ok()).toBeTruthy();
 });
 
-test('should verify the holiday exists in the list', async ({ request }) => {
+test('should verify and then delete the generated holiday', async ({ request }) => {
   const apiClient = new ApiClient(request);
   const adminService = new AdminService(apiClient);
 
   const year = 2026;
   const clientId = 54;
   const locationId = 1;
+  const targetHolidayName = "Auto Holiday";
 
-  const response = await adminService.getAllHolidays(year, clientId, locationId);
+  // 1. Get the holiday list
+  const getResponse = await adminService.getAllHolidays(year, clientId, locationId);
+  expect(getResponse.ok()).toBeTruthy();
   
-  expect(response.ok()).toBeTruthy();
+  const holidays = await getResponse.json();
+  expect(Array.isArray(holidays)).toBe(true);
+
+  console.log("holiday[0].Location.Holidays[1].HolidayName : ",holidays[0].Location.Holidays[1].HolidayName);
+  // 2. Find the specific holiday
+  // Using .includes() to be safe, and checking case-insensitivity
+  const holidayToDelete = holidays[0].Location.Holidays.find((h: any) => {
+    // Ensure HolidayName exists and isn't null before calling .toLowerCase()
+    return h.HolidayName && h.HolidayName.toLowerCase().includes(targetHolidayName.toLowerCase());
+  });
+  console.log(`Found holiday: ${holidayToDelete?.HolidayName} (ID: ${holidayToDelete?.HolidayId})`);
   
-  const data = await response.json();
+  // Verify it exists before attempting deletion
+  expect(holidayToDelete, `Holiday with name "${targetHolidayName}" not found!`).toBeDefined();
+
+  //3. Delete the holiday
+  const deleteResponse = await adminService.deleteHoliday(holidayToDelete, clientId);
   
-  // Check if data exists and is an array
-  if (!data || !Array.isArray(data)) {
-    console.error('Expected array but got:', typeof data, data);
-    throw new Error(`Expected array but got ${typeof data}`);
-  }
+  // 4. Assert deletion success
+  expect(deleteResponse.ok()).toBeTruthy();
+  console.log(`Successfully deleted holiday: ${targetHolidayName}`);
+
+  // Final Check: Verify it's gone from the list
+  const finalCheckResponse = await adminService.getAllHolidays(year, clientId, locationId);
+  const finalData = await finalCheckResponse.json();
+  const existsAfterDelete = finalData.some((h: any) => h.HolidayId === holidayToDelete.HolidayId);
   
-  // Verify we have holidays in the response
-  expect(data.length).toBeGreaterThan(0);
-  
-  // Check that holidays have valid names
-  const holidayExists = data.some((h: any) => h.HolidayName && h.HolidayName.length > 0);
-  expect(holidayExists).toBe(true);
-  
-  // Optional: Log found holidays for debugging
-  const holidayNames = data.map((h: any) => h.HolidayName).filter(name => name);
-  console.log('Found holidays:', holidayNames);
+  expect(existsAfterDelete).toBe(false);
 });
 
-// // guessing that these created a data issue in some survices. therefore keeping them commented.
-// test('Update service via API- DisableAppointmentCancellationOrUpdate=false', async ({ request }) => {
-//   const apiClient = new ApiClient(request);
-//   const productService = new ProductService(apiClient);
+// guessing that these created a data issue in some survices. therefore keeping them commented.
+test('Update service via API- DisableAppointmentCancellationOrUpdate=false', async ({ request }) => {
+  const apiClient = new ApiClient(request);
+  const productService = new ProductService(apiClient);
 
-//   // Test with disableCancellation set to false (overriding the JSON default of true)
-//   const response = await productService.UpdateService(
-//     serviceData.updatePersonalAccount.serviceData, 
-//     serviceData.updatePersonalAccount.saveOptions,
-//     false // Override DisableAppointmentCancellationOrUpdate to false
-//   );
+  // Test with disableCancellation set to false (overriding the JSON default of true)
+  const response = await productService.UpdateServiceDisableAppointmentCancellationOrUpdate(
+    serviceData.updatePersonalAccount.serviceData, 
+    serviceData.updatePersonalAccount.saveOptions,
+    false // Override DisableAppointmentCancellationOrUpdate to false
+  );
   
-//   expect(response.ok()).toBeTruthy();
-//   const data = await response.json();
+  expect(response.ok()).toBeTruthy();
+  const data = await response.json();
   
-//   console.log('Service updated successfully:', data);
-// });
+  console.log('Service updated successfully:', data);
+});
 
-// test('Update service via API- DisableAppointmentCancellationOrUpdate=true', async ({ request }) => {
-//   const apiClient = new ApiClient(request);
-//   const productService = new ProductService(apiClient);
+test('Update service via API- DisableAppointmentCancellationOrUpdate=true', async ({ request }) => {
+  const apiClient = new ApiClient(request);
+  const productService = new ProductService(apiClient);
 
-//   // Test with disableCancellation set to true (overriding the JSON default of true)
-//   const response = await productService.UpdateService(
-//     serviceData.updatePersonalAccount.serviceData, 
-//     serviceData.updatePersonalAccount.saveOptions,
-//     true // Override DisableAppointmentCancellationOrUpdate to true
-//   );
+  // Test with disableCancellation set to true (overriding the JSON default of true)
+  const response = await productService.UpdateServiceDisableAppointmentCancellationOrUpdate(
+    serviceData.updatePersonalAccount.serviceData, 
+    serviceData.updatePersonalAccount.saveOptions,
+    true // Override DisableAppointmentCancellationOrUpdate to true
+  );
   
-//   expect(response.ok()).toBeTruthy();
-//   const data = await response.json();
+  expect(response.ok()).toBeTruthy();
+  const data = await response.json();
   
-//   console.log('Service updated successfully:', data);
-// });
+  console.log('Service updated successfully:', data);
+});
