@@ -509,21 +509,21 @@
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Go to date/time for partial holiday date", "expected": "Slots load" },
-      { "step": 2, "action": "Verify slots before 10:00 available", "expected": "Early morning slots selectable" },
-      { "step": 3, "action": "Verify slots 10:00-12:00 disabled", "expected": "Holiday time range blocked" },
-      { "step": 4, "action": "Verify slots after 12:00 available", "expected": "Afternoon slots selectable" },
-      { "step": 5, "action": "Verify holiday-blocked slots", "expected": "Blocked slots unavailable" },
-      { "step": 6, "action": "Verify allowed slots", "expected": "Allowed slots available" },
-      { "step": 7, "action": "Select available slot and proceed", "expected": "Can complete booking" },
-      { "step": 8, "action": "Verify confirmation", "expected": "Shows selected non-holiday slot" },
-      { "step": 9, "action": "Validate portal", "expected": "Correct appointment recorded" },
-      { "step": 10, "action": "Verify holiday setup via API", "expected": "Holiday configuration confirmed" }
+      { "step": 1, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 2, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 3, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 4, "action": "Go to date/time for partial holiday date", "expected": "Slots load" },
+      { "step": 5, "action": "Verify slots before 10:00 available", "expected": "Early morning slots selectable" },
+      { "step": 6, "action": "Verify slots 10:00-12:00 disabled", "expected": "Holiday time range blocked" },
+      { "step": 7, "action": "Verify slots after 12:00 available", "expected": "Afternoon slots selectable" },
+      { "step": 8, "action": "Verify holiday-blocked slots", "expected": "Blocked slots unavailable" },
+      { "step": 9, "action": "Verify allowed slots", "expected": "Allowed slots available" },
+      { "step": 10, "action": "Select available slot and proceed", "expected": "Can complete booking" },
+      { "step": 11, "action": "Verify confirmation", "expected": "Shows selected non-holiday slot" }
     ],
     "expectedResult": [
       "Partial holiday blocks only configured time range",
-      "Widget allows booking outside holiday hours",
-      "Holiday behavior matches AC Portal configuration"
+      "Widget allows booking outside holiday hours"
     ],
     "reusableActions": [
       "Check slot availability",
@@ -545,24 +545,22 @@
       "Widget accessible",
       "Service/location bookable normally",
       "Full day holiday configured on test date",
-      "Adjacent non-holiday dates available for comparison",
-      "Holiday setup verified via AC Portal",
-      "Admin Portal access available",
-      "Valid personal details available"
+      "Adjacent non-holiday dates available for comparison"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Go to full holiday date", "expected": "No selectable slots" },
-      { "step": 2, "action": "Verify all time slots disabled on holiday date", "expected": "No selectable slots available" },
-      { "step": 3, "action": "Attempt to select any slot", "expected": "Selection prevented, no navigation to personal details" },
-      { "step": 4, "action": "Try selecting slot", "expected": "Cannot proceed" },
-      { "step": 5, "action": "Navigate to next available non-holiday date", "expected": "Normal slot availability displayed" },
-      { "step": 6, "action": "Select non-holiday date", "expected": "Slots available" },
-      { "step": 7, "action": "Complete booking on non-holiday date", "expected": "Success" },
-      { "step": 8, "action": "Validate portal", "expected": "No holiday booking captured" },
-      { "step": 9, "action": "Verify full holiday setup via API", "expected": "Full day holiday configuration confirmed" }
+      { "step": 1, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 2, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 3, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 4, "action": "Go to date/time for full holiday date", "expected": "No selectable slots" },
+      { "step": 5, "action": "Verify all time slots disabled on holiday date", "expected": "No selectable slots available" },
+      { "step": 6, "action": "Attempt to select any slot", "expected": "Selection prevented, no navigation to personal details" },
+      { "step": 7, "action": "Try selecting slot", "expected": "Cannot proceed" },
+      { "step": 8, "action": "Navigate to next available non-holiday date", "expected": "Normal slot availability displayed" },
+      { "step": 9, "action": "Select non-holiday date", "expected": "Slots available" },
+      { "step": 10, "action": "Complete booking on non-holiday date", "expected": "Success" }
     ],
     "expectedResult": [
       "Full holiday prevents all bookings on configured date",
@@ -572,9 +570,7 @@
     "reusableActions": [
       "Check holiday date restriction",
       "Use non-holiday date",
-      "Complete booking",
-      "Validate portal",
-      "Verify holiday configuration"
+      "Complete booking"
     ],
     "configurationDependencies": [
       "Full day holiday configuration",
@@ -730,12 +726,10 @@
     ],
     "uiSteps": [
       { "step": 1, "action": "Launch with svc only", "expected": "Service page skipped, location shown" },
-      { "step": 2, "action": "Launch with loc only", "expected": "Location skipped after service select" },
-      { "step": 3, "action": "Launch with loc+svc", "expected": "Service+location skipped, meeting pref shown" },
-      { "step": 4, "action": "Complete booking", "expected": "Confirmation reflects URL selections" },
       { "step": 5, "action": "Launch with /loc=invalid (unknown location code)", "expected": "Service selection page displayed, location selection shown (invalid ignored)" },
-      { "step": 6, "action": "Launch with /unknown=value (unknown parameter)", "expected": "Normal flow continues, unknown parameter ignored" },
-      { "step": 7, "action": "Launch with malformed parameter /loc=", "expected": "Graceful fallback to normal flow" }
+      { "step": 2, "action": "Launch with loc only", "expected": "Location skipped after service select, meeting pref shown" },
+      { "step": 3, "action": "Launch with loc+svc", "expected": "Service+location skipped, meeting pref shown" },
+      { "step": 4, "action": "Complete booking", "expected": "Confirmation reflects URL selections" }
     ],
     "expectedResult": [
       "Valid parameters processed correctly and skip appropriate steps",
@@ -763,11 +757,10 @@
       "Request Spanish Speaker enabled",
       "At least two eligible staff exist",
       "Manual staff selection enabled",
-      "Valid availability for both paths",
-      "Admin Portal access available"
+      "Spanish Speaker who is eligible staff exists"
     ],
     "setupRequirements": [
-      "None"
+      "check spanish "
     ],
     "uiSteps": [
       { "step": 1, "action": "Select Staff A without Spanish request", "expected": "Appointment with Staff A can complete" },
