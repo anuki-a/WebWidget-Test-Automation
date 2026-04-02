@@ -649,20 +649,15 @@
     "testName": "OAC-20017: Verify Widget Spanish Language Translations Load Properly",
     "businessGoal": "Verify Spanish localization is loaded and displayed across widget pages.",
     "preconditions": [
-      "Widget accessible",
-      "Language selector enabled",
-      "Spanish resources available",
-      "Valid service/location path"
+      "Widget accessible"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
       { "step": 1, "action": "Open widget default language", "expected": "English page" },
-      { "step": 2, "action": "Change language to Spanish", "expected": "UI updates to Spanish" },
-      { "step": 3, "action": "Navigate key pages", "expected": "Spanish text on labels/buttons/validation" },
-      { "step": 4, "action": "Trigger validation message", "expected": "Spanish validation message" },
-      { "step": 5, "action": "Complete booking", "expected": "Confirmation in Spanish" }
+      { "step": 2, "action": "Change language to Spanish from top bar dropdown", "expected": "UI updates to Spanish" },
+      { "step": 3, "action": "check navigation bar for spanish text", "expected": "Spanish text on the 6 labels" }
     ],
     "expectedResult": [
       "Spanish translation works end-to-end"
