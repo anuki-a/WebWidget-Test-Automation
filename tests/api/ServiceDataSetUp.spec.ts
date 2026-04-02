@@ -143,7 +143,7 @@ bookingTest('should add a new holiday 2 business days from now', async ({ reques
 
   // 1. Calculate dynamic date (matching the original midnight format)
   const today = new Date();
-  const futureDate = DateUtils.addBusinessDays(today, 2);
+  const futureDate = DateUtils.addBusinessDays(today, 3);
   futureDate.setUTCHours(0, 0, 0, 0);
   const isoDate = futureDate.toISOString();
 

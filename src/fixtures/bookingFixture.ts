@@ -19,6 +19,7 @@ export const test = base.extend<{
   notaryServiceBookingData: BookingData;
   singleMeetingPreferenceBookingData: BookingData;
   spanishTranslationsBookingData: BookingData;
+  fullHodidayHandlingData: BookingData;
   spanishTranslationsOfPages: SpanishTranslationsOfPages; 
 }>({
   bookingData: async ({}, use: (data: BookingData) => Promise<void>) => {
@@ -697,6 +698,51 @@ export const test = base.extend<{
 
       // Date formatting (Spanish months)
       spanishMonths: SPANISH_TRANSLATIONS.SPANISH_MONTHS
+    };
+
+    await use(data);
+  },
+
+
+  fullHodidayHandlingData: async ({}, use: (data: BookingData) => Promise<void>) => {
+    // Generate customer data using TestDataBuilder
+    const customer = TestDataBuilder.generateCustomer();
+    
+    // Generate date/time data
+    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 3)
+    const formattedDate = DateUtils.formatDateForUI(nextBusinessDay);
+    
+    const rawName = 'Update Personal Account  60';
+    const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
+
+    // Create complete booking data for cancellation path (copy of bookingData)
+    const data: BookingData = {
+      service: {
+        category: 'Personal Accounts',
+        name: rawName,
+        displayName: cleanName,
+        duration: 60
+      },
+      location: {
+        code: '75071',
+        name: 'McKinney 2093 N. Central',
+        confirmationName: 'McKinney'
+      },
+      dateTime: {
+        date: nextBusinessDay,
+        formattedDate: formattedDate.fullDateString,
+        time: '10:00 AM',
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
+      meetingPreference: {
+        type: 'in-person',
+        displayName: MeetingPreference.IN_PERSON
+      }
     };
 
     await use(data);

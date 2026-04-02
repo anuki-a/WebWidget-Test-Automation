@@ -224,8 +224,8 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 #### Calendar & availability
 
 - [ ] OAC-20013 → Partial holiday
-- [ ] OAC-20014 → Full holiday
-- [ ] OAC-20015 → Past date restriction
+- [ ] OAC-20014 → Full holiday 🔄 IN PROGRESS
+- [x] OAC-20015 → Past date restriction ✅ IMPLEMENTED
 - [ ] OAC-20016 → Timeslot availability
 
 #### Localization & UI behavior
