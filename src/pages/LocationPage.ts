@@ -44,13 +44,29 @@ export class LocationPage {
    * @param timeout - Maximum time to wait
    */
   async waitForLocationPage(timeout: number = 30000): Promise<void> {
-    // Wait for location buttons to be visible
-    await expect(this.locationButtons.first()).toBeVisible({
-      timeout,
-    }).catch(() => {
-      // Fallback: wait for search textbox as indicator of page load
-      return expect(this.searchTextBox).toBeVisible({ timeout });
-    });
+    try {
+      // First wait for any network activity to settle
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        // Ignore networkidle timeout and continue
+      });
+      
+      // Wait for location buttons to be visible
+      await expect(this.locationButtons.first()).toBeVisible({
+        timeout,
+      }).catch(() => {
+        // Fallback 1: wait for search textbox as indicator of page load
+        return expect(this.searchTextBox).toBeVisible({ timeout });
+      }).catch(() => {
+        // Fallback 2: wait for the location page header
+        return this.page.getByRole('heading', { name: 'Select a Location' }).waitFor({ state: 'visible', timeout: 10000 });
+      }).catch(() => {
+        // Fallback 3: wait for any location-related text
+        return this.page.getByText('Select a Location').waitFor({ state: 'visible', timeout: 10000 });
+      });
+    } catch (error) {
+      // If all waits fail, throw a descriptive error
+      throw new Error(`Location page failed to load within ${timeout}ms. Last error: ${error}`);
+    }
   }
 
   /**

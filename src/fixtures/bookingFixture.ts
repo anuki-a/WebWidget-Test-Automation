@@ -20,6 +20,7 @@ export const test = base.extend<{
   singleMeetingPreferenceBookingData: BookingData;
   spanishTranslationsBookingData: BookingData;
   fullHodidayHandlingData: BookingData;
+  urlCodeHandlingData: BookingData;
   partialHolidayHandlingData: PartialHolidayBookingData;
   spanishTranslationsOfPages: SpanishTranslationsOfPages; 
 }>({
@@ -779,6 +780,52 @@ export const test = base.extend<{
         formattedDate: formattedDate.fullDateString,
         startTime: '01:00 PM',
         endTime: '03:00 PM'
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
+      meetingPreference: {
+        type: 'in-person',
+        displayName: MeetingPreference.IN_PERSON
+      }
+    };
+
+    await use(data);
+  },
+
+  urlCodeHandlingData: async ({}, use: (data: BookingData) => Promise<void>) => {
+    // Generate customer data using TestDataBuilder
+    const customer = TestDataBuilder.generateCustomer();
+    
+    // Generate date/time data
+    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 3)
+    const formattedDate = DateUtils.formatDateForUI(nextBusinessDay);
+    
+    const rawName = 'Update Personal Account  60';
+    const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
+
+    // Create complete booking data for cancellation path (copy of bookingData)
+    const data: BookingData = {
+      service: {
+        category: 'Personal Accounts',
+        name: rawName,
+        displayName: cleanName,
+        duration: 60,
+        svcCode: 'UP'
+      },
+      location: {
+        code: '75071',
+        name: 'McKinney 2093 N. Central',
+        confirmationName: 'McKinney',
+        locCode: '10073'
+      },
+      dateTime: {
+        date: nextBusinessDay,
+        formattedDate: formattedDate.fullDateString,
+        time: '10:00 AM',
       },
       customer: {
         firstName: customer.firstName,

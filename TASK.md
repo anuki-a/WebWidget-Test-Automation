@@ -235,7 +235,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 #### URL & advanced features
 
-- [ ] OAC-20019 → URL params
+- [x] OAC-20019 → URL params ✅ IMPLEMENTED
 - [ ] OAC-20020 → Staff + Spanish request
 
 ### 🔹 Phase 2.6: Assertions Standardization
@@ -685,3 +685,56 @@ After Phase 3:
 - Uses proper TypeScript typing and JSDoc documentation
 - Test includes comprehensive assertions and console logging for debugging
 - All locators verified against live widget application using MCP tools
+
+### OAC-20019 URL Parameters Implementation - April 3, 2026
+
+✅ **URL Parameters Functionality Complete**
+
+- Implemented comprehensive test suite for verifying URL parameters `loc` and `svc` in Widget
+- Created new test file `OAC-20019_UrlParameters.spec.ts` with six test scenarios covering all URL parameter behaviors
+- Used existing `urlCodeHandlingData` fixture which provides:
+  - Service: "Update Personal Account  60" with svcCode: 'UP'
+  - Location: "McKinney 2093 N. Central" with locCode: '10073'
+  - Customer data and date/time for next business day at 10:00 AM
+- Test suite covers all scenarios from test case specification:
+  - **Test 1**: Navigate with both valid loc and svc parameters - skip both pages ✓
+    - URL: `meeting-preference?urlCode=MPCDSXKRCD&loc=10073&svc=UP`
+    - Verifies direct navigation to meeting preference page
+    - Completes full booking flow to verify selections persist
+  - **Test 2**: Navigate with only valid loc parameter - skip location page only ✓
+    - URL: `service?urlCode=MPCDSXKRCD&loc=10073`
+    - Verifies service page loads, location page skipped
+    - Continues flow to confirm meeting preference page appears
+  - **Test 3**: Navigate with only valid svc parameter - skip service page only ✓
+    - URL: `location?urlCode=MPCDSXKRCD&svc=UP`
+    - Verifies location page loads, service page skipped
+    - Continues flow to confirm meeting preference page appears
+  - **Test 4**: Navigate with invalid loc parameter - graceful fallback ✓
+    - URL: `service?urlCode=MPCDSXKRCD&loc=INVALID999`
+    - Verifies normal service page flow (invalid parameter ignored)
+    - Confirms graceful handling without errors
+  - **Test 5**: Navigate with invalid svc parameter - graceful fallback ✓
+    - URL: `location?urlCode=MPCDSXKRCD&svc=INVALID999`
+    - Verifies normal location page flow (invalid parameter ignored)
+    - Confirms graceful handling without errors
+  - **Test 6**: Navigate with both invalid parameters - graceful fallback ✓
+    - URL: `meeting-preference?urlCode=MPCDSXKRCD&loc=INVALID999&svc=INVALID999`
+    - Verifies normal service page flow (both parameters ignored)
+    - Confirms service categories are available
+- Key technical implementation:
+  - Uses `urlCodes` enum for parameter names: `LOCATION_URL_CODE = 'loc'`, `SERVICE_URL_CODE = 'svc'`
+  - Dynamic URL construction with valid test data from fixture
+  - Page verification using appropriate wait methods: `waitForServicePage()`, `waitForLocationPage()`, `waitForMeetingPreferencePage()`
+  - Negative verification using `.not.toBeVisible()` for skipped pages
+  - Positive verification using direct page locators for current page
+- Validates expected results:
+  - Valid loc parameter skips location selection page ✓
+  - Valid svc parameter skips service selection page ✓
+  - Both parameters skip both pages and go directly to meeting preference ✓
+  - Invalid parameters fall back to normal flow gracefully ✓
+  - Selected values persist throughout the booking process ✓
+- Follows project architecture: Test → Fixture → Page → Component → UI
+- Uses existing page objects and methods with proper TypeScript typing
+- All tests tagged appropriately: `@smoke`, `@functional`, `@validation`, `@url-parameters`
+- TypeScript compilation passes without errors
+- Comprehensive JSDoc documentation following project conventions

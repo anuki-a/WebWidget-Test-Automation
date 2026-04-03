@@ -32,15 +32,17 @@ export interface ServiceData {
   name: string;
   displayName?: string;
   duration?: number;
+  svcCode?: string; // string that assigns to as (short form of service) / (number) 
 }
 
 /**
  * Location selection data.
  */
 export interface LocationData {
-  code: string;
+  code: string; // zip code of city
   name: string;
   confirmationName?: string;
+  locCode?: string; // a string that creator assigns to as (short form of location name)/ (number)
 }
 
 /**
@@ -212,5 +214,11 @@ export interface SpanishTranslationsOfPages {
   spanishMonths: {
     [key: string]: string;
   };
+}
+
+
+export enum urlCodes {
+  SERVICE_URL_CODE = 'svc',
+  LOCATION_URL_CODE = 'loc'
 }
 

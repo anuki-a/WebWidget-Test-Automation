@@ -131,11 +131,27 @@ export class ServicePage {
    * @param timeout - Maximum time to wait
    */
   async waitForServicePage(timeout: number = 30000): Promise<void> {
-    // Wait for service categories to be visible using defined locators
-    await this.serviceCategoryButtons.first().waitFor({ state: 'visible', timeout }).catch(() => {
-      // Fallback: wait for page heading
-      return this.pageHeading.waitFor({ state: 'visible', timeout });
-    });
+    try {
+      // First wait for any network activity to settle
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        // Ignore networkidle timeout and continue
+      });
+      
+      // Wait for service categories to be visible using defined locators
+      await this.serviceCategoryButtons.first().waitFor({ state: 'visible', timeout }).catch(() => {
+        // Fallback 1: wait for page heading
+        return this.pageHeading.waitFor({ state: 'visible', timeout });
+      }).catch(() => {
+        // Fallback 2: wait for any service category button with more specific selector
+        return this.page.locator('button').filter({ hasText: /^(Personal|Business|Estate|Speak|Notary|Safe|Other)/ }).first().waitFor({ state: 'visible', timeout: 10000 });
+      }).catch(() => {
+        // Fallback 3: wait for the heading role as last resort
+        return this.page.getByRole('heading', { name: 'Select a Service' }).waitFor({ state: 'visible', timeout: 10000 });
+      });
+    } catch (error) {
+      // If all waits fail, throw a descriptive error
+      throw new Error(`Service page failed to load within ${timeout}ms. Last error: ${error}`);
+    }
   }
 
   /**
