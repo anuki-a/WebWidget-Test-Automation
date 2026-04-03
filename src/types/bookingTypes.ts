@@ -13,6 +13,18 @@ export interface BookingData {
 }
 
 /**
+ * Complete booking data for appointment booking tests.
+ * Contains all data needed for end-to-end booking verification.
+ */
+export interface PartialHolidayBookingData {
+  service: ServiceData;
+  location: LocationData;
+  customer: CustomerData;
+  meetingPreference: MeetingPreference;
+  partialHolidayDateTime: PartialHolidayDateTimeData;
+}
+
+/**
  * Service selection data.
  */
 export interface ServiceData {
@@ -46,6 +58,16 @@ export interface DateTimeData {
   date: Date;
   formattedDate: string;
   time: string;
+}
+
+/**
+ * Date and time selection data for partial holiday.
+ */
+export interface PartialHolidayDateTimeData {
+  date: Date;
+  formattedDate: string;
+  startTime:string;
+  endTime:string;
 }
 
 /**

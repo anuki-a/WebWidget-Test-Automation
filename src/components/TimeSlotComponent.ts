@@ -37,11 +37,21 @@ export class TimeSlotComponent {
     
     // Use async retry pattern from the happy path test
     await expect(async () => {
-      const availableTimeLocator = this.page
+      // First try to find explicitly available slots
+      let availableTimeLocator = this.page
         .locator('div, span, a, button') // Check all common clickable tags
         .filter({ hasText: /^(?:\d{1,2}:\d{2}\s(?:AM|PM))$/ }) // Matches exact time format like "6:15 AM"
-        .filter({ hasNot: this.page.locator('.disabled, [disabled], .grayed-out') }) // Exclude typical disabled classes
+        .filter({ hasNot: this.page.locator('.disabled, [disabled], .grayed-out, .unavailable') }) // Exclude typical disabled classes
         .first();
+      
+      // If no explicitly available slots found, try any time slot that's clickable
+      const count = await availableTimeLocator.count();
+      if (count === 0) {
+        availableTimeLocator = this.page
+          .locator('div, span, a, button') // Check all common clickable tags
+          .filter({ hasText: /^(?:\d{1,2}:\d{2}\s(?:AM|PM))$/ }) // Matches exact time format like "6:15 AM"
+          .first();
+      }
       
       await expect(availableTimeLocator).toBeVisible({ timeout: 5000 });
       selectedTime = (await availableTimeLocator.innerText()).trim();

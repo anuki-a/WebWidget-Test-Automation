@@ -223,7 +223,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 
 #### Calendar & availability
 
-- [ ] OAC-20013 → Partial holiday
+- [x] OAC-20013 → Partial holiday ✅ IMPLEMENTED (includes service duration impact)
 - [ ] OAC-20014 → Full holiday 🔄 IN PROGRESS
 - [x] OAC-20015 → Past date restriction ✅ IMPLEMENTED
 - [ ] OAC-20016 → Timeslot availability
@@ -587,6 +587,62 @@ After Phase 3:
   - Command: `npx @executeautomation/playwright-mcp-server`
   - Environment: `PLAYWRIGHT_BROWSER=chromium`
 - Ready for AI-assisted browser automation and testing workflows
+
+### OAC-20013 Partial Holiday Behavior Enhancement - April 3, 2026
+
+✅ **Service Duration Buffer Zone Test Added to OAC-20013**
+
+- Enhanced existing OAC-20013 test file with second test case for service duration impact on holiday availability
+- Added service duration capture functionality to ServicePage:
+  - `extractServiceDuration(serviceText)` - Extract duration from service text using regex pattern
+  - `getServiceDuration(serviceName)` - Get duration for specific service by reading UI text
+- Added second test "Verify service duration blocks pre-holiday time slots" to existing test suite:
+  - **Step 1**: Capture service duration before selecting service (e.g., 60 minutes from "Update Personal Account  60")
+  - **Step 2**: Select service and navigate to date/time page
+  - **Step 3**: Navigate to partial holiday date (1:00 PM - 3:00 PM)
+  - **Step 4**: Calculate pre-holiday buffer zone based on service duration
+  - **Step 5**: Verify pre-holiday buffer slots are disabled (12:15 PM, 12:30 PM, 12:45 PM for 60-min service)
+  - **Step 6**: Verify holiday slots are disabled (1:00 PM - 3:00 PM)
+  - **Step 7**: Verify slots outside buffer zones remain available
+- Key technical implementation:
+  - Service duration extraction using regex: `/(\d+)\s*Mins?/i` pattern
+  - Buffer zone calculation: `bufferStartTime = holidayStartHour - (serviceDuration / 60)`
+  - Time slot analysis with 24-hour conversion for accurate comparison
+  - Individual slot verification using `isTimeSlotDisabled()` method
+- Test validates realistic scenario: 60-minute service starting at 12:15 PM would run until 1:15 PM, overlapping with 1:00 PM holiday start
+- Uses existing `partialHolidayHandlingData` fixture with 1:00 PM - 3:00 PM holiday configuration
+- TypeScript compilation passes without errors
+- Follows project architecture: Test → Page → Component → UI
+- Includes comprehensive console logging for debugging buffer zone calculations
+- Test tagged with `@duration` for easy identification and filtering
+
+### OAC-20015 Service Duration Impact on Holiday Availability Implementation - April 3, 2026
+
+✅ **Service Duration Buffer Zone Functionality Complete**
+
+- Implemented comprehensive test for verifying service duration blocks pre-holiday time slots based on appointment duration
+- Enhanced ServicePage with new methods for capturing service duration:
+  - `extractServiceDuration(serviceText)` - Extract duration from service text using regex pattern
+  - `getServiceDuration(serviceName)` - Get duration for specific service by reading UI text
+- Created new test file `OAC-20015_ServiceDurationHolidayImpact.spec.ts` with minimal focused test:
+  - **Step 1**: Capture service duration before selecting service (e.g., 60 minutes from "Update Personal Account  60")
+  - **Step 2**: Select service and navigate to date/time page
+  - **Step 3**: Navigate to partial holiday date (1:00 PM - 3:00 PM)
+  - **Step 4**: Calculate pre-holiday buffer zone based on service duration
+  - **Step 5**: Verify pre-holiday buffer slots are disabled (12:15 PM, 12:30 PM, 12:45 PM for 60-min service)
+  - **Step 6**: Verify holiday slots are disabled (1:00 PM - 3:00 PM)
+  - **Step 7**: Verify slots outside buffer zones remain available
+- Key technical implementation:
+  - Service duration extraction using regex: `/(\d+)\s*Mins?/i` pattern
+  - Buffer zone calculation: `bufferStartTime = holidayStartHour - (serviceDuration / 60)`
+  - Time slot analysis with 24-hour conversion for accurate comparison
+  - Individual slot verification using `isTimeSlotDisabled()` method
+- Test validates realistic scenario: 60-minute service starting at 12:15 PM would run until 1:15 PM, overlapping with 1:00 PM holiday start
+- Uses existing `partialHolidayHandlingData` fixture with 1:00 PM - 3:00 PM holiday configuration
+- TypeScript compilation passes without errors
+- Follows project architecture: Test → Page → Component → UI
+- Includes comprehensive console logging for debugging buffer zone calculations
+- **Note**: This functionality has been moved to OAC-20013 as a second test case to consolidate related holiday behavior tests
 
 ### OAC-20017 Spanish Language Translations Implementation - April 2, 2026
 

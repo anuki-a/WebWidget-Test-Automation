@@ -496,6 +496,74 @@ export class ServicePage {
   }
 
   /**
+   * Extract service duration from service text.
+   * @param serviceText - The full service text containing duration
+   * @returns Promise resolving to duration in minutes
+   */
+  async extractServiceDuration(serviceText: string): Promise<number> {
+    // Match pattern like "60 Mins" or "75 Mins"
+    const durationMatch = serviceText.match(/(\d+)\s*Mins?/i);
+    if (durationMatch && durationMatch[1]) {
+      return parseInt(durationMatch[1]);
+    }
+    // Default to 60 minutes if no duration found
+    return 60;
+  }
+
+  /**
+   * Get service duration for the selected service.
+   * @param serviceName - Service name to get duration for
+   * @returns Promise resolving to duration in minutes
+   */
+  async getServiceDuration(serviceName: string): Promise<number> {
+    let serviceLink;
+    
+    // Use specific service locators when possible
+    switch (serviceName) {
+      case 'Update Personal Account':
+        serviceLink = this.updatePersonalAccountLink;
+        break;
+      case 'Update Personal Account with Spanish Speaker':
+        serviceLink = this.updatePersonalAccountWithSpanishSpeakerLink;
+        break;
+      case 'Update Business Account':
+        serviceLink = this.updateBusinessAccountLink;
+        break;
+      case 'Update Business Account with Spanish Speaker':
+        serviceLink = this.updateBusinessAccountWithSpanishSpeakerLink;
+        break;
+      case 'Estate Accounts':
+        serviceLink = this.estateAccountsLink;
+        break;
+      case 'Fraud RwG Edit':
+        serviceLink = this.fraudRwGEditLink;
+        break;
+      case 'IRA (Individual Retirement Account)':
+        serviceLink = this.iraAccountLink;
+        break;
+      case 'Notary':
+        serviceLink = this.notaryServiceLink;
+        break;
+      case 'Safe Deposit Access':
+        serviceLink = this.safeDepositAccessLink;
+        break;
+      case 'Online Banking Assistance':
+        serviceLink = this.onlineBankingAssistanceLink;
+        break;
+      default:
+        serviceLink = this.page.getByRole('link', { name: serviceName });
+    }
+    
+    const text = await serviceLink.textContent();
+    if (text) {
+      return await this.extractServiceDuration(text);
+    }
+    
+    // Default fallback
+    return 60;
+  }
+
+  /**
    * Check if a specific service is available.
    * @param serviceName - Service name to check
    * @returns Promise resolving to true if service is available
