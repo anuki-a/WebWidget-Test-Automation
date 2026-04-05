@@ -21,6 +21,7 @@ export const test = base.extend<{
   spanishTranslationsBookingData: BookingData;
   fullHodidayHandlingData: BookingData;
   urlCodeHandlingData: BookingData;
+  checklistsOfAppointmentsData: [BookingData, string[]];
   partialHolidayHandlingData: PartialHolidayBookingData;
   spanishTranslationsOfPages: SpanishTranslationsOfPages; 
 }>({
@@ -840,5 +841,54 @@ export const test = base.extend<{
     };
 
     await use(data);
+  },
+
+  checklistsOfAppointmentsData: async ({}, use) => {
+    // Generate customer data using TestDataBuilder
+    const customer = TestDataBuilder.generateCustomer();
+    
+    // Generate date/time data
+    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 3)
+    const formattedDate = DateUtils.formatDateForUI(nextBusinessDay);
+    
+    const rawName = 'Update Personal Account  60';
+    const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
+
+    // Create complete booking data for cancellation path (copy of bookingData)
+    const data = {
+      service: {
+        category: 'Personal Accounts',
+        name: rawName,
+        displayName: cleanName,
+        duration: 60,
+      },
+      location: {
+        code: '75071',
+        name: 'McKinney 2093 N. Central',
+        confirmationName: 'McKinney',
+      },
+      dateTime: {
+        date: nextBusinessDay,
+        formattedDate: formattedDate.fullDateString,
+        time: '10:00 AM',
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
+      meetingPreference: {
+        type: 'in-person',
+        displayName: MeetingPreference.IN_PERSON
+      }
+    };
+
+    const checklists = [
+      'Passport or NIC (proof of identity)', 
+      'Utility Bill (Residency & Address Verification)', 
+      'Tax Residency Proof (Tax & Social Information)​'
+    ];
+    await use([data, checklists]);
   },
 });

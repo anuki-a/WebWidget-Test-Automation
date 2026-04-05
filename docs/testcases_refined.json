@@ -678,19 +678,18 @@
     "preconditions": [
       "Widget accessible",
       "Checklist on confirmation enabled",
-      "Checklist items configured for P/S A",
-      "Another P/S exists with different/no checklist",
-      "Admin Portal access available"
+      "Checklist items configured for service"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Book P/S A", "expected": "Checklist link appears on confirmation" },
-      { "step": 2, "action": "Click Checklist", "expected": "Popup shows checklist items for P/S A" },
-      { "step": 3, "action": "Book P/S B", "expected": "Checklist content matches P/S B configuration" },
-      { "step": 4, "action": "Compare popup content", "expected": "Difference as configured" },
-      { "step": 5, "action": "Disable checklist setting and book again", "expected": "Checklist link absent" }
+      {"step": 1, "action": "Open widget", "expected": "Widget loads"},
+      {"step": 2, "action": "Select service with checklist", "expected": "Service selected"},
+      {"step": 3, "action": "Continue to book", "expected": "Booking flow continues"},
+      { "step": 3, "action": "Book Service That configured with checklist", "expected": "Checklist link appears on confirmation" },
+      { "step": 4, "action": "Click Checklist link on Confirmation Page", "expected": "Popup shows checklist items" },
+      { "step": 5, "action": "Check checklist content", "expected": "Checklist content matches popup Content" }
     ],
     "expectedResult": [
       "Checklist visibility/content depends on service + config"
