@@ -85,7 +85,7 @@ test.describe('Admin System Settings Data Setup', () => {
     const config = body.Entities[0];
     expect(config.ShowCheckListInWidget).toBe(false);
   });
-  
+
 });
 
 test('should fetch product details by ID ->setup OAC-20010', async ({request}) => {
@@ -174,13 +174,13 @@ bookingTest('should setup OAC-20010 by fetching and updating product preferences
 });
 
 
-bookingTest('should add a new holiday 2 business days from now', async ({ request }) => {
+bookingTest('should add a new holiday 3 business days from now', async ({ request }) => {
   const apiClient = new ApiClient(request);
   const adminService = new AdminService(apiClient);
 
   // 1. Calculate dynamic date (matching the original midnight format)
   const today = new Date();
-  const futureDate = DateUtils.addBusinessDays(today, 3);
+  const futureDate = DateUtils.addBusinessDays(today, 4);
   futureDate.setUTCHours(0, 0, 0, 0);
   const isoDate = futureDate.toISOString();
 
@@ -215,7 +215,7 @@ bookingTest('should add a new holiday 2 business days from now', async ({ reques
       End: "",
       Inherited: "Inherited",
       OptInStatus: true,
-      HolidayDate: isoDate 
+      HolidayDate: new Date().toISOString() // Current timestamp 
     },
     entityAspect: {
       entityTypeName: "Holiday:#Oac.Model.Data.ClientData",
