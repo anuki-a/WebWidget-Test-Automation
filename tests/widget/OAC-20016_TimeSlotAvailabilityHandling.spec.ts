@@ -100,9 +100,7 @@ test.describe('Time Slot Availability Handling - OAC-20016', () => {
       // Generate slots for this staff member (30-minute intervals)
       expectedEnabledSlots.push(startTime, lastSlotTime);
     });
-
-    // Verify that the calculated expected slots are reflected in the actual enabled slots
-
+    
     // Select a specific staff member (use first staff from fixture data)
     const selectedStaffName = staffAvailabilityData[0]?.staffName;
     if (selectedStaffName) {
@@ -117,9 +115,8 @@ test.describe('Time Slot Availability Handling - OAC-20016', () => {
     // Continue with time selection (first available time slot for selected staff)
     let selectedDateTime: { date: Date; time: string; formattedDate: string };
     
-      selectedDateTime = await dateTimePage.selectDayAndFirstAvailableTime(bookingData.dateTime);
+    selectedDateTime = await dateTimePage.selectDayAndFirstAvailableTime(bookingData.dateTime);
    
-
     await personalDetailsPage.fillDetails(bookingData.customer);
     await personalDetailsPage.submit();
 
