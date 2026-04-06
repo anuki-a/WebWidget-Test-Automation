@@ -216,6 +216,12 @@ export interface SpanishTranslationsOfPages {
   };
 }
 
+export interface staffAvailabilityData {
+  staffName: string;
+  availabilityStart: string;
+  availabilityEnd: string;
+}
+
 
 export enum urlCodes {
   SERVICE_URL_CODE = 'svc',

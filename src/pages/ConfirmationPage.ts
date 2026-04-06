@@ -739,25 +739,16 @@ export class ConfirmationPage {
   async verifyChecklistItems(expectedItems: string[]): Promise<boolean> {
     const actualItems = await this.getChecklistItems();
     
-    console.log('Verifying checklist items...');
-    console.log('Expected items:', expectedItems);
-    console.log('Actual items:', actualItems);
-    console.log('Expected count:', expectedItems.length);
-    console.log('Actual count:', actualItems.length);
-    
     if (actualItems.length !== expectedItems.length) {
-      console.log('Item count mismatch - returning false');
       return false;
     }
     
     const result = expectedItems.every((expectedItem, index) => {
       const actualItem = actualItems[index];
       const matches = actualItem && (actualItem.includes(expectedItem) || expectedItem.includes(actualItem));
-      console.log(`Item ${index}: expected="${expectedItem}", actual="${actualItem}", matches=${matches}`);
       return matches;
     });
     
-    console.log('Checklist verification result:', result);
     return result;
   }
 
@@ -784,7 +775,6 @@ export class ConfirmationPage {
       await this.waitForChecklistPopup();
       
       const itemsMatch = await this.verifyChecklistItems(expectedChecklists);
-      console.log("itemMatch :",itemsMatch )
       await this.closeChecklistPopup();
       
       return itemsMatch;

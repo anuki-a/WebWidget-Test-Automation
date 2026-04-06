@@ -1,5 +1,5 @@
 import { test as base } from '@playwright/test';
-import { BookingData, PartialHolidayBookingData, ServiceData, SpanishTranslationsOfPages } from '../types/bookingTypes';
+import { BookingData, PartialHolidayBookingData, ServiceData, SpanishTranslationsOfPages, staffAvailabilityData } from '../types/bookingTypes';
 import { TestDataBuilder } from '../utils/testDataBuilder';
 import { DateUtils } from '../utils/dateUtils';
 import { MeetingPreference } from '@/pages/MeetingPreferencePage';
@@ -21,6 +21,7 @@ export const test = base.extend<{
   spanishTranslationsBookingData: BookingData;
   fullHodidayHandlingData: BookingData;
   urlCodeHandlingData: BookingData;
+  TimeSlotAvailabilityHandlingData: [BookingData, staffAvailabilityData[]];
   checklistsOfAppointmentsData: [BookingData, string[]];
   partialHolidayHandlingData: PartialHolidayBookingData;
   spanishTranslationsOfPages: SpanishTranslationsOfPages; 
@@ -890,5 +891,64 @@ export const test = base.extend<{
       'Tax Residency Proof (Tax & Social Information)​'
     ];
     await use([data, checklists]);
+  },
+
+
+    TimeSlotAvailabilityHandlingData: async ({}, use: (data: [BookingData, staffAvailabilityData[]]) => Promise<void>) => {
+    // Generate customer data using TestDataBuilder
+    const customer = TestDataBuilder.generateCustomer();
+    
+    // Generate date/time data
+    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 1)
+    const formattedDate = DateUtils.formatDateForUI(nextBusinessDay);
+    
+    const rawName = 'Notary  30 Mins Notary';
+    const cleanName = rawName.replace(/\s?[^\w\s].*$/, '').trim();
+
+    // Create complete booking data for cancellation path (copy of bookingData)
+    const data: BookingData = {
+      service: {
+        category: 'Notary and Medallion Services',
+        name: rawName,
+        displayName: cleanName,
+        duration: 30
+      },
+      location: {
+        code: '78154',
+        name: 'Northcliffe 22015 N IH 35',
+        confirmationName: 'Northcliffe'
+      },
+      dateTime: {
+        date: nextBusinessDay,
+        formattedDate: formattedDate.fullDateString,
+        time: '10:00 AM',
+      },
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone,
+        notes:"Non Important note"
+      },
+      meetingPreference: {
+        type: 'in-person',
+        displayName: MeetingPreference.IN_PERSON
+      }
+    };
+
+    const staffAvailabilityData: staffAvailabilityData[] = [
+      {
+      staffName: 'Rora Rora',
+      availabilityStart: '09:00 AM',
+      availabilityEnd: '11:30 AM'
+      },
+      {
+      staffName: 'Zina Caisse',
+      availabilityStart: '01:00 PM',
+      availabilityEnd: '05:00 PM'
+      }
+  ];
+
+    await use([data, staffAvailabilityData]);
   },
 });
