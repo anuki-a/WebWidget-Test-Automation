@@ -10,7 +10,7 @@ import { AdminService } from '@/api/AdminService';
 import { ApiClient } from '@/api/apiClient';
 
 /**
- * OAC-20018: Verify Appointment Checklist Display Based on Selected P/S and Configuration
+ * OAC-20018-A: Verify Appointment Checklist Display Based on Selected P/S and Configuration
  * 
  * Test Case: Verify confirmation checklist link visibility and content follows service-specific checklist config.
  * 
@@ -104,7 +104,7 @@ test.describe('Appointment Checklist Display - OAC-20018', () => {
   test.afterEach(async ({}, testInfo) => {
   // Only triggers after the checklist display verification test
   if (testInfo.title.includes('Verify checklist display for service with checklist configuration')) {
-    console.log('Running Teardown: Disabling Appointment Checklist...');
+    console.log('Running Teardown inorder to prepare for OAC-20018-B: Disabling Appointment Checklist...');
     
     try {
       // Using the dynamic method to flip only the Checklist setting to false
@@ -122,58 +122,4 @@ test.describe('Appointment Checklist Display - OAC-20018', () => {
   }
 });
 
-// below test is working, but should implement configuration switch from test suite to use this test.
-
-  // test('OAC-20018-B Verify checklist not displayed when checklist configuration is disabled', { tag: ['@functional', '@checklist'] }, async ({ 
-  //   page, 
-  //   checklistsOfAppointmentsData 
-  // }) => {
-  //   // Extract test data from fixture
-  //   const [bookingData] = checklistsOfAppointmentsData;
-    
-  //   // Initialize page objects
-  //   const servicePage = new ServicePage(page);
-  //   const locationPage = new LocationPage(page);
-  //   const meetingPreferencePage = new MeetingPreferencePage(page);
-  //   const dateTimePage = new DateTimePage(page);
-  //   const personalDetailsPage = new PersonalDetailsPage(page);
-  //   const confirmationPage = new ConfirmationPage(page);
-
-  //   // Complete booking flow
-  //   await page.goto(process.env.BASE_URL!);
-
-  //   // Wait for page to be fully loaded with retry logic
-  //   await expect(async () => {
-  //     await expect(page.getByRole('button', { name: 'Personal Accounts' })).toBeVisible({ timeout: 10000 });
-  //   }).toPass({ timeout: 30000 });
-    
-  //   await expect(page.getByRole('button', { name: 'Speak with a Department' })).toBeVisible();
-
-  //   const selectedService = await servicePage.selectServiceFlow(bookingData.service.category, bookingData.service.name);
-
-  //   await locationPage.searchAndSelectLocation(bookingData.location.code, bookingData.location.name);
-
-  //   await meetingPreferencePage.selectInPerson();
-
-  //   const selectedDateTime = await dateTimePage.selectDayAndFirstAvailableTime(bookingData.dateTime);
-
-  //   await personalDetailsPage.fillDetails(bookingData.customer);
-  //   await personalDetailsPage.submit();
-
-  //   // Wait for confirmation page
-  //   await confirmationPage.waitForConfirmationPage();
-    
-  //   // Update booking data with actual selected values
-  //   bookingData.dateTime.time = selectedDateTime.time;
-  //   bookingData.dateTime.date = selectedDateTime.date;
-  //   bookingData.dateTime.formattedDate = selectedDateTime.formattedDate;
-    
-  //   // Verify booking details first
-  //   const bookingVerified = await confirmationPage.verifyBooking(bookingData);
-  //   expect(bookingVerified).toBe(true);
-
-  //   // Verify checklist link is NOT visible when checklist configuration is disabled
-  //   const checklistLinkVisible = await confirmationPage.isChecklistLinkVisible();
-  //   expect(checklistLinkVisible).toBe(false);
-  // });
 });

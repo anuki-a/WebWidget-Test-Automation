@@ -140,10 +140,11 @@ test.describe('Past Date Selection Validation - OAC-20015', () => {
     await personalDetailsPage.waitForPersonalDetailsPage();
   });
 
+
   test.afterEach(async ({}, testInfo) => {
   // Only triggers after the "Verify past dates cannot be selected for appointments" test
   if (testInfo.title.includes('Verify past dates cannot be selected for appointments')) {
-    console.log('Running Teardown: Enabling Appointment Checklist...');
+    console.log('Running Teardown inorder to prepare for OAC-20018-A : Enabling Appointment Checklist...');
     
     try {
       // Using the dynamic method to flip only the Checklist setting
