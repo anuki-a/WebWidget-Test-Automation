@@ -180,6 +180,11 @@ test.describe('Appointment Booking - OAC-20001', () => {
     
   });
 
+  // TODO : OAC-20018-B 
+  
+  
+  
+
   test.afterEach(async ({}, testInfo) => {
   if (testInfo.title.includes('Personal Details Validation - Optional Configurations')) {
     try {

@@ -57,6 +57,35 @@ test.describe('Admin System Settings Data Setup', () => {
     expect(config.RequireCustomerEmail).toBe(false);
     expect(config.RequireCustomerPhone).toBe(false);
   });
+
+  test('should enable appointment checklist in confirmation page', async () => {
+    // Toggling the ShowCheckListInWidget setting to true
+    const response = await adminService.updateConfigSetting({ 
+      ShowCheckListInWidget: true 
+    });
+    
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    
+    // Validate the response contains the updated value
+    const config = body.Entities[0];
+    expect(config.ShowCheckListInWidget).toBe(true);
+  });
+
+  test('should disable appointment checklist in confirmation page', async () => {
+    // Toggling the ShowCheckListInWidget setting to false
+    const response = await adminService.updateConfigSetting({ 
+      ShowCheckListInWidget: false 
+    });
+    
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    
+    // Validate the response reflects the disabled state
+    const config = body.Entities[0];
+    expect(config.ShowCheckListInWidget).toBe(false);
+  });
+  
 });
 
 test('should fetch product details by ID ->setup OAC-20010', async ({request}) => {

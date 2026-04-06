@@ -9,6 +9,8 @@ import { TestDataBuilder } from '../../src/utils/testDataBuilder';
 import { DateUtils } from '../../src/utils/dateUtils';
 import { MeetingPreference } from '../../src/pages/MeetingPreferencePage';
 import { expect } from '@playwright/test';
+import { AdminService } from '@/api/AdminService';
+import { ApiClient } from '@/api/apiClient';
 
 /**
  * OAC-20015: Verify Past Dates Cannot Be Selected
@@ -37,6 +39,13 @@ import { expect } from '@playwright/test';
  */
 
 test.describe('Past Date Selection Validation - OAC-20015', () => {
+
+  let adminService: AdminService;
+    
+  test.beforeEach(async ({ request }) => {
+    adminService = new AdminService(new ApiClient(request));
+  });
+
   test('Verify past dates cannot be selected for appointments', { tag: ['@functional', '@validation', '@date'] }, async ({ page, pastDateBookingData: bookingData }) => {
     const servicePage = new ServicePage(page);
     const locationPage = new LocationPage(page);
@@ -130,4 +139,25 @@ test.describe('Past Date Selection Validation - OAC-20015', () => {
     // Verify navigation to Personal Details page
     await personalDetailsPage.waitForPersonalDetailsPage();
   });
+
+  test.afterEach(async ({}, testInfo) => {
+  // Only triggers after the "Verify past dates cannot be selected for appointments" test
+  if (testInfo.title.includes('Verify past dates cannot be selected for appointments')) {
+    console.log('Running Teardown: Enabling Appointment Checklist...');
+    
+    try {
+      // Using the dynamic method to flip only the Checklist setting
+      const response = await adminService.updateConfigSetting({ 
+        ShowCheckListInWidget: true 
+      });
+      
+      // Log warning if the reset failed without failing the test itself
+      if (response.status() !== 200) {
+        console.error('Teardown Warning: Failed to reset ShowCheckListInWidget to true.');
+      }
+    } catch (error) {
+      console.error('Teardown Error:', error);
+    }
+  }
+});
 });

@@ -101,9 +101,30 @@ test.describe('Appointment Checklist Display - OAC-20018', () => {
     expect(checklistFlowSuccessful).toBe(true);
   });
 
+  test.afterEach(async ({}, testInfo) => {
+  // Only triggers after the checklist display verification test
+  if (testInfo.title.includes('Verify checklist display for service with checklist configuration')) {
+    console.log('Running Teardown: Disabling Appointment Checklist...');
+    
+    try {
+      // Using the dynamic method to flip only the Checklist setting to false
+      const response = await adminService.updateConfigSetting({ 
+        ShowCheckListInWidget: false 
+      });
+      
+      // Log warning if the reset failed to help with debugging flaky teardowns
+      if (response.status() !== 200) {
+        console.error('Teardown Warning: Failed to reset ShowCheckListInWidget to false.');
+      }
+    } catch (error) {
+      console.error('Teardown Error during Admin Settings reset:', error);
+    }
+  }
+});
+
 // below test is working, but should implement configuration switch from test suite to use this test.
 
-  // test('Verify checklist not displayed when checklist configuration is disabled', { tag: ['@functional', '@checklist'] }, async ({ 
+  // test('OAC-20018-B Verify checklist not displayed when checklist configuration is disabled', { tag: ['@functional', '@checklist'] }, async ({ 
   //   page, 
   //   checklistsOfAppointmentsData 
   // }) => {
