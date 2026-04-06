@@ -101,6 +101,27 @@ export class DateTimePage {
   }
 
   /**
+   * Select today's date and first available time slot (Spanish version).
+   * @returns Promise resolving to the selected date and time
+   */
+  async selectDayAndFirstAvailableTimeSpanish(dateTime: DateTimeData): Promise<{ date: Date; time: string; formattedDate: string }> {
+    await this.waitForDateTimePageSpanish();
+    const day = dateTime.date || DateUtils.getToday();
+    
+    // Select date using Spanish method
+    await this.calendarComponent.selectDateSpanish(day);
+
+    // Select first available time slot
+    const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
+
+    return {
+      date: day,
+      time: selectedTime,
+      formattedDate: DateUtils.formatDateForUISpanish(day).fullDateString,
+    };
+  }
+
+  /**
    * Select a future date and first available time slot.
    * @param daysAhead - Number of days ahead to select
    * @returns Promise resolving to the selected date and time

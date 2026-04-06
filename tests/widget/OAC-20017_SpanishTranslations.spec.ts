@@ -124,7 +124,7 @@ test.describe('OAC-20017: Spanish Language Translations', () => {
     await expect(dateTimeHeading).toBeVisible();
 
     // Select a date and time to proceed (use Spanish method)
-    await dateTimePage.selectDateAndTimeSpanish(spanishTranslationsBookingData.dateTime.date, spanishTranslationsBookingData.dateTime.time);
+    const selectedDateTime = await dateTimePage.selectDayAndFirstAvailableTimeSpanish(spanishTranslationsBookingData.dateTime);
 
     // 5. Verify Personal Details page heading
     const personalDetailsHeading = page.getByRole('heading', { name: expectedSpanishHeadings.personalDetails });
