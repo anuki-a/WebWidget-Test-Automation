@@ -28,19 +28,27 @@ test.describe('Admin System Settings Data Setup', () => {
   });
 
   test('should enable email and phone requirements', async () => {
-    const response = await adminService.updateContactRequirements(true, true);
+    // We only pass the fields we want to flip
+    const response = await adminService.updateConfigSetting({ 
+      RequireCustomerEmail: true, 
+      RequireCustomerPhone: true 
+    });
     
     expect(response.ok()).toBeTruthy();
     const body = await response.json();
     
     // Validate the response contains the updated values
+    // Note: The API returns 'Entities' (Capitalized) in the response object
     const config = body.Entities[0];
     expect(config.RequireCustomerEmail).toBe(true);
     expect(config.RequireCustomerPhone).toBe(true);
   });
 
   test('should disable email and phone requirements', async () => {
-    const response = await adminService.updateContactRequirements(false, false);
+    const response = await adminService.updateConfigSetting({ 
+      RequireCustomerEmail: false, 
+      RequireCustomerPhone: false 
+    });
     
     expect(response.ok()).toBeTruthy();
     const body = await response.json();

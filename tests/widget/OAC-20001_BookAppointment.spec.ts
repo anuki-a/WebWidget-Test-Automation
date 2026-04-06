@@ -181,21 +181,18 @@ test.describe('Appointment Booking - OAC-20001', () => {
   });
 
   test.afterEach(async ({}, testInfo) => {
-    // Only triggers for Test Case 4
-    if (testInfo.title.includes('Personal Details Validation - Optional Configurations')) {
-      console.log('Running Teardown for OAC-20009-A: setting Webwidget Settings...');
+  if (testInfo.title.includes('Personal Details Validation - Optional Configurations')) {
+    try {
+      // Clean and descriptive: Only update what you need
+      const response = await adminService.updateConfigSetting({ 
+        RequireCustomerEmail: true, 
+        RequireCustomerPhone: true 
+      });
       
-      try {
-        const response = await adminService.updateContactRequirements(true, true);
-        
-        // We log instead of using expect() here to prevent the teardown 
-        // itself from failing the test if the API is momentarily down.
-        if (response.status() !== 200) {
-          console.error('Teardown Warning: Failed to reset admin settings.');
-        }
-      } catch (error) {
-        console.error('Teardown Error:', error);
-      }
+      if (response.status() !== 200) console.error('Teardown Warning: Fail');
+    } catch (error) {
+      console.error('Teardown Error:', error);
     }
-  });
+  }
+});
 });

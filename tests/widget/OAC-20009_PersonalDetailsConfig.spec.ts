@@ -156,21 +156,17 @@ test.describe('Personal Details Validation - OAC-20009-B', () => {
 
 
   test.afterEach(async ({}, testInfo) => {
-    // Only triggers for Test Case 4
-    if (testInfo.title.includes('Navigate to Personal Details page with mandatory email/phone config')) {
-      console.log('Running Teardown for OAC-20009-B: Resetting Admin Settings...');
-      
-      try {
-        const response = await adminService.updateContactRequirements(false, false);
-        
-        // We log instead of using expect() here to prevent the teardown 
-        // itself from failing the test if the API is momentarily down.
-        if (response.status() !== 200) {
-          console.error('Teardown Warning: Failed to reset admin settings.');
-        }
-      } catch (error) {
-        console.error('Teardown Error:', error);
-      }
+  if (testInfo.title.includes('Navigate to Personal Details page')) {
+    try {
+      // Works for any field! Example: turning off SMS and requirements
+      await adminService.updateConfigSetting({ 
+        RequireCustomerEmail: false, 
+        RequireCustomerPhone: false,
+        SmsEnabled: false 
+      });
+    } catch (error) {
+      console.error('Teardown Error:', error);
     }
-  });
+  }
+});
 });
