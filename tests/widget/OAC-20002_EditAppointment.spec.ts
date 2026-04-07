@@ -51,35 +51,16 @@ test.describe('Appointment Editing - OAC-20002', () => {
     // Step 0: Complete happy path booking first (precondition)
     await page.goto(process.env.BASE_URL!);
 
-    // Check what page we're actually on - could be service or location page
-    await page.waitForTimeout(2000); // Wait for page to settle
+    // Wait for page to be fully loaded with retry logic
+    await expect(async () => {
+      await expect(page.getByRole('button', { name: 'Personal Accounts' })).toBeVisible({ timeout: 10000 });
+    }).toPass({ timeout: 30000 });
     
-    // Try to detect if we're on service page first
-    const servicePageVisible = await page.getByRole('button', { name: 'Personal Accounts' }).isVisible().catch(() => false);
+    await expect(page.getByRole('button', { name: 'Speak with a Department' })).toBeVisible();
     
-    if (servicePageVisible) {
-      // We're on service page, proceed with normal flow
-      await servicePage.selectServiceFlow(editBookingData.service.category, editBookingData.service.name);
-      await locationPage.searchAndSelectLocation(editBookingData.location.code, editBookingData.location.name);
-    } else {
-      // We might be on location page or need to handle service selection differently
-      // Wait for either location page or service page to be fully loaded
-      await expect(async () => {
-        const locationVisible = await page.getByText('Select Location').isVisible().catch(() => false);
-        const serviceVisible = await page.getByRole('button', { name: 'Personal Accounts' }).isVisible().catch(() => false);
-        return locationVisible || serviceVisible;
-      }).toPass({ timeout: 30000 });
-
-      // Check again if service page is available
-      const servicePageAvailable = await page.getByRole('button', { name: 'Personal Accounts' }).isVisible().catch(() => false);
-      
-      if (servicePageAvailable) {
-        await servicePage.selectServiceFlow(editBookingData.service.category, editBookingData.service.name);
-      }
-      
-      // Proceed to location selection
-      await locationPage.searchAndSelectLocation(editBookingData.location.code, editBookingData.location.name);
-    }
+    // We're on service page, proceed with normal flow
+    await servicePage.selectServiceFlow(editBookingData.service.category, editBookingData.service.name);
+    await locationPage.searchAndSelectLocation(editBookingData.location.code, editBookingData.location.name);
 
     await meetingPreferencePage.selectInPerson();
 
