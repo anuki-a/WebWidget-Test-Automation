@@ -190,19 +190,14 @@ test.describe('Partial Holiday Behavior - OAC-20013', () => {
     console.log(`Found ${afternoonSlots.length} available afternoon slots after ${holidayEndTime}`);
     expect(afternoonSlots.length).toBeGreaterThan(0);
 
-    // Wait a moment for UI to stabilize before selecting available slot
     await page.waitForTimeout(500);
-    console.log("before to select selectFirstAvailableSlot");
-
     const selectedTime = await timeSlotComponent.selectFirstAvailableSlot();
-    console.log("after to select selectFirstAvailableSlot");
+
     expect(selectedTime).toBeTruthy();
 
-    
-      // Step 11: Proceed with booking on non-holiday date
+    // Step 11: Proceed with booking on non-holiday date
     await dateTimePage.submit();
 
-    console.log("submit after to select selectFirstAvailableSlot");
     // Verify navigation to Personal Details page
     await personalDetailsPage.waitForPersonalDetailsPage();
 
