@@ -24,7 +24,7 @@ test.describe('Manual Staff Selection and Spanish Speaker Request - OAC-20020', 
     adminService = new AdminService(new ApiClient(request));
   });
     
-  test('Complete booking with manual staff selection and Spanish speaker request', { tag: ['@functional', '@staff-selection'] }, async ({ page, TimeSlotAvailabilityHandlingData }) => {
+  test('Complete booking with Spanish speaker request and manual staff selection', { tag: ['@functional', '@staff-selection'] }, async ({ page, TimeSlotAvailabilityHandlingData }) => {
     const [bookingData, staffAvailabilityData] = TimeSlotAvailabilityHandlingData;
     const servicePage = new ServicePage(page);
     const locationPage = new LocationPage(page);

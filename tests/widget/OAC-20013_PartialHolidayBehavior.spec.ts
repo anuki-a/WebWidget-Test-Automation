@@ -198,6 +198,7 @@ test.describe('Partial Holiday Behavior - OAC-20013', () => {
     console.log("after to select selectFirstAvailableSlot");
     expect(selectedTime).toBeTruthy();
 
+    
       // Step 11: Proceed with booking on non-holiday date
     await dateTimePage.submit();
 

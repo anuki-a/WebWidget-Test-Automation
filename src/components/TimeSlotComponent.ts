@@ -58,7 +58,7 @@ export class TimeSlotComponent {
       }
       
       // Get element text 
-      const elementText = await availableTimeLocator.innerText();
+      selectedTime = (await availableTimeLocator.innerText()).trim();
       
       // Wait for element to be visible and enabled
       await availableTimeLocator.waitFor({ state: 'visible', timeout: 3000 });
