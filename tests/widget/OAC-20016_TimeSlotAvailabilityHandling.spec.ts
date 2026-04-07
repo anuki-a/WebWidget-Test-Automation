@@ -100,9 +100,9 @@ test.describe('Time Slot Availability Handling - OAC-20016', () => {
       // Generate slots for this staff member (30-minute intervals)
       expectedEnabledSlots.push(startTime, lastSlotTime);
     });
-    
+
     // Select a specific staff member (use first staff from fixture data)
-    const selectedStaffName = staffAvailabilityData[0]?.staffName;
+    const selectedStaffName = staffAvailabilityData[1]?.staffName;
     if (selectedStaffName) {
       await dateTimePage.selectStaff(selectedStaffName);
 

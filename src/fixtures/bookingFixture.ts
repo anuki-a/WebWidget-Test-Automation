@@ -940,12 +940,14 @@ export const test = base.extend<{
       {
       staffName: 'Rora Rora',
       availabilityStart: '09:00 AM',
-      availabilityEnd: '11:30 AM'
+      availabilityEnd: '11:30 AM',
+      spanishSpeaker: true
       },
       {
       staffName: 'Zina Caisse',
       availabilityStart: '01:00 PM',
-      availabilityEnd: '05:00 PM'
+      availabilityEnd: '05:00 PM',
+      spanishSpeaker: false
       }
   ];
 

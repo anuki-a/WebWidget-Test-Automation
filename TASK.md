@@ -236,7 +236,7 @@ Successfully automate OAC-20001: End-to-End Book Appointment
 #### URL & advanced features
 
 - [x] OAC-20019 → URL params ✅ IMPLEMENTED
-- [ ] OAC-20020 → Staff + Spanish request
+- [x] OAC-20020 → Staff + Spanish request ✅ IMPLEMENTED
 
 ### 🔹 Phase 2.6: Assertions Standardization
 
@@ -736,5 +736,60 @@ After Phase 3:
 - Follows project architecture: Test → Fixture → Page → Component → UI
 - Uses existing page objects and methods with proper TypeScript typing
 - All tests tagged appropriately: `@smoke`, `@functional`, `@validation`, `@url-parameters`
+- TypeScript compilation passes without errors
+- Comprehensive JSDoc documentation following project conventions
+
+### OAC-20020 Manual Staff Selection and Spanish Speaker Implementation - April 6, 2026
+
+✅ **Manual Staff Selection and Spanish Speaker Request Functionality Complete**
+
+- Implemented comprehensive test for verifying manual staff selection and Spanish speaker request impact on slot availability and portal data
+- Created new test file `OAC-20020_ManualStaffSelectionAndSpanishSpeaker.spec.ts` following test case specification from `testcases_refined.json`
+- Enhanced DateTimePage with new methods for staff selection and Spanish speaker functionality:
+  - `isStaffDropdownAvailable()` - Check if staff dropdown is visible
+  - `getDefaultStaffSelection()` - Get default staff selection (should be '0 : undefined')
+  - `getAvailableStaffOptions()` - Get all staff options from dropdown
+  - `enableSpanishSpeakerRequest()` - Enable Spanish speaker checkbox
+  - `getSelectedStaff()` - Get currently selected staff member
+- Enhanced ConfirmationPage with new methods for verification:
+  - `getSpanishSpeakerIndicator()` - Get '(Spanish speaker requested)' text
+  - `getStaffPreference()` - Get staff preference text from confirmation
+- Used existing `TimeSlotAvailabilityHandlingData` fixture which provides:
+  - Service: "Notary  30 Mins Notary" (30-minute duration)
+  - Location: "Northcliffe 22015 N IH 35" with code "78154"
+  - Staff availability data with 2 staff members:
+    - Rora Rora: 09:00 AM - 11:30 AM, Spanish speaker ✓
+    - Zina Caisse: 01:00 PM - 05:00 PM, Non-Spanish speaker ✗
+  - Customer data and date/time for next business day
+- Test covers all UI steps from test case specification:
+  - Step 1: Select active service ✓
+  - Step 2: Select available location ✓
+  - Step 3: Select meeting preference ✓
+  - Step 5: Check staff selection dropdown availability and default selection ✓
+  - Step 6: Check for 2 staff members available to select ✓
+  - Step 7: Tick 'request Spanish speaker' checkbox and verify dropdown shows only Spanish speaker ✓
+  - Step 8: Select Spanish speaker staff from dropdown ✓
+  - Step 9: Select available future date ✓
+  - Step 10: Select time slot and proceed ✓
+  - Step 11: Enter valid details and submit ✓
+  - Step 12: Verify confirmation details with Spanish speaker indicator ✓
+- Key technical implementation:
+  - Staff dropdown verification using existing StaffComponent methods
+  - Spanish speaker checkbox interaction with multiple locator strategies
+  - Dynamic staff filtering verification based on Spanish speaker requirement
+  - Confirmation page validation for staff preference and Spanish speaker indicators
+  - TypeScript error handling for undefined staff selection
+- Validates expected results:
+  - Manual staff and Spanish request honored ✓
+  - Staff dropdown available with default '0 : undefined' selection ✓
+  - 2 staff members available initially ✓
+  - Spanish speaker request filters staff to only Spanish speakers ✓
+  - Selected staff persists through booking flow ✓
+  - Confirmation page shows '(Spanish speaker requested)' text ✓
+  - Staff preference displayed correctly on confirmation ✓
+- Follows project architecture: Test → Fixture → Page → Component → UI
+- Uses existing page objects and methods with proper TypeScript typing
+- All assertions handle optional properties safely with null checks
+- Test tagged with `@functional` and `@staff-selection` for easy filtering
 - TypeScript compilation passes without errors
 - Comprehensive JSDoc documentation following project conventions

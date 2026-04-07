@@ -220,6 +220,7 @@ export interface staffAvailabilityData {
   staffName: string;
   availabilityStart: string;
   availabilityEnd: string;
+  spanishSpeaker: boolean;
 }
 
 

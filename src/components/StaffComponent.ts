@@ -32,13 +32,17 @@ export class StaffComponent {
    */
   async getAllStaffOptions(): Promise<string[]> {
     // Wait for staff dropdown to be visible
-    await expect(this.page.getByLabel('Staff Preference')).toBeVisible({ timeout: 10000 });
+    const staffDropdown = this.page.getByLabel('Staff Preference');
+    await expect(staffDropdown).toBeVisible({ timeout: 10000 });
     
     // Click the dropdown to open options
-    await this.page.getByLabel('Staff Preference').click();
+    await staffDropdown.click();
+    
+    // Wait a moment for options to load/refresh
+    await this.page.waitForTimeout(1000);
     
     // Get all options
-    const options = await this.page.getByRole('option').allInnerTexts();
+    const options = await staffDropdown.getByRole('option').allInnerTexts();
     
     // Close dropdown by clicking elsewhere
     await this.page.keyboard.press('Escape');

@@ -782,4 +782,54 @@ export class ConfirmationPage {
       return false;
     }
   }
+
+  /**
+   * Get the Spanish speaker indicator text from confirmation page.
+   * @returns Promise resolving to Spanish speaker indicator text
+   */
+  async getSpanishSpeakerIndicator(): Promise<string> {
+    try {
+      const spanishSpeakerElement = this.page.getByText('(Spanish speaker requested)')
+        .or(this.page.getByText('Spanish speaker requested'))
+        .or(this.page.locator('[data-testid="spanish-speaker-indicator"]'))
+        .first();
+      
+      if (await spanishSpeakerElement.isVisible({ timeout: 5000 })) {
+        return await spanishSpeakerElement.textContent() || '';
+      }
+      return '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  /**
+   * Get the staff preference text from confirmation page.
+   * @returns Promise resolving to staff preference text
+   */
+  async getStaffPreference(): Promise<string> {
+    try {
+      if (await this.staffName.isVisible({ timeout: 5000 })) {
+        return await this.staffName.textContent() || '';
+      }
+      return '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  /**
+   * Verify that a specific staff member's name is displayed on the confirmation page.
+   * @param staffName - The staff member name to search for
+   * @returns Promise resolving to true if staff name is found and visible
+   */
+  async verifyStaffMemberDisplayed(staffName: string): Promise<boolean> {
+    try {
+      const staffNameElement = this.page.getByText(staffName, { exact: false }).first();
+      await expect(staffNameElement).toBeVisible({ timeout: 10000 });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 }

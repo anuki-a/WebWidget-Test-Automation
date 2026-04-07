@@ -434,4 +434,57 @@ export class DateTimePage {
       selectedStaff: staffName || 'All'
     };
   }
+
+  /**
+   * Check if staff selection dropdown is available.
+   * @returns Promise resolving to true if dropdown is visible
+   */
+  async isStaffDropdownAvailable(): Promise<boolean> {
+    try {
+      await this.staffComponent.waitForStaffDropdown(10000);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get the default staff selection from dropdown.
+   * @returns Promise resolving to default selection text
+   */
+  async getDefaultStaffSelection(): Promise<string> {
+    return await this.staffComponent.getCurrentSelection();
+  }
+
+  /**
+   * Get all available staff options from dropdown.
+   * @returns Promise resolving to array of staff names
+   */
+  async getAvailableStaffOptions(): Promise<string[]> {
+    return await this.staffComponent.getAllStaffOptions();
+  }
+
+  /**
+   * Enable Spanish speaker request checkbox.
+   * @returns Promise resolving when checkbox is enabled
+   */
+  async enableSpanishSpeakerRequest(): Promise<void> {
+    const spanishSpeakerCheckbox = this.page.getByText('REQUEST A SPANISH SPEAKER').first();
+    
+    await expect(spanishSpeakerCheckbox).toBeVisible({ timeout: 10000 });
+    
+    // Check if checkbox is already checked
+    const isChecked = await spanishSpeakerCheckbox.isChecked();
+    if (!isChecked) {
+      await spanishSpeakerCheckbox.check();
+    }
+  }
+
+  /**
+   * Get the currently selected staff member.
+   * @returns Promise resolving to selected staff name
+   */
+  async getSelectedStaff(): Promise<string> {
+    return await this.staffComponent.getCurrentSelection();
+  }
 }

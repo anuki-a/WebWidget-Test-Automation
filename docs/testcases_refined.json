@@ -757,11 +757,19 @@
       "check spanish "
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select Staff A without Spanish request", "expected": "Appointment with Staff A can complete" },
-      { "step": 2, "action": "Validate portal for Staff A", "expected": "Assigned Staff A" },
-      { "step": 3, "action": "Select Staff B with Spanish request", "expected": "Spanish speaker conditions applied" },
-      { "step": 4, "action": "Complete booking for Spanish path", "expected": "Booking succeeds with correct options" },
-      { "step": 5, "action": "Validate portal for Spanish request", "expected": "Record reflects staff and Spanish speaker details" }
+      { "step": 1, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 2, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 3, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 5, "action": "check staff selection dropdown availbility", "expected": "dropdown available and default selection '0 : undefined' is selected" },
+      { "step": 6, "action": "check for 2 staff members available to select", "expected": "2 staff members available" },
+      { "step": 7, "action": "tick 'request Spanish speaker' checkbox and see if staff members dropdown only shows spanish speaker", 
+                    "expected": "Spanish speaker is the only option available to select in dropdown" },
+      { "step": 8, "action": "Select a staff from dropdown", "expected": "spanish speaker staff selected from dropdown" },
+      { "step": 9, "action": "Select available future date", "expected": "Available slots displayed" },
+      { "step": 10, "action": "Select time slot and proceed", "expected": "Personal Details page displayed" },
+      { "step": 11, "action": "Enter valid details and submit", "expected": "Navigate to Confirmation page" },
+      { "step": 12, "action": "Verify confirmation details", 
+                    "expected": "Details match selected and entered data, shows '(Spanish speaker requested)' string is staff preference" }
     ],
     "expectedResult": [
       "Manual staff and Spanish request honored"
