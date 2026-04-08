@@ -9,17 +9,20 @@ export const distinctLocations : LocationData[] = [
   { // separate Location to work with normal behaviours - (a location that has more that 6 staff members, availability time periods are normal)
     name: 'McKinney 2093 N. Central', 
     code: '75071',
-    confirmationName: 'McKinney'
+    confirmationName: 'McKinney',
+    locCode: '10073'
   },
   { 
     name: 'Allen 404 E Stacy Rd. Allen,', 
     code: '75002',
-    confirmationName: 'Allen'
+    confirmationName: 'Allen',
+    locCode: '10063'
   },
   { // separate Location to work with Appointment time slot/ spanish translations / staff selection seleted tests - only two staff members should be available for location. also has time availability time periods, names accoring to 'staffAvailabilityData'
     name: 'Northcliffe 22015 N IH 35', 
     code: '78154',
-    confirmationName: 'Northcliffe'
+    confirmationName: 'Northcliffe',
+    locCode: '10033'
   }
 ];
 

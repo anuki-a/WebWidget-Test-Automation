@@ -8,6 +8,15 @@ This is a comprehensive Playwright + TypeScript test automation framework for te
 
 The framework follows a hybrid approach combining UI automation with API-driven test setup for maximum reliability and speed.
 
+## Important
+
+It is good to prevent parallely run Webwidget Tests. AC configurations are switched in between the tests, and also those configurations need more than 5 minutes to reflect in webwidget. Therefore sequential running will be most suitable for the test suite.
+
+Recommending to keep 2 locations for automation testing (better separate those locations from using in other manual testing purposes):
+- Location 1: For testing basic functionality (creation, cancellation, rescheduling)
+- Location 2: For testing appointment Availability, appointment Time Slots, spanish translations, select staff preference related tests 
+
+
 ### Current Implementation Status
 
 #### ✅ **Completed Components**

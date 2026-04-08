@@ -3,6 +3,8 @@ import { ApiClient } from '../../src/api/apiClient';
 import { ProductService } from '../../src/api/ProductService';
 import serviceData from '../../src/data/services.json';
 import { AdminService } from '@/api/AdminService';
+import { AppointmentService } from '@/api/AppointmentService';
+import { distinctLocations } from '@/fixtures/bookingFixture';
 import { test as bookingTest } from '../../src/fixtures/bookingFixture';
 import { DateUtils } from '@/utils/dateUtils';
 
@@ -391,4 +393,94 @@ bookingTest('should add a partial holiday 2 business days from now', async ({ re
   const responseBody = await response.json();
   // Ensure the server returned the entities correctly
   expect(responseBody.Entities.length).toBeGreaterThan(0);
+});
+
+test('should delete appointments in specified locations', async ({ request }) => {
+  const apiClient = new ApiClient(request);
+  const appointmentService = new AppointmentService(apiClient);
+  
+  // Get location codes from distinctLocations
+  const targetLocationCodes = distinctLocations.map(location => location.locCode).filter((code): code is string => code !== undefined);
+  console.log('Target location codes:', targetLocationCodes);
+  
+  // Get date range: today to 4 business days
+  const { firstDate, lastDate } = appointmentService.getDateRangeForQuery();
+  console.log('Date range:', { firstDate, lastDate });
+  
+  try {
+    // 1. Get all appointments for the date range
+    console.log('Fetching all appointments...');
+    const allAppointmentsResponse = await appointmentService.getAllAppointments(
+      54, 1, firstDate, lastDate, -1
+    );
+    
+    expect(allAppointmentsResponse.ok()).toBeTruthy();
+    const allAppointments = await allAppointmentsResponse.json();
+    console.log(`Found ${allAppointments.length} total appointments`);
+    
+    if (allAppointments.length === 0) {
+      console.log('No appointments found in the specified date range. Nothing to delete.');
+      return; // Test passes - nothing to delete
+    }
+    
+    // 2. Filter appointments by target locations
+    console.log('Filtering appointments by location...');
+    const filteredAppointments = appointmentService.filterAppointmentsByLocation(
+      allAppointments, targetLocationCodes
+    );
+    
+    // Log appointment counts by location
+    let totalAppointmentsToDelete = 0;
+    Object.entries(filteredAppointments).forEach(([locationCode, appointments]) => {
+      const locationName = distinctLocations.find(loc => loc.locCode === locationCode)?.confirmationName || locationCode;
+      console.log(`${locationName} (${locationCode}): ${appointments.length} appointments`);
+      totalAppointmentsToDelete += appointments.length;
+    });
+    
+    if (totalAppointmentsToDelete === 0) {
+      console.log('No appointments found in target locations. Nothing to delete.');
+      return; // Test passes - nothing to delete
+    }
+    
+    // 3. Get appointment IDs for detailed data
+    const appointmentIds: number[] = [];
+    Object.values(filteredAppointments).forEach(appointments => {
+      appointments.forEach(appointment => {
+        if (appointment.AppointmentId) {
+          appointmentIds.push(appointment.AppointmentId);
+        }
+      });
+    });
+    
+    console.log(`Getting detailed data for ${appointmentIds.length} appointments...`);
+    const detailedAppointmentsResponse = await appointmentService.getAppointmentsByIds(appointmentIds);
+    expect(detailedAppointmentsResponse.ok()).toBeTruthy();
+    const detailedAppointments = await detailedAppointmentsResponse.json();
+    console.log(`Retrieved ${detailedAppointments.length} detailed appointment records`);
+    console.log(detailedAppointments)
+    
+    // 4. Bulk delete appointments
+    console.log('Deleting appointments...');
+    const deleteResponse = await appointmentService.bulkDeleteAppointments(detailedAppointments);
+    expect(deleteResponse.ok()).toBeTruthy();
+    
+    const deleteResult = await deleteResponse.json();
+    console.log('Deletion response:', deleteResult);
+    
+    // 5. Verify deletion success and log results
+    console.log('\n=== DELETION SUMMARY ===');
+    Object.entries(filteredAppointments).forEach(([locationCode, appointments]) => {
+      const locationName = distinctLocations.find(loc => loc.locCode === locationCode)?.confirmationName || locationCode;
+      console.log(`${locationName} (${locationCode}): ${appointments.length} appointments deleted`);
+    });
+    console.log(`Total appointments deleted: ${totalAppointmentsToDelete}`);
+    console.log('========================\n');
+    
+    // Verify the deletion was successful
+    expect(deleteResult).toBeDefined();
+    
+  } catch (error) {
+    console.error('Error during appointment deletion:', error);
+    throw error;
+  }
 });
