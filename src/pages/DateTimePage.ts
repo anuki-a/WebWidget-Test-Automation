@@ -88,11 +88,14 @@ export class DateTimePage {
    * Select today's date and first available time slot.
    * @returns Promise resolving to the selected date and time
    */
-  async selectDayAndFirstAvailableTime(dateTime: DateTimeData): Promise<{ date: Date; time: string; formattedDate: string }> {
+  async selectDayAndFirstAvailableTime(dateTime: DateTimeData, skipDaySelect:Boolean = false): Promise<{ date: Date; time: string; formattedDate: string }> {
     await this.waitForDateTimePage();
     const day = dateTime.date || DateUtils.getToday();
     // 1. Trigger the click
-    await this.calendarComponent.selectDay(day);
+    
+    if (!skipDaySelect) {
+      await this.calendarComponent.selectDay(day);
+    }
 
     // 3. Select first available time slot
     const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
@@ -136,7 +139,7 @@ export class DateTimePage {
     // Select future date
     const futureDate = DateUtils.getFutureDate(daysAhead);
     await this.calendarComponent.selectFutureDate(daysAhead);
-    
+
     // Select first available time slot
     const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
     

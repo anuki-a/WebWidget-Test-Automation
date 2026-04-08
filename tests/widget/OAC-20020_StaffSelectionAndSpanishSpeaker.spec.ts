@@ -110,7 +110,7 @@ expect(spanishSpeakerStaff[0]?.toString).toEqual(spanishStaffFromFixture[0]?.toS
 
     // Step 9: Select available future date (already done above)
     // Step 10: Select time slot and proceed
-    const selectedDateTime = await dateTimePage.selectDayAndFirstAvailableTime(bookingData.dateTime);
+    const selectedDateTime = await dateTimePage.selectDayAndFirstAvailableTime(bookingData.dateTime, true);
 
     // Step 11: Enter valid details and submit
     await personalDetailsPage.fillDetails(bookingData.customer);
