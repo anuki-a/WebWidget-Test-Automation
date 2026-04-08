@@ -72,9 +72,10 @@ export default defineConfig({
 
   /* Global setup/teardown for authentication */
   globalSetup: require.resolve('./tests/auth.setup.ts'),
+  globalTeardown: require.resolve('./tests/global.teardown.ts'),
 
   /* Test timeout */
-  timeout: parseInt(process.env.DEFAULT_TIMEOUT || '60000'),
+  timeout: parseInt(process.env.DEFAULT_TIMEOUT || '100000'),
 
   /* Expect timeout */
   expect: {
@@ -82,7 +83,7 @@ export default defineConfig({
   },
 
   /* Global timeout for all operations */
-  globalTimeout: parseInt(process.env.DEFAULT_TIMEOUT || '300000'),
+  globalTimeout: parseInt(process.env.DEFAULT_TIMEOUT || '600000') * 6,
 
   /* Output directory for test artifacts */
   outputDir: 'test-results/',

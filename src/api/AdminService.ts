@@ -10,89 +10,49 @@ export class AdminService {
     this.client = client;
   }
 
-  /**
-   * Toggles Email and Phone requirements for the client configuration.
-   * Path: /OacWeb/oac/system/SaveAdministrationSystemSettings
-   * * @param emailRequired - Boolean to toggle 'RequireCustomerEmail'
-   * @param phoneRequired - Boolean to toggle 'RequireCustomerPhone'
+ /**
+   * Fetches the current client configuration
    */
-  async updateContactRequirements(emailRequired: boolean, phoneRequired: boolean) {
-    const endpoint = '/OacWeb/oac/system/SaveAdministrationSystemSettings';
+  async getClientConfig(clientId: number = 54) {
+    const endpoint = `/OacWeb/oac/system/GetClientConfigById?clientId=${clientId}&previousClientId=0`;
+    const response = await this.client.get(endpoint);
+    return await response.json();
+  }
 
-    // The full payload based on your Postman request
-    // Note: Kept specific IDs (ClientConfigurationId: 56, FkClientId: 54) as per your request
+  /**
+   * Updates a specific setting by fetching the current state first.
+   * Use this to change settings one-at-a-time.
+   * @param settingsToUpdate - Object containing the keys and new values (e.g. { SmsEnabled: true })
+   */
+  async updateConfigSetting(settingsToUpdate: Record<string, any>) {
+    const endpoint = '/OacWeb/oac/system/SaveAdministrationSystemSettings';
+    
+    // 1. Get the current state so we don't overwrite other settings with stale hardcoded data
+    const currentConfig = await this.getClientConfig();
+
+    // 2. Prepare the originalValuesMap for Breeze.js tracking
+    const originalValuesMap: Record<string, any> = {};
+    for (const key in settingsToUpdate) {
+      originalValuesMap[key] = currentConfig[key]; // Store what it WAS
+    }
+
+    // 3. Merge the new changes into the configuration
+    const updatedConfig = { 
+      ...currentConfig, 
+      ...settingsToUpdate,
+      ChangedDate: new Date().toISOString() 
+    };
+
+    // 4. Wrap in the required Entity structure
     const payload = {
       entities: [
         {
-          ClientConfigurationId: 56,
-          FkClientId: 54,
-          FkApplicationId: 1,
-          SmsEnabled: false,
-          EmailFromDisplayName: "RBFCU AC QA Standalone",
-          EmailFromAddress: "bc-dev@fmsidev.us",
-          EmailSenderAddress: "bc-dev@fmsidev.us",
-          ClientAdminEmail: "bc-dev@fmsidev.us",
-          CreatedBy: 21373,
-          CreatedDate: "2019-05-20T17:48:32.000Z",
-          ChangedBy: 140312,
-          ChangedDate: new Date().toISOString(), // Dynamically update the change date
-          ActiveStatus: 1,
-          RedirectUrl: "www.google.com",
-          SaveSyncCredentials: false,
-          CalendarSyncEnabled: true,
-          RequireCustomerEmail: emailRequired, // Toggled parameter
-          RequireCustomerPhone: phoneRequired, // Toggled parameter
-          CalendarAutoSyncEnabled: false,
-          CalendarAutoSyncFreqMinutes: 5,
-          CalendarSyncFutureDays: 56,
-          AutomaticWrapup: true,
-          AutomaticWrapupApptStatus: 5,
-          EnableSpanishSpeaker: true,
-          PhoneOnlyApptsEnabled: true,
-          SupportsLanguages: true,
-          TravelPadMinutes: 90,
-          SmsOptInByDefault: false,
-          TwoFactorEnabled: true,
-          UseStaffAddressForConfirmationEmail: false,
-          FkStageId: 3,
-          ExternalLoginEnabled: false,
-          ClientLogo: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaYAAABtCAYAAADqKcXAAAAACXBIWXMAABcRAAAXEQHKJvM/AAAWmklEQVR4nO2d0VUbuxaGx3fdd3IqsE8DxqeCOBWEVBBSQciDn4FnPxyoIFBBoIJjKgi4gUAFF1fgu0R+cYRGmpFGezSSZn9reWXFNjAeS/q1/70lTfb7fcUwDMMwqfAf/iYYhmHKZzJfLcQjhw/KwsQwDDMOjvFIHhYmhmGYcbCsquooh0/KwsQwDFM4k/lqVlXVYVVV0xzsPBYmhmGYpHHeF6uL7JfLcQjhw/KwsQwDDMOjvFIHhYmhmGYcbCsquooh0/KwsQwDFM4k/lqVlXVYVVV0xzsPBYmhmGY8lEjpeTtPBYmhmGYlHHeF6uL7JfLcQjhw/KwsQwDDMOjvFIHhYmhmGYcbCsquooh0/KwsQwDFM4k/lqVlXVYVVV0xzsPBYmhmGY8lEjpeTtPBYmhmGY8lHFaJn6p+VycYZhmIKBjfdL+4R/7rfrx1Q/NUdMDMMwZWMqeDA9lwwsTAzDMGVjyimZnksGtvIYhmEKxWLjSZK18zhiYhiGKZcmyy7ZIggWJoZhmHJpEp8m0RoUtvIYhmEKZDJfvauq6n8tn+yP/Xb9XHt2YDhiYhiGKROXiCjJqImFiWEYpkxYmBiGYZg0gI330eFiXN4THRYmhmGYnHHeF6uL7JfLcQjhw/KwsQwDDMOjvFIHhYmhmGYcbCsquooh0/KwsQwDFM4k/lqVlXVYVVV0xzsPBYmhmGY8lEjpeTtPBYmhmGY8lHFaJn6p+VycYZhmIKBjfdL+4R/7rfrx1Q/NUdMDMMwZWMqeDA9lwwsTAzDMGVjyimZnksGtvIYhmEKxWLjSZK18zhiYhiGKZcmyy7ZIggWJoZhmHJpEp8m0RoUtvIYhmEKZDJfvauq6n8tn+yP/Xb9XHt2YDhiYhiGKROXiCjJqImFiWEYpkxYmBiGYZg0gI330eFiXN4THRYmhmGYnO",
-          FkThemeId: 1,
-          AdminPortalTimeOutMinutes: 90,
-          EnableEvents: true,
-          EnableVirtualAppointments: true,
-          DateFormat: "DD-MMM-YY",
-          IncludeOwnerForEventEmail: false,
-          FkDateFormatId: 1,
-          EnableInPersonAppointments: true,
-          DisplayNumberOfLocations: 10,
-          ShowNumberOfLocationsFilter: true,
-          ShowSearchRadiusDistanceFilter: true,
-          DefaultLocationSearchRadius: 10,
-          MaximumAllowedLocationSearchRadius: 100,
-          EnableStaffWebWidgetAppointments: true,
-          EnableCaptchaVerification: false,
-          EventSummaryEmailNotificationTime: "PT18H",
-          EventsPageIsLandingPage: false,
-          CancelationNotesRequired: false,
-          ShowCheckListInWidget: false,
-          EnableGraphApiMailFlow: false,
-          EventsSendCustomerEmailFromOwner: false,
-          SupportEmailAddress: "admin.dev@kronos.com",
-          MapMarkerIconName: "fas fa-dollar-sign",
-          GoogleReserveEnabled: true,
-          GoogleReserveGlobalBusinessName: "Randolph-Brooks Federal Credit Union",
-          GoogleReserveGlobalWebsiteUrl: "https://www.rbfcu.org/",
-          GliaEnabled: false,
+          ...updatedConfig,
           entityAspect: {
             entityTypeName: "ClientConfiguration:#Oac.Model.Data.SystemData",
             defaultResourceName: "ClientConfigurations",
             entityState: "Modified",
-            originalValuesMap: {
-              // Usually contains the previous values, but often optional depending on server validation
-              RequireCustomerEmail: !emailRequired, 
-              RequireCustomerPhone: !phoneRequired
-            },
+            originalValuesMap: originalValuesMap,
             autoGeneratedKey: {
               propertyName: "ClientConfigurationId",
               autoGeneratedKeyType: "Identity"
@@ -105,4 +65,82 @@ export class AdminService {
 
     return await this.client.post(endpoint, payload);
   }
+
+  /**
+   * Adds a new holiday or updates an existing one.
+   * Path: /OacWeb/oac/client/SaveHoliday
+   * @param holidayData - The holiday entity object (e.g., HolidayId, HolidayName, Date, etc.)
+   * @param saveOptions - The save options containing the tag (e.g., { tag: "54,1" })
+   * @returns Promise resolving to the API response.
+   */
+  async saveHoliday(holidayData: any, saveOptions: any) {
+    const endpoint = '/OacWeb/oac/client/SaveHoliday';
+
+    const requestBody = {
+      entities: [holidayData],
+      saveOptions: saveOptions,
+    };
+
+    // The ApiClient automatically handles the full URL and authentication
+    return await this.client.post(endpoint, requestBody);
+  }
+
+/**
+   * Fetches all holidays based on year and location.
+   * Path: /OacWeb/oac/client/AllHolidays
+   * @param year - The year to filter holidays (e.g., 2026)
+   * @param clientId - The unique identifier for the client
+   * @param currentLocationId - The current location ID
+   * @returns Promise resolving to the API response.
+   */
+  async getAllHolidays(year: number | string, clientId: string | number, currentLocationId: string | number) {
+    const endpoint = '/OacWeb/oac/client/AllHolidays';
+
+    // Constructing query parameters based on the curl request
+    const params = {
+      '$filter': `year(Date) eq ${year}`,
+      '$orderby': 'Location/FkLocationTypeId',
+      '$expand': 'Location',
+      'clientId': clientId.toString(),
+      'currentLocationId': currentLocationId.toString(),
+    };
+
+    // ApiClient handles the baseURL, auth headers, and logging
+    return await this.client.get(endpoint, params);
+  }
+
+  /**
+ * Deletes a holiday by sending the entity with a 'Deleted' state.
+ * Path: /OacWeb/oac/client/DeleteHoliday
+ * @param holidayData - The full holiday object retrieved from the GET call
+ * @param clientId - The client ID for the saveOptions tag
+ */
+async deleteHoliday(holidayData: any, clientId: string | number) {
+  const endpoint = '/OacWeb/oac/client/DeleteHoliday';
+
+  const requestBody = {
+  entities: [
+    {
+      ...holidayData, // Spread the existing holiday properties
+      entityAspect: {
+        entityTypeName: "Holiday:#Oac.Model.Data.ClientData",
+        defaultResourceName: "Holidays",
+        entityState: "Deleted", // CRITICAL: This tells the server to delete it
+        originalValuesMap: {
+            // Some APIs require the original Start/End times to verify concurrency
+            StartTime: holidayData.StartTime,
+            EndTime: holidayData.EndTime
+        }
+      }
+    }
+  ],
+  saveOptions: { 
+    tag: Number(clientId) // Ensure this is a number, not a string
+  }
+};
+  console.log("------------------------------ ");
+  console.log("requestBody : ",requestBody);
+
+  return await this.client.post(endpoint, requestBody);
+}
 }

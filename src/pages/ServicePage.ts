@@ -131,11 +131,27 @@ export class ServicePage {
    * @param timeout - Maximum time to wait
    */
   async waitForServicePage(timeout: number = 30000): Promise<void> {
-    // Wait for service categories to be visible using defined locators
-    await this.serviceCategoryButtons.first().waitFor({ state: 'visible', timeout }).catch(() => {
-      // Fallback: wait for page heading
-      return this.pageHeading.waitFor({ state: 'visible', timeout });
-    });
+    try {
+      // First wait for any network activity to settle
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        // Ignore networkidle timeout and continue
+      });
+      
+      // Wait for service categories to be visible using defined locators
+      await this.serviceCategoryButtons.first().waitFor({ state: 'visible', timeout }).catch(() => {
+        // Fallback 1: wait for page heading
+        return this.pageHeading.waitFor({ state: 'visible', timeout });
+      }).catch(() => {
+        // Fallback 2: wait for any service category button with more specific selector
+        return this.page.locator('button').filter({ hasText: /^(Personal|Business|Estate|Speak|Notary|Safe|Other)/ }).first().waitFor({ state: 'visible', timeout: 10000 });
+      }).catch(() => {
+        // Fallback 3: wait for the heading role as last resort
+        return this.page.getByRole('heading', { name: 'Select a Service' }).waitFor({ state: 'visible', timeout: 10000 });
+      });
+    } catch (error) {
+      // If all waits fail, throw a descriptive error
+      throw new Error(`Service page failed to load within ${timeout}ms. Last error: ${error}`);
+    }
   }
 
   /**
@@ -242,6 +258,29 @@ export class ServicePage {
       const dialogButton = continueWithScheduling 
         ? this.page.getByRole('button', { name: 'NO, CONTINUE WITH SCHEDULING AN APPOINTMENT' })
         : this.page.getByRole('button', { name: 'YES, SKIP THE WAIT' });
+
+      if (await dialog.isVisible()) {
+        await dialogButton.click();
+      }
+  }
+
+  /**
+   * Handle the Spanish online application dialog if it appears.
+   * @param continueWithScheduling - Whether to continue with scheduling (true) or handle online application
+   * @returns Promise resolving when dialog is handled
+   */
+  async handleSpanishSkipAppointmentDialog(continueWithScheduling: boolean = true): Promise<void> {
+      // Wait for the Spanish dialog to appear (timeout is short since it may not appear)
+      const spanishDialogText = "¡Buenas Noticias! Usted puede aplicar en linea ahora, saltando la espera";
+      const dialog = this.page.getByText(spanishDialogText, { exact: false });
+
+      await dialog.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {
+        // We catch the error internally so the test doesn't fail if it's missing
+      });
+
+      const dialogButton = continueWithScheduling 
+        ? this.page.getByRole('button', { name: 'No, continuar con la planificación de una cita' })
+        : this.page.getByRole('button', { name: 'Sí, omitir la espera' });
 
       if (await dialog.isVisible()) {
         await dialogButton.click();
@@ -470,6 +509,74 @@ export class ServicePage {
     } catch (error) {
       return false;
     }
+  }
+
+  /**
+   * Extract service duration from service text.
+   * @param serviceText - The full service text containing duration
+   * @returns Promise resolving to duration in minutes
+   */
+  async extractServiceDuration(serviceText: string): Promise<number> {
+    // Match pattern like "60 Mins" or "75 Mins"
+    const durationMatch = serviceText.match(/(\d+)\s*Mins?/i);
+    if (durationMatch && durationMatch[1]) {
+      return parseInt(durationMatch[1]);
+    }
+    // Default to 60 minutes if no duration found
+    return 60;
+  }
+
+  /**
+   * Get service duration for the selected service.
+   * @param serviceName - Service name to get duration for
+   * @returns Promise resolving to duration in minutes
+   */
+  async getServiceDuration(serviceName: string): Promise<number> {
+    let serviceLink;
+    
+    // Use specific service locators when possible
+    switch (serviceName) {
+      case 'Update Personal Account':
+        serviceLink = this.updatePersonalAccountLink;
+        break;
+      case 'Update Personal Account with Spanish Speaker':
+        serviceLink = this.updatePersonalAccountWithSpanishSpeakerLink;
+        break;
+      case 'Update Business Account':
+        serviceLink = this.updateBusinessAccountLink;
+        break;
+      case 'Update Business Account with Spanish Speaker':
+        serviceLink = this.updateBusinessAccountWithSpanishSpeakerLink;
+        break;
+      case 'Estate Accounts':
+        serviceLink = this.estateAccountsLink;
+        break;
+      case 'Fraud RwG Edit':
+        serviceLink = this.fraudRwGEditLink;
+        break;
+      case 'IRA (Individual Retirement Account)':
+        serviceLink = this.iraAccountLink;
+        break;
+      case 'Notary':
+        serviceLink = this.notaryServiceLink;
+        break;
+      case 'Safe Deposit Access':
+        serviceLink = this.safeDepositAccessLink;
+        break;
+      case 'Online Banking Assistance':
+        serviceLink = this.onlineBankingAssistanceLink;
+        break;
+      default:
+        serviceLink = this.page.getByRole('link', { name: serviceName });
+    }
+    
+    const text = await serviceLink.textContent();
+    if (text) {
+      return await this.extractServiceDuration(text);
+    }
+    
+    // Default fallback
+    return 60;
   }
 
   /**

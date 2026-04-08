@@ -60,6 +60,11 @@ export class ConfirmationPage {
   readonly confirmPopupButton: Locator;
   readonly cancellationConfirmationMessage: Locator;
   readonly cancelledIndicators: Locator[];
+  readonly checklistLink: Locator;
+  readonly checklistPopup: Locator;
+  readonly checklistPopupTitle: Locator;
+  readonly checklistItems: Locator;
+  readonly checklistPopupCloseButton: Locator;
 
   /**
    * Initialize the confirmation page.
@@ -117,21 +122,25 @@ export class ConfirmationPage {
       this.page.locator('[data-testid="appointment-cancelled"]'),
       this.page.locator('.cancelled-appointment')
     ];
+    this.checklistLink = this.page.getByLabel('View checklist');
+    this.checklistPopup = this.page.getByRole('dialog').filter({ hasText: /checklist/i });
+    this.checklistPopupTitle = this.checklistPopup.getByRole('heading', { name: /checklist/i });
+    this.checklistItems = this.checklistPopup.locator('li');
+    this.checklistPopupCloseButton = this.checklistPopup.getByRole('button', { name: 'OK' });
   }
 
   /**
    * Wait for the confirmation page to be loaded and visible.
    * @param timeout - Maximum time to wait
    */
-  async waitForConfirmationPage(timeout: number = 220000): Promise<void> {
-    // Wait for confirmation heading with retry logic
-    await expect(async () => {
-      await expect(this.confirmationHeading)
-        .toBeVisible({ timeout: 10000 });
-    }).toPass({ 
-      timeout: timeout,
-    });
-  }
+async waitForConfirmationPage(timeout: number = 220000): Promise<void> {
+  await expect(async () => {
+    await expect(this.confirmationHeading).toBeVisible();
+  }).toPass({ 
+    timeout: timeout, // The total time to keep retrying
+    intervals: [2000, 5000, 10000], // Optional: Custom retry intervals (in ms)
+  });
+}
 
   /**
    * Get all confirmation details from the page.
@@ -669,6 +678,155 @@ export class ConfirmationPage {
 
       // For non-editable appointment, these should not be interactive
       return !editDateTimeClickable && !cancelClickable;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Check if the checklist link is visible on the confirmation page.
+   * @returns Promise resolving to true if checklist link is visible
+   */
+  async isChecklistLinkVisible(): Promise<boolean> {
+    return await this.checklistLink.isVisible().catch(() => false);
+  }
+
+  /**
+   * Click the checklist link to open the checklist popup.
+   * @returns Promise resolving when checklist link is clicked
+   */
+  async clickChecklistLink(): Promise<void> {
+    await expect(this.checklistLink).toBeVisible();
+    await this.checklistLink.click();
+  }
+
+  /**
+   * Wait for the checklist popup to be visible.
+   * @param timeout - Maximum time to wait
+   * @returns Promise resolving when popup is visible
+   */
+  async waitForChecklistPopup(timeout: number = 10000): Promise<void> {
+    await expect(this.checklistPopupTitle).toBeVisible({ timeout });
+  }
+
+  /**
+   * Get the checklist items from the popup.
+   * @returns Promise resolving to array of checklist item texts
+   */
+  async getChecklistItems(): Promise<string[]> {
+    await this.waitForChecklistPopup();
+    
+    const items: string[] = [];
+    const itemCount = await this.checklistItems.count();
+    
+    for (let i = 0; i < itemCount; i++) {
+      const item = this.checklistItems.nth(i);
+      const text = await item.textContent();
+      if (text) {
+        items.push(text.trim());
+      }
+    }
+    
+    return items;
+  }
+
+  /**
+   * Verify that the checklist items match the expected items.
+   * @param expectedItems - Expected checklist items
+   * @returns Promise resolving to true if all items match
+   */
+  async verifyChecklistItems(expectedItems: string[]): Promise<boolean> {
+    const actualItems = await this.getChecklistItems();
+    
+    if (actualItems.length !== expectedItems.length) {
+      return false;
+    }
+    
+    const result = expectedItems.every((expectedItem, index) => {
+      const actualItem = actualItems[index];
+      const matches = actualItem && (actualItem.includes(expectedItem) || expectedItem.includes(actualItem));
+      return matches;
+    });
+    
+    return result;
+  }
+
+  /**
+   * Close the checklist popup by clicking the OK button.
+   * @returns Promise resolving when popup is closed
+   */
+  async closeChecklistPopup(): Promise<void> {
+    await expect(this.checklistPopupCloseButton).toBeVisible();
+    await this.checklistPopupCloseButton.click();
+    
+    // Wait for popup to close
+    await expect(this.checklistPopup).not.toBeVisible({ timeout: 5000 });
+  }
+
+  /**
+   * Complete checklist verification flow: click link, verify items, close popup.
+   * @param expectedChecklists - Expected checklist items to verify
+   * @returns Promise resolving to true if entire flow succeeds
+   */
+  async verifyChecklistFlow(expectedChecklists: string[]): Promise<boolean> {
+    try {
+      await this.clickChecklistLink();
+      await this.waitForChecklistPopup();
+      
+      const itemsMatch = await this.verifyChecklistItems(expectedChecklists);
+      await this.closeChecklistPopup();
+      
+      return itemsMatch;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get the Spanish speaker indicator text from confirmation page.
+   * @returns Promise resolving to Spanish speaker indicator text
+   */
+  async getSpanishSpeakerIndicator(): Promise<string> {
+    try {
+      const spanishSpeakerElement = this.page.getByText('(Spanish speaker requested)')
+        .or(this.page.getByText('Spanish speaker requested'))
+        .or(this.page.locator('[data-testid="spanish-speaker-indicator"]'))
+        .first();
+      
+      if (await spanishSpeakerElement.isVisible({ timeout: 5000 })) {
+        return await spanishSpeakerElement.textContent() || '';
+      }
+      return '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  /**
+   * Get the staff preference text from confirmation page.
+   * @returns Promise resolving to staff preference text
+   */
+  async getStaffPreference(): Promise<string> {
+    try {
+      if (await this.staffName.isVisible({ timeout: 5000 })) {
+        return await this.staffName.textContent() || '';
+      }
+      return '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  /**
+   * Verify that a specific staff member's name is displayed on the confirmation page.
+   * @param staffName - The staff member name to search for
+   * @returns Promise resolving to true if staff name is found and visible
+   */
+  async verifyStaffMemberDisplayed(staffName: string): Promise<boolean> {
+    try {
+      const staffNameElement = this.page.getByText(staffName, { exact: false }).first();
+      await expect(staffNameElement).toBeVisible({ timeout: 10000 });
+      return true;
     } catch (error) {
       return false;
     }

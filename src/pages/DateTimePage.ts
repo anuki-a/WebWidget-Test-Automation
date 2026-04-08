@@ -1,8 +1,10 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { CalendarComponent } from '../components/CalendarComponent';
 import { TimeSlotComponent } from '../components/TimeSlotComponent';
+import { StaffComponent } from '../components/StaffComponent';
 import { DateUtils, FormattedDate } from '../utils/dateUtils';
 import { DateTimeData } from '@/types/bookingTypes';
+import { staffAvailabilityData } from '@/types/bookingTypes';
 
 /**
  * Date and time page for selecting appointment date and time.
@@ -12,6 +14,7 @@ export class DateTimePage {
   private page: Page;
   private calendarComponent: CalendarComponent;
   private timeSlotComponent: TimeSlotComponent;
+  private staffComponent: StaffComponent;
 
   /**
    * Initialize the date time page.
@@ -21,6 +24,7 @@ export class DateTimePage {
     this.page = page;
     this.calendarComponent = new CalendarComponent(page);
     this.timeSlotComponent = new TimeSlotComponent(page);
+    this.staffComponent = new StaffComponent(page);
   }
 
   /**
@@ -29,6 +33,14 @@ export class DateTimePage {
    */
   async waitForDateTimePage(timeout: number = 30000): Promise<void> {
     await expect(this.page.getByText("Select a Date and Time")).toBeVisible({ timeout });
+  }
+
+  /**
+   * Wait for the date time page to be loaded and visible (Spanish version).
+   * @param timeout - Maximum time to wait
+   */
+  async waitForDateTimePageSpanish(timeout: number = 30000): Promise<void> {
+    await expect(this.page.getByText("Elige una fecha y hora")).toBeVisible({ timeout });
   }
 
   /**
@@ -53,14 +65,37 @@ export class DateTimePage {
   }
 
   /**
+   * Select a specific date and time (Spanish version).
+   * @param date - Date to select
+   * @param timeString - Time string to select (e.g., "6:15 AM")
+   * @returns Promise resolving to the selected date and time
+   */
+  async selectDateAndTimeSpanish(date: Date, timeString: string): Promise<{ date: Date; time: string }> {
+    await this.waitForDateTimePageSpanish();
+    // Select date using Spanish method
+    await this.calendarComponent.selectDateSpanish(date);
+    
+    // Select time slot
+    await this.timeSlotComponent.selectTimeSlot(timeString);
+    
+    return {
+      date,
+      time: timeString,
+    };
+  }
+
+  /**
    * Select today's date and first available time slot.
    * @returns Promise resolving to the selected date and time
    */
-  async selectDayAndFirstAvailableTime(dateTime: DateTimeData): Promise<{ date: Date; time: string; formattedDate: string }> {
+  async selectDayAndFirstAvailableTime(dateTime: DateTimeData, skipDaySelect:Boolean = false): Promise<{ date: Date; time: string; formattedDate: string }> {
     await this.waitForDateTimePage();
     const day = dateTime.date || DateUtils.getToday();
     // 1. Trigger the click
-    await this.calendarComponent.selectDay(day);
+    
+    if (!skipDaySelect) {
+      await this.calendarComponent.selectDay(day);
+    }
 
     // 3. Select first available time slot
     const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
@@ -69,6 +104,27 @@ export class DateTimePage {
       date: day,
       time: selectedTime,
       formattedDate: DateUtils.formatDateForUI(day).fullDateString,
+    };
+  }
+
+  /**
+   * Select today's date and first available time slot (Spanish version).
+   * @returns Promise resolving to the selected date and time
+   */
+  async selectDayAndFirstAvailableTimeSpanish(dateTime: DateTimeData): Promise<{ date: Date; time: string; formattedDate: string }> {
+    await this.waitForDateTimePageSpanish();
+    const day = dateTime.date || DateUtils.getToday();
+    
+    // Select date using Spanish method
+    await this.calendarComponent.selectDateSpanish(day);
+
+    // Select first available time slot
+    const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
+
+    return {
+      date: day,
+      time: selectedTime,
+      formattedDate: DateUtils.formatDateForUISpanish(day).fullDateString,
     };
   }
 
@@ -83,7 +139,7 @@ export class DateTimePage {
     // Select future date
     const futureDate = DateUtils.getFutureDate(daysAhead);
     await this.calendarComponent.selectFutureDate(daysAhead);
-    
+
     // Select first available time slot
     const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
     
@@ -215,6 +271,18 @@ export class DateTimePage {
   }
 
   /**
+   * Wait for date time selection to complete and next step to load (Spanish version).
+   * @param timeout - Maximum time to wait
+   */
+  async waitForDateTimeSelectionCompleteSpanish(timeout: number = 30000): Promise<void> {
+    // Wait for personal details form to appear in Spanish
+    await this.page.waitForSelector('[data-testid="personal-details"], input[name="firstName"], input:has-text("Primer Nombre")', {
+      timeout,
+      state: 'visible',
+    });
+  }
+
+  /**
    * Get access to the calendar component for advanced operations.
    * @returns CalendarComponent instance
    */
@@ -253,5 +321,173 @@ export class DateTimePage {
     
     await expect(continueButton).toBeVisible({ timeout: 10000 });
     await continueButton.click();
+  }
+
+  /**
+   * Select a specific staff member from the dropdown.
+   * @param staffName - Name of the staff member to select
+   * @returns Promise resolving when staff is selected
+   */
+  async selectStaff(staffName: string): Promise<void> {
+    await this.staffComponent.selectStaff(staffName);
+  }
+
+  /**
+   * Get all available staff options from the dropdown.
+   * @returns Promise resolving to array of staff names
+   */
+  async getAllStaffOptions(): Promise<string[]> {
+    return await this.staffComponent.getAllStaffOptions();
+  }
+
+  /**
+   * Get the currently selected staff preference.
+   * @returns Promise resolving to the selected staff name or "All"
+   */
+  async getCurrentStaffSelection(): Promise<string> {
+    return await this.staffComponent.getCurrentSelection();
+  }
+
+  /**
+   * Verify that "All" is the default staff selection.
+   * @returns Promise resolving to true if "All" is selected
+   */
+  async verifyAllStaffIsDefault(): Promise<boolean> {
+    const isDefault = await this.staffComponent.verifyAllIsDefault();
+    return isDefault;
+  }
+
+  /**
+   * Get staff availability summary for the current date.
+   * @param staffData - Array of staff availability data
+   * @param duration - Service duration in minutes
+   * @param selectedStaff - Selected staff name (undefined for "All")
+   * @returns Promise resolving to availability summary
+   */
+  async getStaffAvailabilitySummary(
+    staffData: staffAvailabilityData[],
+    duration: number,
+    selectedStaff?: string
+  ): Promise<{
+    totalSlots: number;
+    availableSlots: string[];
+    unavailableSlots: string[];
+    staffCoverage?: Array<{staff: string, start: string, end: string}>;
+  }> {
+    return await this.timeSlotComponent.summarizeAvailableSlots(selectedStaff, staffData, duration);
+  }
+
+  /**
+   * Verify combined availability when "All" staff is selected.
+   * @param staffData - Array of staff availability data
+   * @param duration - Service duration in minutes
+   * @returns Promise resolving to verification result
+   */
+  async verifyCombinedStaffAvailability(
+    staffData: staffAvailabilityData[],
+    duration: number
+  ): Promise<{
+    isCorrect: boolean;
+    enabledSlots: string[];
+    disabledSlots: string[];
+    expectedEnabled: string[];
+    expectedDisabled: string[];
+  }> {
+    return await this.timeSlotComponent.verifyCombinedAvailability(staffData, duration);
+  }
+
+  /**
+   * Get access to the staff component for advanced operations.
+   * @returns StaffComponent instance
+   */
+  getStaff(): StaffComponent {
+    return this.staffComponent;
+  }
+
+  /**
+   * Select date and time with staff preference.
+   * @param date - Date to select
+   * @param staffName - Staff name to select (undefined for "All")
+   * @param staffData - Staff availability data
+   * @param duration - Service duration
+   * @returns Promise resolving to the selected date and time
+   */
+  async selectDateWithStaff(
+    date: Date,
+    staffName?: string,
+    staffData?: staffAvailabilityData[],
+    duration?: number
+  ): Promise<{ date: Date; time: string; selectedStaff: string }> {
+    await this.waitForDateTimePage();
+    
+    // Select date
+    await this.calendarComponent.selectDate(date);
+    
+    // Select staff if specified
+    if (staffName && staffData) {
+      await this.selectStaff(staffName);
+    }
+    
+    // Select first available time slot
+    const selectedTime = await this.timeSlotComponent.selectFirstAvailableSlot();
+    
+    return {
+      date,
+      time: selectedTime,
+      selectedStaff: staffName || 'All'
+    };
+  }
+
+  /**
+   * Check if staff selection dropdown is available.
+   * @returns Promise resolving to true if dropdown is visible
+   */
+  async isStaffDropdownAvailable(): Promise<boolean> {
+    try {
+      await this.staffComponent.waitForStaffDropdown(10000);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get the default staff selection from dropdown.
+   * @returns Promise resolving to default selection text
+   */
+  async getDefaultStaffSelection(): Promise<string> {
+    return await this.staffComponent.getCurrentSelection();
+  }
+
+  /**
+   * Get all available staff options from dropdown.
+   * @returns Promise resolving to array of staff names
+   */
+  async getAvailableStaffOptions(): Promise<string[]> {
+    return await this.staffComponent.getAllStaffOptions();
+  }
+
+  /**
+   * Enable Spanish speaker request checkbox.
+   * @returns Promise resolving when checkbox is enabled
+   */
+  async enableSpanishSpeakerRequest(): Promise<void> {
+    const spanishSpeakerCheckbox = this.page.getByText('REQUEST A SPANISH SPEAKER').first();
+    
+    await expect(spanishSpeakerCheckbox).toBeVisible({ timeout: 10000 });
+    
+    // Check if checkbox is already checked
+    const isChecked = await spanishSpeakerCheckbox.isChecked();
+    if (!isChecked) {
+      await spanishSpeakerCheckbox.check();
+    }
+  }
+
+  /**
+   * Get the currently selected staff member.
+   * @returns Promise resolving to selected staff name
+   */
+  async getSelectedStaff(): Promise<string> {
+    return await this.staffComponent.getCurrentSelection();
   }
 }

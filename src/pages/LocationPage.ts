@@ -15,6 +15,10 @@ export class LocationPage {
   readonly mapRegion: Locator;
   readonly locationList: Locator;
 
+  // Spanish locators
+  readonly searchTextBoxSpanish: Locator;
+  readonly locationsDropdownSpanish: Locator;
+
   /**
    * Initialize the location page.
    * @param page - Playwright page object
@@ -29,6 +33,10 @@ export class LocationPage {
     this.locationButtons = page.locator('button').filter({ hasText: /\b(TX|Texas)\b|\b\d{5}\b/ });
     this.mapRegion = page.getByRole('region', { name: 'map' });
     this.locationList = page.locator('[data-testid="location-list"], .location-list');
+
+    // Initialize Spanish locators
+    this.searchTextBoxSpanish = page.getByRole('textbox', { name: 'Ingrese ciudad y estado, o código postal' });
+    this.locationsDropdownSpanish = page.getByRole('combobox', { name: 'Sitios' });
   }
 
   /**
@@ -36,13 +44,29 @@ export class LocationPage {
    * @param timeout - Maximum time to wait
    */
   async waitForLocationPage(timeout: number = 30000): Promise<void> {
-    // Wait for location buttons to be visible
-    await expect(this.locationButtons.first()).toBeVisible({
-      timeout,
-    }).catch(() => {
-      // Fallback: wait for search textbox as indicator of page load
-      return expect(this.searchTextBox).toBeVisible({ timeout });
-    });
+    try {
+      // First wait for any network activity to settle
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+        // Ignore networkidle timeout and continue
+      });
+      
+      // Wait for location buttons to be visible
+      await expect(this.locationButtons.first()).toBeVisible({
+        timeout,
+      }).catch(() => {
+        // Fallback 1: wait for search textbox as indicator of page load
+        return expect(this.searchTextBox).toBeVisible({ timeout });
+      }).catch(() => {
+        // Fallback 2: wait for the location page header
+        return this.page.getByRole('heading', { name: 'Select a Location' }).waitFor({ state: 'visible', timeout: 10000 });
+      }).catch(() => {
+        // Fallback 3: wait for any location-related text
+        return this.page.getByText('Select a Location').waitFor({ state: 'visible', timeout: 10000 });
+      });
+    } catch (error) {
+      // If all waits fail, throw a descriptive error
+      throw new Error(`Location page failed to load within ${timeout}ms. Last error: ${error}`);
+    }
   }
 
   /**
@@ -171,6 +195,43 @@ export class LocationPage {
   }
 
   /**
+   * Search for a location using code and select it by name (Spanish version).
+   * @param locationCode - Location code to search for (e.g., "72052")
+   * @param locationName - Location name to select (e.g., "CUSO")
+   * @returns Promise resolving to the selected location name
+   */
+  async searchAndSelectLocationSpanish(locationCode: string, locationName: string): Promise<string> {
+    
+    // Use the Spanish search textbox locator
+    const mileText = this.page.getByText("milla");
+
+    // Wait for search box to be visible
+    await expect(this.searchTextBoxSpanish).toBeVisible();
+    await expect(mileText.first()).toBeVisible({ timeout: 10000 });
+
+    // Clear any existing text and enter location code
+    await this.searchTextBoxSpanish.clear();
+    await this.searchTextBoxSpanish.fill(locationCode);
+    await this.searchTextBoxSpanish.press('Enter');
+    
+    // Wait for search results to load
+    await this.page.waitForTimeout(1000);
+    
+    // Find the location button with the specified name
+    const locationButton = this.page.getByRole('button', { name: locationName });
+    
+    // Wait for the button to be visible
+    await expect(locationButton).toBeVisible({ timeout: 5000 }).catch(() => {
+      throw new Error(`Location "${locationName}" not found after searching for code "${locationCode}"`);
+    });
+    
+    // Click the location button
+    await locationButton.click();
+    
+    return locationName;
+  }
+
+  /**
    * Wait for location selection to complete and next step to load.
    * @param timeout - Maximum time to wait
    */
@@ -189,12 +250,39 @@ export class LocationPage {
   }
 
   /**
+   * Wait for location selection to complete and next step to load (Spanish version).
+   * @param timeout - Maximum time to wait
+   */
+  async waitForLocationSelectionCompleteSpanish(timeout: number = 30000): Promise<void> {
+    // Wait for either meeting preference page or next step to appear in Spanish
+    await this.page.waitForSelector('[data-testid="meeting-preference"], button:has-text("Conocer en persona"), button:has-text("Virtual")', {
+      timeout,
+      state: 'visible',
+    }).catch(() => {
+      // Fallback: wait for calendar or date picker
+      return this.page.waitForSelector('[data-testid="calendar"], .calendar, [data-testid="date-picker"]', {
+        timeout,
+        state: 'visible',
+      });
+    });
+  }
+
+  /**
    * Set the number of locations to display.
    * @param count - Number of locations to display (5, 10, 15, 25, or 50)
    */
   async setLocationsCount(count: number): Promise<void> {
     await expect(this.locationsDropdown).toBeVisible();
     await this.locationsDropdown.selectOption(count.toString());
+  }
+
+  /**
+   * Set the number of locations to display (Spanish version).
+   * @param count - Number of locations to display (5, 10, 15, 25, or 50)
+   */
+  async setLocationsCountSpanish(count: number): Promise<void> {
+    await expect(this.locationsDropdownSpanish).toBeVisible();
+    await this.locationsDropdownSpanish.selectOption(`${count} Sitios`);
   }
 
   /**

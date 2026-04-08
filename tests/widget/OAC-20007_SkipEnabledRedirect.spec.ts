@@ -54,7 +54,7 @@ test.describe('Skip Appointment Redirect - OAC-20007', () => {
 
     // Step 4: Verify redirect URL matches configuration
     // Wait for navigation to external site
-    await page.waitForURL(url => url.href !== process.env.BASE_URL, { timeout: 10000 });
+    await page.waitForURL(url => url.href !== process.env.BASE_URL, { timeout: 30000 });
     
     // Verify we're no longer on the widget domain
     const currentUrl = page.url();

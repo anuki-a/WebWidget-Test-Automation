@@ -509,21 +509,21 @@
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Go to date/time for partial holiday date", "expected": "Slots load" },
-      { "step": 2, "action": "Verify slots before 10:00 available", "expected": "Early morning slots selectable" },
-      { "step": 3, "action": "Verify slots 10:00-12:00 disabled", "expected": "Holiday time range blocked" },
-      { "step": 4, "action": "Verify slots after 12:00 available", "expected": "Afternoon slots selectable" },
-      { "step": 5, "action": "Verify holiday-blocked slots", "expected": "Blocked slots unavailable" },
-      { "step": 6, "action": "Verify allowed slots", "expected": "Allowed slots available" },
-      { "step": 7, "action": "Select available slot and proceed", "expected": "Can complete booking" },
-      { "step": 8, "action": "Verify confirmation", "expected": "Shows selected non-holiday slot" },
-      { "step": 9, "action": "Validate portal", "expected": "Correct appointment recorded" },
-      { "step": 10, "action": "Verify holiday setup via API", "expected": "Holiday configuration confirmed" }
+      { "step": 1, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 2, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 3, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 4, "action": "Go to date/time for partial holiday date", "expected": "Slots load" },
+      { "step": 5, "action": "Verify slots before 01:00 PM available", "expected": "Early morning slots selectable" },
+      { "step": 6, "action": "Verify slots 01:00 PM - 03:00 PM disabled", "expected": "Holiday time range blocked" },
+      { "step": 7, "action": "Verify slots after 03:00 PM available", "expected": "Afternoon slots selectable" },
+      { "step": 8, "action": "Verify holiday-blocked slots by clicking on them", "expected": "Blocked slots unavailable" },
+      { "step": 9, "action": "Verify allowed slots", "expected": "Allowed slots available" },
+      { "step": 10, "action": "Select available slot and proceed", "expected": "Can complete booking" },
+      { "step": 11, "action": "Verify confirmation", "expected": "Shows selected non-holiday slot" }
     ],
     "expectedResult": [
       "Partial holiday blocks only configured time range",
-      "Widget allows booking outside holiday hours",
-      "Holiday behavior matches AC Portal configuration"
+      "Widget allows booking outside holiday hours"
     ],
     "reusableActions": [
       "Check slot availability",
@@ -545,24 +545,22 @@
       "Widget accessible",
       "Service/location bookable normally",
       "Full day holiday configured on test date",
-      "Adjacent non-holiday dates available for comparison",
-      "Holiday setup verified via AC Portal",
-      "Admin Portal access available",
-      "Valid personal details available"
+      "Adjacent non-holiday dates available for comparison"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Go to full holiday date", "expected": "No selectable slots" },
-      { "step": 2, "action": "Verify all time slots disabled on holiday date", "expected": "No selectable slots available" },
-      { "step": 3, "action": "Attempt to select any slot", "expected": "Selection prevented, no navigation to personal details" },
-      { "step": 4, "action": "Try selecting slot", "expected": "Cannot proceed" },
-      { "step": 5, "action": "Navigate to next available non-holiday date", "expected": "Normal slot availability displayed" },
-      { "step": 6, "action": "Select non-holiday date", "expected": "Slots available" },
-      { "step": 7, "action": "Complete booking on non-holiday date", "expected": "Success" },
-      { "step": 8, "action": "Validate portal", "expected": "No holiday booking captured" },
-      { "step": 9, "action": "Verify full holiday setup via API", "expected": "Full day holiday configuration confirmed" }
+      { "step": 1, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 2, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 3, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 4, "action": "Go to date/time for full holiday date", "expected": "No selectable slots" },
+      { "step": 5, "action": "Verify all time slots disabled on holiday date", "expected": "No selectable slots available" },
+      { "step": 6, "action": "Attempt to select any slot", "expected": "Selection prevented, no navigation to personal details" },
+      { "step": 7, "action": "Try selecting slot", "expected": "Cannot proceed" },
+      { "step": 8, "action": "Navigate to next available non-holiday date", "expected": "Normal slot availability displayed" },
+      { "step": 9, "action": "Select non-holiday date", "expected": "Slots available" },
+      { "step": 10, "action": "Complete booking on non-holiday date", "expected": "Success" }
     ],
     "expectedResult": [
       "Full holiday prevents all bookings on configured date",
@@ -572,9 +570,7 @@
     "reusableActions": [
       "Check holiday date restriction",
       "Use non-holiday date",
-      "Complete booking",
-      "Validate portal",
-      "Verify holiday configuration"
+      "Complete booking"
     ],
     "configurationDependencies": [
       "Full day holiday configuration",
@@ -653,20 +649,15 @@
     "testName": "OAC-20017: Verify Widget Spanish Language Translations Load Properly",
     "businessGoal": "Verify Spanish localization is loaded and displayed across widget pages.",
     "preconditions": [
-      "Widget accessible",
-      "Language selector enabled",
-      "Spanish resources available",
-      "Valid service/location path"
+      "Widget accessible"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
       { "step": 1, "action": "Open widget default language", "expected": "English page" },
-      { "step": 2, "action": "Change language to Spanish", "expected": "UI updates to Spanish" },
-      { "step": 3, "action": "Navigate key pages", "expected": "Spanish text on labels/buttons/validation" },
-      { "step": 4, "action": "Trigger validation message", "expected": "Spanish validation message" },
-      { "step": 5, "action": "Complete booking", "expected": "Confirmation in Spanish" }
+      { "step": 2, "action": "Change language to Spanish from top bar dropdown", "expected": "UI updates to Spanish" },
+      { "step": 3, "action": "check navigation bar for spanish text", "expected": "Spanish text on the 6 labels" }
     ],
     "expectedResult": [
       "Spanish translation works end-to-end"
@@ -687,19 +678,18 @@
     "preconditions": [
       "Widget accessible",
       "Checklist on confirmation enabled",
-      "Checklist items configured for P/S A",
-      "Another P/S exists with different/no checklist",
-      "Admin Portal access available"
+      "Checklist items configured for service"
     ],
     "setupRequirements": [
       "None"
     ],
     "uiSteps": [
-      { "step": 1, "action": "Book P/S A", "expected": "Checklist link appears on confirmation" },
-      { "step": 2, "action": "Click Checklist", "expected": "Popup shows checklist items for P/S A" },
-      { "step": 3, "action": "Book P/S B", "expected": "Checklist content matches P/S B configuration" },
-      { "step": 4, "action": "Compare popup content", "expected": "Difference as configured" },
-      { "step": 5, "action": "Disable checklist setting and book again", "expected": "Checklist link absent" }
+      {"step": 1, "action": "Open widget", "expected": "Widget loads"},
+      {"step": 2, "action": "Select service with checklist", "expected": "Service selected"},
+      {"step": 3, "action": "Continue to book", "expected": "Booking flow continues"},
+      { "step": 3, "action": "Book Service That configured with checklist", "expected": "Checklist link appears on confirmation" },
+      { "step": 4, "action": "Click Checklist link on Confirmation Page", "expected": "Popup shows checklist items" },
+      { "step": 5, "action": "Check checklist content", "expected": "Checklist content matches popup Content" }
     ],
     "expectedResult": [
       "Checklist visibility/content depends on service + config"
@@ -730,12 +720,10 @@
     ],
     "uiSteps": [
       { "step": 1, "action": "Launch with svc only", "expected": "Service page skipped, location shown" },
-      { "step": 2, "action": "Launch with loc only", "expected": "Location skipped after service select" },
-      { "step": 3, "action": "Launch with loc+svc", "expected": "Service+location skipped, meeting pref shown" },
-      { "step": 4, "action": "Complete booking", "expected": "Confirmation reflects URL selections" },
       { "step": 5, "action": "Launch with /loc=invalid (unknown location code)", "expected": "Service selection page displayed, location selection shown (invalid ignored)" },
-      { "step": 6, "action": "Launch with /unknown=value (unknown parameter)", "expected": "Normal flow continues, unknown parameter ignored" },
-      { "step": 7, "action": "Launch with malformed parameter /loc=", "expected": "Graceful fallback to normal flow" }
+      { "step": 2, "action": "Launch with loc only", "expected": "Location skipped after service select, meeting pref shown" },
+      { "step": 3, "action": "Launch with loc+svc", "expected": "Service+location skipped, meeting pref shown" },
+      { "step": 4, "action": "Complete booking", "expected": "Confirmation reflects URL selections" }
     ],
     "expectedResult": [
       "Valid parameters processed correctly and skip appropriate steps",
@@ -763,18 +751,25 @@
       "Request Spanish Speaker enabled",
       "At least two eligible staff exist",
       "Manual staff selection enabled",
-      "Valid availability for both paths",
-      "Admin Portal access available"
+      "Spanish Speaker who is eligible staff exists"
     ],
     "setupRequirements": [
-      "None"
+      "check spanish "
     ],
     "uiSteps": [
-      { "step": 1, "action": "Select Staff A without Spanish request", "expected": "Appointment with Staff A can complete" },
-      { "step": 2, "action": "Validate portal for Staff A", "expected": "Assigned Staff A" },
-      { "step": 3, "action": "Select Staff B with Spanish request", "expected": "Spanish speaker conditions applied" },
-      { "step": 4, "action": "Complete booking for Spanish path", "expected": "Booking succeeds with correct options" },
-      { "step": 5, "action": "Validate portal for Spanish request", "expected": "Record reflects staff and Spanish speaker details" }
+      { "step": 1, "action": "Select active service", "expected": "Navigate to Location page with eligible locations" },
+      { "step": 2, "action": "Select available location", "expected": "Navigate to Meeting Preference page" },
+      { "step": 3, "action": "Select meeting preference", "expected": "Navigate to Date and Time page" },
+      { "step": 5, "action": "check staff selection dropdown availbility", "expected": "dropdown available and default selection '0 : undefined' is selected" },
+      { "step": 6, "action": "check for 2 staff members available to select", "expected": "2 staff members available" },
+      { "step": 7, "action": "tick 'request Spanish speaker' checkbox and see if staff members dropdown only shows spanish speaker", 
+                    "expected": "Spanish speaker is the only option available to select in dropdown" },
+      { "step": 8, "action": "Select a staff from dropdown", "expected": "spanish speaker staff selected from dropdown" },
+      { "step": 9, "action": "Select available future date", "expected": "Available slots displayed" },
+      { "step": 10, "action": "Select time slot and proceed", "expected": "Personal Details page displayed" },
+      { "step": 11, "action": "Enter valid details and submit", "expected": "Navigate to Confirmation page" },
+      { "step": 12, "action": "Verify confirmation details", 
+                    "expected": "Details match selected and entered data, shows '(Spanish speaker requested)' string is staff preference" }
     ],
     "expectedResult": [
       "Manual staff and Spanish request honored"

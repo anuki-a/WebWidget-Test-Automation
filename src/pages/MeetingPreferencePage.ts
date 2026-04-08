@@ -6,7 +6,10 @@ import { Page, Locator, expect } from '@playwright/test';
 export enum MeetingPreference {
   IN_PERSON = 'Meet in Person',
   VIRTUAL = 'Virtual',
-  PHONE_CALL = 'Meet via Phone Call'
+  PHONE_CALL = 'Meet via Phone Call',
+  IN_PERSON_SPANISH = 'Conocer en persona',
+  VIRTUAL_SPANISH = 'Virtual',
+  PHONE_CALL_SPANISH = 'Reunirse a través de una llamada telefónica'
 }
 
 /**
@@ -42,12 +45,42 @@ export class MeetingPreferencePage {
   }
 
   /**
+   * Wait for the meeting preference page to be loaded and visible (Spanish version).
+   * @param timeout - Maximum time to wait
+   */
+  async waitForMeetingPreferencePageSpanish(timeout: number = 30000): Promise<void> {
+    // First, check for the page title in Spanish "Elija una preferencia de reunión"
+    await expect(this.page.getByText("Elija una preferencia de reunión")).toBeVisible({
+      timeout,
+    }).catch(() => {
+      // Fallback: if title not found, check for meeting preference buttons in Spanish
+      return this.page.waitForSelector('[data-testid="meeting-preference"], button:has-text("Conocer en persona"), button:has-text("Virtual")', {
+        timeout,
+        state: 'visible',
+      });
+    });
+  }
+
+  /**
    * Select a meeting preference.
    * @param preference - Meeting preference from MeetingPreference enum
    * @returns Promise resolving when preference is selected
    */
   async selectMeetingPreference(preference: MeetingPreference): Promise<void> {
     await this.waitForMeetingPreferencePage();
+    
+    const preferenceButton = this.page.getByRole('button', { name: preference });
+    await expect(preferenceButton).toBeVisible();
+    await preferenceButton.click();
+  }
+
+  /**
+   * Select a meeting preference (Spanish version).
+   * @param preference - Meeting preference from MeetingPreference enum
+   * @returns Promise resolving when preference is selected
+   */
+  async selectMeetingPreferenceSpanish(preference: MeetingPreference): Promise<void> {
+    await this.waitForMeetingPreferencePageSpanish();
     
     const preferenceButton = this.page.getByRole('button', { name: preference });
     await expect(preferenceButton).toBeVisible();
@@ -81,6 +114,14 @@ export class MeetingPreferencePage {
    */
   async selectInPerson(): Promise<void> {
     await this.selectMeetingPreference(MeetingPreference.IN_PERSON);
+  }
+
+  /**
+   * Select in-person meeting preference in Spanish.
+   * @returns Promise resolving when preference is selected
+   */
+  async selectInPersonSpanish(): Promise<void> {
+    await this.selectMeetingPreferenceSpanish(MeetingPreference.IN_PERSON_SPANISH);
   }
 
   /**
@@ -146,12 +187,42 @@ export class MeetingPreferencePage {
   }
 
   /**
+   * Check if meeting preferences are skipped (not shown) - Spanish version.
+   * @returns Promise resolving to true if meeting preferences are skipped
+   */
+  async isMeetingPreferenceSkippedSpanish(): Promise<boolean> {
+    const timeout = 5000;
+    await this.page.waitForTimeout(timeout);
+    try {
+      // If "Elige una fecha y hora" is visible but "Elija una preferencia de reunión" is not, they're skipped
+      const calendarVisible = await this.page.getByText("Elige una fecha y hora").isVisible({ timeout });
+      const preferencesVisible = await this.page.getByText("Elija una preferencia de reunión").isVisible({ timeout });
+      
+      return calendarVisible && !preferencesVisible;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Wait for meeting preference selection to complete and next step to load.
    * @param timeout - Maximum time to wait
    */
   async waitForMeetingPreferenceSelectionComplete(timeout: number = 30000): Promise<void> {
     // Wait for "Select a Date and Time" text to appear
     await this.page.waitForSelector('text=Select a Date and Time', {
+      timeout,
+      state: 'visible',
+    });
+  }
+
+  /**
+   * Wait for meeting preference selection to complete and next step to load (Spanish version).
+   * @param timeout - Maximum time to wait
+   */
+  async waitForMeetingPreferenceSelectionCompleteSpanish(timeout: number = 30000): Promise<void> {
+    // Wait for "Elige una fecha y hora" text to appear
+    await this.page.waitForSelector('text=Elige una fecha y hora', {
       timeout,
       state: 'visible',
     });

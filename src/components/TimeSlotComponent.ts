@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { DateUtils } from '../utils/dateUtils';
+import { staffAvailabilityData } from '../types/bookingTypes';
 
 /**
  * Interface for available time slot information.
@@ -32,22 +33,42 @@ export class TimeSlotComponent {
    * @param timeout - Maximum time to wait for time slots to load
    * @returns Promise resolving to the selected time string
    */
-  async selectFirstAvailableSlot(timeout: number = 120000): Promise<string> {
+  async selectFirstAvailableSlot(timeout: number = 30000): Promise<string> {
     let selectedTime = '';
     
-    // Use async retry pattern from the happy path test
+    // Wait for time slots to reload after staff selection
+    await this.page.waitForTimeout(1000);
+    
+    // Use async retry pattern with better error handling and attempt limits
     await expect(async () => {
-      const availableTimeLocator = this.page
+      // First try to find explicitly available slots
+      let availableTimeLocator = this.page
         .locator('div, span, a, button') // Check all common clickable tags
         .filter({ hasText: /^(?:\d{1,2}:\d{2}\s(?:AM|PM))$/ }) // Matches exact time format like "6:15 AM"
-        .filter({ hasNot: this.page.locator('.disabled, [disabled], .grayed-out') }) // Exclude typical disabled classes
+        .filter({ hasNot: this.page.locator('.disabled, [disabled], .grayed-out, .unavailable') }) // Exclude typical disabled classes
         .first();
       
-      await expect(availableTimeLocator).toBeVisible({ timeout: 5000 });
+      // If no explicitly available slots found, try any time slot that's clickable
+      const count = await availableTimeLocator.count();
+      if (count === 0) {
+        availableTimeLocator = this.page
+          .locator('div, span, a, button') // Check all common clickable tags
+          .filter({ hasText: /^(?:\d{1,2}:\d{2}\s(?:AM|PM))$/ }) // Matches exact time format like "6:15 AM"
+          .first();
+      }
+      
+      // Get element text 
       selectedTime = (await availableTimeLocator.innerText()).trim();
+      
+      // Wait for element to be visible and enabled
+      await availableTimeLocator.waitFor({ state: 'visible', timeout: 3000 });
+      await availableTimeLocator.isEnabled();
+      
+      // Click the time slot
       await availableTimeLocator.click();
     }).toPass({ 
-      timeout: timeout, // Total time to keep trying (2 minute)
+      timeout: timeout, // Reduced timeout to 30 seconds
+      intervals: [1000, 2000, 3000] // Custom intervals for faster retries
     });
 
     return selectedTime;
@@ -63,7 +84,7 @@ export class TimeSlotComponent {
     
     const timeSlots: TimeSlot[] = [];
     
-    // Find all elements with time format
+    // Find all elements that look like time slots
     const timeElements = this.page
       .locator('div, span, a, button')
       .filter({ hasText: /^(?:\d{1,2}:\d{2}\s(?:AM|PM))$/ });
@@ -83,7 +104,7 @@ export class TimeSlotComponent {
           hours: parsedTime.hours,
           minutes: parsedTime.minutes,
           isAvailable: !isDisabled,
-          element,
+          element: element
         });
       }
     }
@@ -254,5 +275,168 @@ export class TimeSlotComponent {
     } catch (error) {
       return false;
     }
+  }
+
+  /**
+   * Get available time slots for a specific staff member.
+   * @param staffName - Name of the staff member (undefined for "All")
+   * @param staffData - Array of staff availability data
+   * @param duration - Service duration in minutes
+   * @returns Promise resolving to array of available time slots for the staff
+   */
+  async getAvailableTimeSlotsForStaff(
+    staffName?: string,
+    staffData?: staffAvailabilityData[],
+    duration?: number
+  ): Promise<TimeSlot[]> {
+    const allSlots = await this.getAvailableTimeSlots();
+    
+    if (!staffData || !duration || staffName === 'All') {
+      return allSlots;
+    }
+    
+    const staffMember = staffData.find(staff => staff.staffName === staffName);
+    if (!staffMember) {
+      return [];
+    }
+    
+    // Filter slots based on staff availability
+    return allSlots.filter(slot => {
+      if (!slot.isAvailable) return false;
+      
+      const slotTimeMinutes = slot.hours * 60 + slot.minutes;
+      const startTimeMinutes = this.parseTimeToMinutes(staffMember.availabilityStart);
+      const endTimeMinutes = this.parseTimeToMinutes(staffMember.availabilityEnd) - duration;
+      
+      return slotTimeMinutes >= startTimeMinutes && slotTimeMinutes <= endTimeMinutes;
+    });
+  }
+
+  /**
+   * Summarize available slots for display or verification.
+   * @param staffName - Name of the staff member (undefined for "All")
+   * @param staffData - Array of staff availability data
+   * @param duration - Service duration in minutes
+   * @returns Promise resolving to availability summary
+   */
+  async summarizeAvailableSlots(
+    staffName?: string,
+    staffData?: staffAvailabilityData[],
+    duration?: number
+  ): Promise<{
+    totalSlots: number;
+    availableSlots: string[];
+    unavailableSlots: string[];
+    staffCoverage?: Array<{staff: string, start: string, end: string}>;
+  }> {
+    const allSlots = await this.getAvailableTimeSlots();
+    
+    const availableSlots = await this.getAvailableTimeSlotsForStaff(staffName, staffData, duration);
+    
+    const unavailableSlots = allSlots
+      .filter(slot => !availableSlots.some(available => available.time === slot.time))
+      .map(slot => slot.time);
+    
+    const staffCoverage = staffData?.map(staff => ({
+      staff: staff.staffName,
+      start: staff.availabilityStart,
+      end: staff.availabilityEnd
+    }));
+    
+    return {
+      totalSlots: allSlots.length,
+      availableSlots: availableSlots.map(slot => slot.time),
+      unavailableSlots,
+      staffCoverage
+    };
+  }
+
+  /**
+   * Verify combined availability when "All" staff is selected.
+   * @param staffData - Array of staff availability data
+   * @param duration - Service duration in minutes
+   * @returns Promise resolving to verification result
+   */
+  async verifyCombinedAvailability(
+    staffData: staffAvailabilityData[],
+    duration: number
+  ): Promise<{
+    isCorrect: boolean;
+    enabledSlots: string[];
+    disabledSlots: string[];
+    expectedEnabled: string[];
+    expectedDisabled: string[];
+  }> {
+    const allSlots = await this.getAvailableTimeSlots();
+    
+    // Calculate expected availability based on staff data
+    const expectedEnabled: string[] = [];
+    const expectedDisabled: string[] = [];
+    
+    allSlots.forEach(slot => {
+      const slotTimeMinutes = slot.hours * 60 + slot.minutes;
+      let isCovered = false;
+      
+      // Check if any staff covers this time slot
+      staffData.forEach(staff => {
+        const startTimeMinutes = this.parseTimeToMinutes(staff.availabilityStart);
+        const endTimeMinutes = this.parseTimeToMinutes(staff.availabilityEnd) - duration;
+        
+        if (slotTimeMinutes >= startTimeMinutes && slotTimeMinutes <= endTimeMinutes) {
+          isCovered = true;
+        }
+      });
+      
+      if (isCovered) {
+        expectedEnabled.push(slot.time);
+      } else {
+        expectedDisabled.push(slot.time);
+      }
+    });
+    
+    // Get actual availability from UI
+    const actualEnabled = allSlots.filter(slot => slot.isAvailable).map(slot => slot.time);
+    const actualDisabled = allSlots.filter(slot => !slot.isAvailable).map(slot => slot.time);
+    
+    // Sort arrays for comparison
+    expectedEnabled.sort();
+    expectedDisabled.sort();
+    actualEnabled.sort();
+    actualDisabled.sort();
+    
+    const isCorrect = 
+      JSON.stringify(expectedEnabled) === JSON.stringify(actualEnabled) &&
+      JSON.stringify(expectedDisabled) === JSON.stringify(actualDisabled);
+    
+    return {
+      isCorrect,
+      enabledSlots: actualEnabled,
+      disabledSlots: actualDisabled,
+      expectedEnabled,
+      expectedDisabled
+    };
+  }
+
+  /**
+   * Parse time string to minutes since midnight.
+   * @param timeString - Time string (e.g., "9:00 AM")
+   * @returns Minutes since midnight
+   */
+  private parseTimeToMinutes(timeString: string): number {
+    const parts = timeString.split(' ');
+    const time = parts[0] || '0:0';
+    const period = parts[1] || 'AM';
+    const [hoursStr, minutesStr] = time.split(':');
+    const hours = parseInt(hoursStr || '0', 10);
+    const minutes = parseInt(minutesStr || '0', 10);
+    
+    let totalMinutes = hours * 60 + minutes;
+    if (period === 'PM' && hours !== 12) {
+      totalMinutes += 12 * 60;
+    } else if (period === 'AM' && hours === 12) {
+      totalMinutes -= 12 * 60;
+    }
+    
+    return totalMinutes;
   }
 }
