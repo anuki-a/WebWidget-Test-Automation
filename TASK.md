@@ -365,6 +365,38 @@ After Phase 3:
 
 ## 📝 Discovered During Work
 
+### Holiday Teardown Implementation - April 8, 2026
+
+**Holiday Teardown Functionality Complete**
+
+- Implemented comprehensive teardown tests to clean up both full and partial holidays created by API tests
+- Added new test describe block "Holiday Teardown" with two cleanup tests:
+  - **Full Holiday Teardown**: Cleans up holidays matching "Auto Holiday [date]" pattern using regex
+  - **Partial Holiday Teardown**: Cleans up "Auto Half Holiday" with exact name match
+- Key technical features:
+  - Uses existing `AdminService` methods (`getAllHolidays`, `deleteHoliday`)
+  - Implements robust error handling with graceful fallback when holidays don't exist
+  - Provides comprehensive logging for debugging and verification
+  - Verifies successful deletion with final checks
+- Test execution results:
+  - Successfully identified and deleted "Auto Holiday 2026-04-14" (ID: 203) - full holiday
+  - Successfully identified and deleted "Auto Half Holiday" (ID: 204) - partial holiday
+  - Both tests pass with comprehensive verification
+- Benefits achieved:
+  - Environment cleanliness maintained between test runs
+  - Test isolation ensured - each test starts with clean state
+  - Centralized cleanup logic following project architecture patterns
+  - No modification to existing creation tests required
+- Integration approach:
+  - Teardown tests run independently and can be executed on demand
+  - Uses same API patterns and error handling as existing tests
+  - Follows TypeScript typing and JSDoc documentation standards
+- Implementation maintains project standards:
+  - Test structure: `test.describe()` with proper `beforeEach` setup
+  - Error handling: Graceful when holidays not found, strict when deletion fails
+  - Logging: Comprehensive console output for debugging
+  - Verification: Final checks to ensure successful cleanup
+
 ### OAC-20010 Single Meeting Preference Skip Implementation - March 30, 2026
 
 ✅ **Single Meeting Preference Skip Functionality Complete**

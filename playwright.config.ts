@@ -72,6 +72,7 @@ export default defineConfig({
 
   /* Global setup/teardown for authentication */
   globalSetup: require.resolve('./tests/auth.setup.ts'),
+  globalTeardown: require.resolve('./tests/global.teardown.ts'),
 
   /* Test timeout */
   timeout: parseInt(process.env.DEFAULT_TIMEOUT || '60000'),
