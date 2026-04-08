@@ -1,13 +1,137 @@
 import { test } from '@playwright/test';
 import { request } from '@playwright/test';
+import dotenv from 'dotenv';
 import { ApiClient } from '../src/api/apiClient';
 import { AdminService } from '../src/api/AdminService';
+import { AppointmentService } from '../src/api/AppointmentService';
+import { distinctLocations } from '../src/fixtures/bookingFixture';
+
+// Load environment variables
+dotenv.config();
+
+/**
+ * Clean up appointments in specified locations if enabled via environment variable
+ * @param apiRequestContext - Playwright request context for API calls
+ */
+async function cleanupAppointments(apiRequestContext: any) {
+  // Debug: Show environment variable value
+  console.log('DEBUG: DELETE_APPOINTMENTS_ON_TEARDOWN =', process.env.DELETE_APPOINTMENTS_ON_TEARDOWN);
+  
+  // Check if appointment deletion is enabled via environment variable
+  const deleteAppointments = process.env.DELETE_APPOINTMENTS_ON_TEARDOWN === 'true';
+  
+  console.log('DEBUG: deleteAppointments =', deleteAppointments);
+  
+  if (!deleteAppointments) {
+    console.log('Appointment deletion is disabled via DELETE_APPOINTMENTS_ON_TEARDOWN=false');
+    return;
+  }
+  
+  console.log('Starting appointment cleanup...');
+  
+  try {
+    const apiClient = new ApiClient(apiRequestContext);
+    const appointmentService = new AppointmentService(apiClient);
+    
+    // Get location codes from distinctLocations
+    const targetLocationCodes = distinctLocations.map(location => location.locCode).filter((code): code is string => code !== undefined);
+    console.log('Target location codes:', targetLocationCodes);
+    
+    // Get date range: today to 4 business days
+    const { firstDate, lastDate } = appointmentService.getDateRangeForQuery();
+    console.log('Date range:', { firstDate, lastDate });
+    
+    // 1. Get all appointments for the date range
+    console.log('Fetching all appointments...');
+    const allAppointmentsResponse = await appointmentService.getAllAppointments(
+      54, 1, firstDate, lastDate, -1
+    );
+    
+    if (!allAppointmentsResponse.ok()) {
+      console.log('Failed to fetch appointments - skipping cleanup');
+      return;
+    }
+    
+    const allAppointments = await allAppointmentsResponse.json();
+    console.log(`Found ${allAppointments.length} total appointments`);
+    
+    if (allAppointments.length === 0) {
+      console.log('No appointments found in the specified date range. Nothing to delete.');
+      return;
+    }
+    
+    // 2. Filter appointments by target locations
+    console.log('Filtering appointments by location...');
+    const filteredAppointments = appointmentService.filterAppointmentsByLocation(
+      allAppointments, targetLocationCodes
+    );
+    
+    // Log appointment counts by location
+    let totalAppointmentsToDelete = 0;
+    Object.entries(filteredAppointments).forEach(([locationCode, appointments]) => {
+      const locationName = distinctLocations.find(loc => loc.locCode === locationCode)?.confirmationName || locationCode;
+      console.log(`${locationName} (${locationCode}): ${appointments.length} appointments`);
+      totalAppointmentsToDelete += appointments.length;
+    });
+    
+    if (totalAppointmentsToDelete === 0) {
+      console.log('No appointments found in target locations. Nothing to delete.');
+      return;
+    }
+    
+    // 3. Get appointment IDs for detailed data
+    const appointmentIds: number[] = [];
+    Object.values(filteredAppointments).forEach(appointments => {
+      appointments.forEach(appointment => {
+        if (appointment.AppointmentId) {
+          appointmentIds.push(appointment.AppointmentId);
+        }
+      });
+    });
+    
+    console.log(`Getting detailed data for ${appointmentIds.length} appointments...`);
+    const detailedAppointmentsResponse = await appointmentService.getAppointmentsByIds(appointmentIds);
+    
+    if (!detailedAppointmentsResponse.ok()) {
+      console.log('Failed to get detailed appointment data - skipping deletion');
+      return;
+    }
+    
+    const detailedAppointments = await detailedAppointmentsResponse.json();
+    console.log(`Retrieved ${detailedAppointments.length} detailed appointment records`);
+    
+    // 4. Bulk delete appointments
+    console.log('Deleting appointments...');
+    const deleteResponse = await appointmentService.bulkDeleteAppointments(detailedAppointments);
+    
+    if (!deleteResponse.ok()) {
+      console.log('Failed to delete appointments');
+      return;
+    }
+    
+    const deleteResult = await deleteResponse.json();
+    console.log('Deletion response:', deleteResult);
+    
+    // 5. Verify deletion success and log results
+    console.log('\n=== DELETION SUMMARY ===');
+    Object.entries(filteredAppointments).forEach(([locationCode, appointments]) => {
+      const locationName = distinctLocations.find(loc => loc.locCode === locationCode)?.confirmationName || locationCode;
+      console.log(`${locationName} (${locationCode}): ${appointments.length} appointments deleted`);
+    });
+    console.log(`Total appointments deleted: ${totalAppointmentsToDelete}`);
+    console.log('========================\n');
+    
+  } catch (error) {
+    console.error('Error during appointment cleanup:', error);
+  }
+}
 
 /**
  * Global teardown function to clean up holidays after test suite completion
  * This runs automatically after all tests finish
  */
 async function globalTeardown() {
+  console.log('=== GLOBAL TEARDOWN STARTED ===');
   console.log('Starting global holiday cleanup...');
   
   try {
@@ -92,6 +216,9 @@ async function globalTeardown() {
     }
 
     console.log('Global holiday cleanup completed');
+    
+    // Appointment deletion cleanup (controlled by environment variable)
+    await cleanupAppointments(apiRequestContext);
     
     // Clean up request context
     await apiRequestContext.dispose();
