@@ -1,9 +1,27 @@
 import { test as base } from '@playwright/test';
-import { BookingData, PartialHolidayBookingData, ServiceData, SpanishTranslationsOfPages, staffAvailabilityData } from '../types/bookingTypes';
+import { BookingData, LocationData, PartialHolidayBookingData, ServiceData, SpanishTranslationsOfPages, staffAvailabilityData } from '../types/bookingTypes';
 import { TestDataBuilder } from '../utils/testDataBuilder';
 import { DateUtils } from '../utils/dateUtils';
 import { MeetingPreference } from '@/pages/MeetingPreferencePage';
 import { SPANISH_TRANSLATIONS } from '../data/spanishTranslations';
+
+export const distinctLocations : LocationData[] = [
+  { // separate Location to work with normal behaviours - (a location that has more that 6 staff members, availability time periods are normal)
+    name: 'McKinney 2093 N. Central', 
+    code: '75071',
+    confirmationName: 'McKinney'
+  },
+  { 
+    name: 'Allen 404 E Stacy Rd. Allen,', 
+    code: '75002',
+    confirmationName: 'Allen'
+  },
+  { // separate Location to work with Appointment time slot/ spanish translations / staff selection seleted tests - only two staff members should be available for location. also has time availability time periods, names accoring to 'staffAvailabilityData'
+    name: 'Northcliffe 22015 N IH 35', 
+    code: '78154',
+    confirmationName: 'Northcliffe'
+  }
+];
 
 export const test = base.extend<{ 
   bookingData: BookingData;
@@ -49,9 +67,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: today,
@@ -78,9 +96,9 @@ export const test = base.extend<{
         duration: 75
       },
       location: {
-        code: '75002',
-        name: 'Allen 404 E Stacy Rd. Allen,',
-        confirmationName: 'Allen'
+        code: distinctLocations[1]?.code || '',
+        name: distinctLocations[1]?.name || '',
+        confirmationName: distinctLocations[1]?.confirmationName || ''
       },
       dateTime: {
         date: today,
@@ -121,9 +139,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: nextBusinessDay,
@@ -166,9 +184,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: today,
@@ -212,9 +230,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: tomorrow,
@@ -270,9 +288,9 @@ export const test = base.extend<{
         duration: 45
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: tomorrow,
@@ -315,9 +333,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: today,
@@ -360,9 +378,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: tomorrow,
@@ -404,9 +422,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: nextBusinessDay,
@@ -448,9 +466,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: nextBusinessDay,
@@ -493,9 +511,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '78154',
-        name: 'Northcliffe 22015 N IH 35',
-        confirmationName: 'Northcliffe'
+        code: distinctLocations[2]?.code || '',
+        name: distinctLocations[2]?.name || '',
+        confirmationName: distinctLocations[2]?.confirmationName || ''
       },
       dateTime: {
         date: nextBusinessDay,
@@ -539,9 +557,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: nextBusinessDay,
@@ -728,9 +746,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       dateTime: {
         date: nextBusinessDay,
@@ -773,9 +791,9 @@ export const test = base.extend<{
         duration: 60
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney'
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || ''
       },
       partialHolidayDateTime: {
         date: nextBusinessDay,
@@ -819,9 +837,9 @@ export const test = base.extend<{
         svcCode: 'UP'
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney',
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || '',
         locCode: '10073'
       },
       dateTime: {
@@ -864,9 +882,9 @@ export const test = base.extend<{
         duration: 60,
       },
       location: {
-        code: '75071',
-        name: 'McKinney 2093 N. Central',
-        confirmationName: 'McKinney',
+        code: distinctLocations[0]?.code || '',
+        name: distinctLocations[0]?.name || '',
+        confirmationName: distinctLocations[0]?.confirmationName || '',
       },
       dateTime: {
         date: nextBusinessDay,
@@ -914,9 +932,9 @@ export const test = base.extend<{
         duration: 30
       },
       location: {
-        code: '78154',
-        name: 'Northcliffe 22015 N IH 35',
-        confirmationName: 'Northcliffe'
+        code: distinctLocations[2]?.code || '',
+        name: distinctLocations[2]?.name || '',
+        confirmationName: distinctLocations[2]?.confirmationName || ''
       },
       dateTime: {
         date: nextBusinessDay,
