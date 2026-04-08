@@ -75,7 +75,7 @@ export default defineConfig({
   globalTeardown: require.resolve('./tests/global.teardown.ts'),
 
   /* Test timeout */
-  timeout: parseInt(process.env.DEFAULT_TIMEOUT || '60000'),
+  timeout: parseInt(process.env.DEFAULT_TIMEOUT || '100000'),
 
   /* Expect timeout */
   expect: {

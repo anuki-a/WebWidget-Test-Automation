@@ -133,15 +133,14 @@ export class ConfirmationPage {
    * Wait for the confirmation page to be loaded and visible.
    * @param timeout - Maximum time to wait
    */
-  async waitForConfirmationPage(timeout: number = 220000): Promise<void> {
-    // Wait for confirmation heading with retry logic
-    await expect(async () => {
-      await expect(this.confirmationHeading)
-        .toBeVisible({ timeout: 10000 });
-    }).toPass({ 
-      timeout: timeout,
-    });
-  }
+async waitForConfirmationPage(timeout: number = 220000): Promise<void> {
+  await expect(async () => {
+    await expect(this.confirmationHeading).toBeVisible();
+  }).toPass({ 
+    timeout: timeout, // The total time to keep retrying
+    intervals: [2000, 5000, 10000], // Optional: Custom retry intervals (in ms)
+  });
+}
 
   /**
    * Get all confirmation details from the page.
