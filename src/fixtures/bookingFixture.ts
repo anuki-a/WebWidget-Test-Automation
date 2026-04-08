@@ -803,7 +803,7 @@ export const test = base.extend<{
     const customer = TestDataBuilder.generateCustomer();
     
     // Generate date/time data
-    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 3)
+    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 1)
     const formattedDate = DateUtils.formatDateForUI(nextBusinessDay);
     
     const rawName = 'Update Personal Account  60';
@@ -849,7 +849,7 @@ export const test = base.extend<{
     const customer = TestDataBuilder.generateCustomer();
     
     // Generate date/time data
-    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 3)
+    const nextBusinessDay = DateUtils.addBusinessDays(DateUtils.getToday(), 1)
     const formattedDate = DateUtils.formatDateForUI(nextBusinessDay);
     
     const rawName = 'Update Personal Account  60';
