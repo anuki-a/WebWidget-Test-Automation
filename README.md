@@ -21,11 +21,12 @@ Recommending to keep 2 locations for automation testing (better separate those l
 
 #### ✅ **Completed Components**
 
-- **API Layer** (4 files): Full backend integration with authentication
+- **API Layer** (5 files): Full backend integration with authentication
   - `apiClient.ts`: Base API wrapper using Playwright request
-  - `ProvisioningClient.ts`: Service/Location/Availability setup
-  - `ConfigClient.ts`: Widget configuration management
-  - `AppointmentClient.ts`: Appointment CRUD operations
+  - `AdminService.ts`: Admin portal operations and configuration
+  - `AppointmentService.ts`: Appointment CRUD operations
+  - `AuthService.ts`: Authentication and session management
+  - `ProductService.ts`: Product and service management
 
 - **Pages** (6 files): Complete Page Object Model
   - `ServicePage.ts`: Service selection and category navigation
@@ -35,9 +36,11 @@ Recommending to keep 2 locations for automation testing (better separate those l
   - `PersonalDetailsPage.ts`: Customer information forms
   - `ConfirmationPage.ts`: Booking verification and cancellation
 
-- **Components** (2 files): Reusable UI elements
+- **Components** (4 files): Reusable UI elements
   - `CalendarComponent.ts`: Date picker with availability validation
   - `TimeSlotComponent.ts`: Time slot selection with async loading
+  - `LanguageSwitcher.ts`: Language selection and Spanish localization
+  - `StaffComponent.ts`: Staff selection and Spanish speaker requests
 
 - **Fixtures** (1 file): Test data generation
   - `bookingFixture.ts`: Dynamic booking data with customer generation
@@ -48,6 +51,10 @@ Recommending to keep 2 locations for automation testing (better separate those l
 
 - **Types** (1 file): TypeScript definitions
   - `bookingTypes.ts`: Complete type definitions for booking data
+
+- **Data** (2 files): Static data and translations
+  - `testcases_refined.json`: Test case specifications
+  - `spanishTranslations.ts`: Spanish language translations
 
 ## Tech Stack
 
@@ -65,9 +72,10 @@ Recommending to keep 2 locations for automation testing (better separate those l
 ├── src/
 │   ├── api/                     # API clients for backend operations
 │   │   ├── apiClient.ts         # Base API wrapper
-│   │   ├── ProvisioningClient.ts # Service/Location setup
-│   │   ├── ConfigClient.ts      # Widget configuration
-│   │   └── AppointmentClient.ts # Appointment operations
+│   │   ├── AdminService.ts      # Admin portal operations
+│   │   ├── AppointmentService.ts # Appointment CRUD
+│   │   ├── AuthService.ts       # Authentication
+│   │   └── ProductService.ts    # Product management
 │   ├── pages/                   # Page Object Models
 │   │   ├── ServicePage.ts
 │   │   ├── LocationPage.ts
@@ -78,45 +86,65 @@ Recommending to keep 2 locations for automation testing (better separate those l
 │   ├── components/              # Reusable UI components
 │   │   ├── CalendarComponent.ts
 │   │   ├── TimeSlotComponent.ts
-│   │   └── SkipPopup.ts
+│   │   ├── LanguageSwitcher.ts
+│   │   └── StaffComponent.ts
 │   ├── fixtures/                # Test data setup and context
-│   │   ├── baseFixture.ts
 │   │   └── bookingFixture.ts
-│   └── utils/                   # Helper utilities
-│       ├── testDataBuilder.ts
-│       ├── dateUtils.ts
-│       └── randomGenerator.ts
-├── tests/
-│   ├── auth.setup.ts            # Authentication setup
-│   └── widget/                  # Test specifications
-│       ├── OAC-20001_BookAppointment.spec.ts
-│       └── ...
-└── data/                        # Static test data
-    └── testcases_refined.json
+│   ├── utils/                   # Helper utilities
+│   │   ├── testDataBuilder.ts
+│   │   └── dateUtils.ts
+│   ├── types/                   # TypeScript definitions
+│   │   └── bookingTypes.ts
+│   └── data/                    # Static data and translations
+│       ├── testcases_refined.json
+│       └── spanishTranslations.ts
+└── tests/
+    ├── auth.setup.ts            # Authentication setup
+    ├── global.teardown.ts       # Global cleanup
+    ├── api/                     # API tests
+    └── widget/                  # Test specifications (20 tests)
+        ├── OAC-20001_BookAppointment.spec.ts
+        ├── OAC-20002_EditAppointment.spec.ts
+        └── ... (18 more tests)
 ```
 
 ## Test Coverage
 
 The framework covers the complete appointment booking lifecycle:
 
-### ✅ **Implemented Tests (2/20)**
+### ✅ **Implemented Tests (20/20) - 100% Complete**
 
-- **Core Flows**:
-  - ✅ OAC-20001: Create Appointment (end-to-end)
-  - ✅ OAC-20004: Cancel Appointment (full flow with validation)
-- **Framework Verification**: Basic connectivity and page load tests
-- **API Health Check**: Backend connectivity validation
+#### **Core Flows (4 tests)**
+- ✅ OAC-20001: Book Appointment (end-to-end booking flow)
+- ✅ OAC-20002: Edit Appointment (modify date/time and personal details)
+- ✅ OAC-20003: Non-Editable Appointment (validation of non-editable state)
+- ✅ OAC-20004: Cancel Appointment (full cancellation flow)
 
-### 🔄 **Planned Coverage (18 remaining)**
+#### **Multi-Booking Flows (2 tests)**
+- ✅ OAC-20005: Book Another (book second appointment after first)
+- ✅ OAC-20006: Cancel and Book Another (cancellation + rebooking)
 
-- **Core Flows**: Edit appointments, Non-editable validation
-- **Configuration**: Meeting preferences, validation rules, holidays
-- **Localization**: Spanish language support
-- **Advanced Features**: URL parameters, staff selection, checklists
-- **Multi-booking**: Book another, Book after cancel
-- **Skip Behavior**: Skip confirmation flows
-- **Validation Rules**: Email/phone validation
-- **Calendar & Availability**: Holiday restrictions, timeslot availability
+#### **Skip Behavior (2 tests)**
+- ✅ OAC-20007: Skip Enabled - Redirect (skip appointment with Yes)
+- ✅ OAC-20008: Skip Enabled - Continue (skip appointment with No)
+
+#### **Validation & Configuration (4 tests)**
+- ✅ OAC-20009: Personal Details Configuration (email/phone validation)
+- ✅ OAC-20010: Single Meeting Preference (skip MP page)
+- ✅ OAC-20011: Multiple Meeting Preferences (multi-option selection)
+- ✅ OAC-20012: Meet Via Phone Validations (phone-specific validation)
+
+#### **Calendar & Availability (4 tests)**
+- ✅ OAC-20013: Partial Holiday Behavior (partial day restrictions)
+- ✅ OAC-20014: Full Holiday Behavior (full day restrictions)
+- ✅ OAC-20015: Past Date Selection (past date validation)
+- ✅ OAC-20016: Time Slot Availability Handling (slot availability logic)
+
+#### **Localization & Advanced Features (4 tests)**
+- ✅ OAC-20017: Spanish Translations (Spanish language support)
+- ✅ OAC-20018: Checklist Behaviour (checklist functionality)
+- ✅ OAC-20019: URL Parameters (loc and svc parameter handling)
+- ✅ OAC-20020: Staff Selection & Spanish Speaker (manual staff selection)
 
 ## Setup Instructions
 
@@ -174,17 +202,17 @@ npm test
 #### Run Specific Test
 
 ```bash
-# Book Appointment test
+# Run all widget tests
+npx playwright test tests/widget/
+
+# Run specific test by number
 npx playwright test tests/widget/OAC-20001_BookAppointment.spec.ts
+npx playwright test tests/widget/OAC-20017_SpanishTranslations.spec.ts
 
-# Cancel Appointment test
-npx playwright test tests/widget/OAC-20004_CancelAppointment.spec.ts
-
-# Framework verification
-npx playwright test tests/verification/framework-check.spec.ts
-
-# API health check
-npx playwright test tests/api/api-health-check.spec.ts
+# Run tests by category (using grep)
+npx playwright test --grep "@functional"
+npx playwright test --grep "@validation"
+npx playwright test --grep "@localization"
 ```
 
 #### Run with UI Mode (for debugging)
@@ -299,34 +327,33 @@ Key settings in `playwright.config.ts`:
 
 ## Current Status & Next Steps
 
-### ✅ **Completed (March 25, 2026)**
+### ✅ **Completed (April 2026)**
 
-- **Phase 1 Foundation**: 100% complete
-- **Framework Architecture**: Hybrid API + UI approach working
-- **Core Components**: All pages, components, and API clients functional
-- **Test Implementation**: 2 end-to-end tests passing
+- **Phase 1 Foundation**: 100% complete (March 2026)
+- **Phase 2 Test Implementation**: 100% complete (April 2026)
+- **Framework Architecture**: Hybrid API + UI approach fully operational
+- **All Components**: 5 API services, 6 pages, 4 components, fixtures, and utilities
+- **Test Coverage**: 20/20 test cases implemented and passing
+- **Localization**: Spanish language support fully integrated
+- **Advanced Features**: URL parameters, staff selection, holiday handling
 - **Build System**: TypeScript compilation and Playwright configuration stable
 
-### 🔄 **In Progress**
+### � **Next Development Priorities (Phase 3)**
 
-- **Phase 2 Expansion**: Adding remaining 18 test cases
-- **API Layer Enhancement**: Additional configuration endpoints
-- **Component Expansion**: Skip popups, language switcher, checklist components
-
-### 📋 **Next Development Priorities**
-
-1. **OAC-20002**: Edit Appointment functionality
-2. **Validation Rules**: Email/phone validation components
-3. **Meeting Preferences**: Multi-preference configuration
-4. **Calendar Enhancements**: Holiday restrictions and past date validation
-5. **Localization**: Spanish language support
+1. **Stability & Hardening**: Reduce test flakiness, optimize waits
+2. **CI/CD Integration**: Setup pipeline for automated test execution
+3. **Reporting**: Enhance HTML reports, integrate Allure reporting
+4. **Performance**: Optimize test runtime, enable safe parallel execution
+5. **Documentation**: Add troubleshooting guides, onboarding materials
 
 ### 📊 **Project Metrics**
 
-- **Source Files**: 16 TypeScript files implemented
-- **Test Files**: 5 tests created (2 functional, 1 verification, 1 API health check)
-- **Coverage**: 10% of target test cases (2/20)
-- **Framework Readiness**: 100% - Ready for rapid test case development
+- **Source Files**: 20 TypeScript files implemented
+- **Test Files**: 20 functional tests + 3 supporting tests
+- **Coverage**: 100% of target test cases (20/20)
+- **Framework Status**: Production-ready - All phases complete
+- **Code Quality**: TypeScript strict mode, comprehensive JSDoc documentation
+- **Test Execution**: Sequential execution recommended (config-dependent tests)
 
 ---
 
